@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChambersDataModel
 {
+    [Table("PointsPaces")]
     public partial class CollectionPointsPace
     {
         public CollectionPointsPace()

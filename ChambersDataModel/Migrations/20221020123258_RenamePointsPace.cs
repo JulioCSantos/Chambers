@@ -11,14 +11,14 @@ namespace ChambersDataModel.Migrations
         {
             migrationBuilder.RenameTable(
                 name: nameof(CollectionPointsPace), 
-                newName: "PointsPace"
+                newName: "PointsPaces"
             );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameTable(
-                name: "PointsPace",
+                name: "PointsPaces",
                 newName: nameof(CollectionPointsPace)
             );
         }
