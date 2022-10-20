@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ChambersDataModel;
@@ -11,36 +12,17 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class TagTests
     {
-        public static int Id { get; private set; } = 1000;
 
-        public static Func<int> NextId = () => { Id++; return Id; };
+        #region Context
+        private static ChambersDbContext Context = BootStrap.DbInMemorycontext;
+        #endregion Context
 
-        private static ChambersDbContext? _context;
-
-        public static ChambersDbContext Context {
-            //get
-            //{
-            //    if (_context != null) { return _context; }
-
-            //    _context = new ChambersDbContext();
-
-            //    return _context;
-            //}
-            get {
-                if (_context != null) { return _context; }
-
-                var contextOptions = new DbContextOptionsBuilder<ChambersDbContext>()
-                    .UseInMemoryDatabase(nameof(TagTests)).Options;
-                _context = new ChambersDbContext(contextOptions);
-
-                return _context;
-            }
+        public static Tag NewTag([CallerMemberName] string? tagName = null) {
+            var tag = new Tag() { TagId = BootStrap.NextId(), TagName = tagName };
+            return tag;
         }
 
-        public static Lazy<Tag> InsertTestTag = new Lazy<Tag>(
-            () => new Tag(){TagId = NextId(), TagName = nameof(InsertTestTag)}
-        );
-
+        public static Lazy<Tag> InsertTestTag = new Lazy<Tag>(() => NewTag(nameof(InsertTestTag)));
 
         [TestMethod]
         public void InsertTest()
@@ -70,11 +52,5 @@ namespace ChambersTests.DataModel
             Context.SaveChanges();
         }
 
-        [ClassCleanup]
-        public static void CleanTags() {
-           //Context.Database.ExecuteSqlRaw("TRUNCATE TABLE [Tags]");
-           //Context.Database.CloseConnection();
-           Context.Dispose();
-        }
     }
 }

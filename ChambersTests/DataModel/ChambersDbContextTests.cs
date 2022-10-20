@@ -24,5 +24,20 @@ namespace ChambersTests.DataModel
             var target = new ChambersDbContext(contextOptions);
             Assert.IsNotNull(target);
         }
+
+        [TestMethod]
+        public void ContextFactoryTest()
+        {
+            Assert.IsNotNull(BootStrap.Dbcontext);
+            Assert.IsNotNull(BootStrap.DbInMemorycontext);
+        }
+
+        [TestMethod]
+        public void NamedContextTest()
+        {
+            var context = BootStrap.GetNamedContext(nameof(NamedContextTest));
+            Assert.IsNotNull(context);
+            Assert.AreEqual(context, BootStrap.GetNamedContext(nameof(NamedContextTest)));
+        }
     }
 }

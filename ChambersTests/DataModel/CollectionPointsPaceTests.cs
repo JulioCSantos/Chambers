@@ -25,16 +25,27 @@ namespace ChambersTests.DataModel
             }
         }
 
+        public static int Id { get; private set; } = 1000;
+
+        public static Func<int> NextId = () => { Id++; return Id; };
+
+        public static Lazy<Tag> InsertPointPace = new Lazy<Tag>(
+            () => new Tag() { TagId = NextId(), TagName = nameof(InsertPointPace) }
+        );
+
+        public static Lazy<CollectionPointsPace> InsertPointsPace = new (
+            () => new CollectionPointsPace() { TagId = InsertPointPace.Value.TagId, }
+        );
+
+
         [TestMethod]
-        public void InstantiationTest()
-        {
+        public void InstantiationTest() {
             var target = new CollectionPointsPace();
             Assert.IsNotNull(target);
-            
         }
 
         [TestMethod]
-        public void InsertTest() {
+        public void InsertPointsPaceTest() {
             PreTest();
             var target = new CollectionPointsPace();
             Assert.IsNotNull(target);
