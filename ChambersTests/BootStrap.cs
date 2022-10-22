@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -57,5 +58,11 @@ namespace ChambersTests
         }
         #endregion GetNamedContext
 
+
+        public static Tag NewTag(this DbContext context, [CallerMemberName] string? tagName = null) {
+            var tag = new Tag() { TagId = BootStrap.NextId(), TagName = tagName };
+            context.Add(tag);
+            return tag;
+        }
     }
 }

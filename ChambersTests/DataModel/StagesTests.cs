@@ -13,14 +13,14 @@ namespace ChambersTests.DataModel
     public class StagesTests
     {
         #region Context
-        private static ChambersDbContext Context = BootStrap.InMemoryDbcontext;
+        private static ChambersDbContext imContext = BootStrap.InMemoryDbcontext;
         #endregion Context
 
         public static Stage NewStage(string stageName)
         {
             var tag = TagTests.NewTag(stageName);
-            Context.Tags.Add(tag);
-            var stage = new Stage() { TagId = tag.TagId, StageName = stageName };
+            //imContext.Tags.Add(tag);
+            var stage = new Stage() { Tag = tag, StageName = stageName };
             return stage;
         }
 
@@ -32,26 +32,24 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void InsertTest() {
             var name = NewName();
-            RemoveNameInStageTests(name);
-            var newStage = NewStage(name);
-            newStage.MinValue = 10;
-            newStage.MaxValue = 100;
-            Context.Stages.Add(newStage);
-            Context.SaveChanges();
-            Assert.AreEqual(1, Context.Stages.Count());
-            Assert.AreEqual(name, Context.Stages.First((st) => st.StageId == newStage.StageId).StageName);
-            RemoveNameInStageTests(name);
+            CascadeDelete(name);
+            var newStage = NewStage(name); newStage.MinValue = 10; newStage.MaxValue = 100;
+            imContext.Stages.Add(newStage);
+            imContext.SaveChanges();
+            Assert.AreEqual(1, imContext.Stages.Count());
+            Assert.AreEqual(name, imContext.Stages.First((st) => st.StageId == newStage.StageId).StageName);
+            CascadeDelete(name);
         }
 
-        public void RemoveNameInStageTests(string nameOnTest)
+        public void CascadeDelete(string nameOnTest)
         {
-            var stage = Context.Stages.FirstOrDefault((st) => st.StageName == nameOnTest);
-            if (stage != null) { Context.Remove(stage); }
+            var stage = imContext.Stages.FirstOrDefault((st) => st.StageName == nameOnTest);
+            if (stage != null) { imContext.Remove(stage); }
 
-            var tag = Context.Tags.FirstOrDefault((t) => t.TagName == nameOnTest);
-            if (tag != null) { Context.Remove(tag); }
+            var tag = imContext.Tags.FirstOrDefault((t) => t.TagName == nameOnTest);
+            if (tag != null) { imContext.Remove(tag); }
 
-            Context.SaveChanges();
+            imContext.SaveChanges();
 
         }
     }

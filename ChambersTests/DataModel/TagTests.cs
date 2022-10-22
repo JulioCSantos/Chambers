@@ -37,6 +37,19 @@ namespace ChambersTests.DataModel
             PostTest(target);
         }
 
+        [TestMethod]
+        public void InsertTest2()
+        {
+            var target = Context.NewTag(nameof(InsertTest2));
+            PreTest(target);
+            Context.Add(target);
+            var changesCnt = Context.SaveChanges();
+            Assert.AreEqual(1, changesCnt);
+            Assert.AreEqual(1, Context.Tags.Count());
+            Assert.AreEqual(target.TagName, Context.Tags.First().TagName);
+            PostTest(target);
+        }
+
         private void PreTest(Tag tag)
         {
             var prev = Context.Tags.FirstOrDefault(t => t.TagId == tag.TagId);
