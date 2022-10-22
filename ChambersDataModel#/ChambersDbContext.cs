@@ -5,6 +5,17 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ChambersDataModel
 {
+    // Created with scaffold-dbcontext "Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True"
+    //      Microsoft.EntityFrameworkCore.SqlServer -context 
+    // .. in the Nuget Package Manager Console after adding Microsoft.EntityFrameworkCore,
+    // Microsoft.EntityFrameworkCore.SqlServer and Microsoft.EntityFrameworkCore.Tools Nuget packages
+    // to DataModel project and Microsoft.EntityFrameworkCore.Design to Startup project
+
+    //To protect potentially sensitive information in your connection string,
+    //you should move it out of source code. You can avoid scaffolding the connection
+    //string by using the Name= syntax to read it from configuration
+    //- see https://go.microsoft.com/fwlink/?linkid=2131148.
+    //For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263
     public partial class ChambersDbContext : DbContext
     {
         public ChambersDbContext()
@@ -16,13 +27,13 @@ namespace ChambersDataModel
         {
         }
 
+        public virtual DbSet<PointsPace> PointsPaces { get; set; } = null!;
+        //public virtual DbSet<CollectionPointsPaceLog> CollectionPointsPaceLogs { get; set; } = null!;
         public virtual DbSet<CollectionPointsPaceLogCalc> CollectionPointsPaceLogCalcs { get; set; } = null!;
         public virtual DbSet<CompValue> CompValues { get; set; } = null!;
         public virtual DbSet<Excursion> Excursions { get; set; } = null!;
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; } = null!;
         public virtual DbSet<ExcursionType> ExcursionTypes { get; set; } = null!;
-        public virtual DbSet<PointsPace> PointsPaces { get; set; } = null!;
-        public virtual DbSet<PointsPacesLog> PointsPacesLogs { get; set; } = null!;
         public virtual DbSet<Stage> Stages { get; set; } = null!;
         public virtual DbSet<StagesDate> StagesDates { get; set; } = null!;
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; } = null!;
@@ -39,6 +50,50 @@ namespace ChambersDataModel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<PointsPace>(entity =>
+            {
+                entity.HasKey(e => e.PaceId)
+                    .HasName("PK__Collecti__F7F38BBDBAF2C721");
+
+                entity.ToTable("PointsPace");
+
+                entity.Property(e => e.NestStepEndTime)
+                    .HasColumnType("datetime")
+                    .HasComputedColumnSql("(dateadd(day,[StepSizeDays],[NextStepStartTime]))", false);
+
+                entity.Property(e => e.NextStepStartTime).HasColumnType("datetime");
+
+                entity.HasOne(d => d.Tag)
+                    .WithMany(p => p.PointsPaces)
+                    .HasForeignKey(d => d.TagId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Collectio__TagId__36B12243");
+            });
+
+            //modelBuilder.Entity<CollectionPointsPaceLog>(entity =>
+            //{
+            //    entity.HasKey(e => e.PaceLogId)
+            //        .HasName("PK__Collecti__B49BB7D0F52C5D73");
+
+            //    entity.ToTable("CollectionPointsPaceLog");
+
+            //    entity.Property(e => e.StepEndTime).HasColumnType("datetime");
+
+            //    entity.Property(e => e.StepStartTime).HasColumnType("datetime");
+
+            //    entity.HasOne(d => d.Pace)
+            //        .WithMany(p => p.CollectionPointsPaceLogs)
+            //        .HasForeignKey(d => d.PaceId)
+            //        .OnDelete(DeleteBehavior.ClientSetNull)
+            //        .HasConstraintName("FK__Collectio__PaceI__37A5467C");
+
+            //    entity.HasOne(d => d.StageDates)
+            //        .WithMany(p => p.CollectionPointsPaceLogs)
+            //        .HasForeignKey(d => d.StageDatesId)
+            //        .OnDelete(DeleteBehavior.ClientSetNull)
+            //        .HasConstraintName("FK__Collectio__Stage__38996AB5");
+            //});
+
             modelBuilder.Entity<CollectionPointsPaceLogCalc>(entity =>
             {
                 entity.HasNoKey();
@@ -72,10 +127,6 @@ namespace ChambersDataModel
             {
                 entity.HasNoKey();
 
-                entity.HasIndex(e => e.RampOutPointId, "IX_Excursions_RampOutPointId");
-
-                entity.HasIndex(e => e.RampinPointId, "IX_Excursions_RampinPointId");
-
                 entity.Property(e => e.ExcursionId).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.RampInDateTime).HasColumnType("datetime");
@@ -85,22 +136,18 @@ namespace ChambersDataModel
                 entity.HasOne(d => d.RampOutPoint)
                     .WithMany()
                     .HasForeignKey(d => d.RampOutPointId)
-                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampOutPointId");
+                    .HasConstraintName("FK__Excursion__RampO__3C69FB99");
 
                 entity.HasOne(d => d.RampinPoint)
                     .WithMany()
                     .HasForeignKey(d => d.RampinPointId)
-                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampInPointId");
+                    .HasConstraintName("FK__Excursion__Rampi__3B75D760");
             });
 
             modelBuilder.Entity<ExcursionPoint>(entity =>
             {
                 entity.HasKey(e => e.PointId)
-                    .HasName("pkExcursionPointsPointId");
-
-                entity.HasIndex(e => e.ExcursionType, "IX_ExcursionPoints_ExcursionType");
-
-                entity.HasIndex(e => e.PaceLogId, "IX_ExcursionPoints_PaceLogId");
+                    .HasName("PK__Excursio__40A977E1FEC34C08");
 
                 entity.Property(e => e.ValueDate).HasColumnType("datetime");
 
@@ -108,19 +155,19 @@ namespace ChambersDataModel
                     .WithMany(p => p.ExcursionPoints)
                     .HasForeignKey(d => d.ExcursionType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkExcursionTypesExcursionType_ExcursionPointsExcursionType");
+                    .HasConstraintName("FK__Excursion__Excur__398D8EEE");
 
                 entity.HasOne(d => d.PaceLog)
                     .WithMany(p => p.ExcursionPoints)
                     .HasForeignKey(d => d.PaceLogId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkPointsPacesLogPaceLogId_ExcursionPointsPaceLogId");
+                    .HasConstraintName("FK__Excursion__PaceL__3A81B327");
             });
 
             modelBuilder.Entity<ExcursionType>(entity =>
             {
                 entity.HasKey(e => e.ExcursionType1)
-                    .HasName("pkExcursionType");
+                    .HasName("PK__Excursio__B449CF3A168138C4");
 
                 entity.Property(e => e.ExcursionType1)
                     .ValueGeneratedNever()
@@ -129,59 +176,10 @@ namespace ChambersDataModel
                 entity.Property(e => e.ExcursionDescription).HasMaxLength(255);
             });
 
-            modelBuilder.Entity<PointsPace>(entity =>
-            {
-                entity.HasKey(e => e.PaceId)
-                    .HasName("pkPointsPacesPointId");
-
-                entity.HasIndex(e => e.TagId, "IX_CollectionPointsPace_TagId");
-
-                entity.Property(e => e.NestStepEndTime)
-                    .HasColumnType("datetime")
-                    .HasComputedColumnSql("(dateadd(day,[StepSizeDays],[NextStepStartTime]))", false);
-
-                entity.Property(e => e.NextStepStartTime).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Tag)
-                    .WithMany(p => p.PointsPaces)
-                    .HasForeignKey(d => d.TagId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkTagsTagId_PointsPacesTagId");
-            });
-
-            modelBuilder.Entity<PointsPacesLog>(entity =>
-            {
-                entity.HasKey(e => e.PaceLogId)
-                    .HasName("pkPointsPacesLogPaceLogId");
-
-                entity.ToTable("PointsPacesLog");
-
-                entity.HasIndex(e => e.PaceId, "IX_CollectionPointsPaceLog_PaceId");
-
-                entity.HasIndex(e => e.StageDatesId, "IX_CollectionPointsPaceLog_StageDatesId");
-
-                entity.Property(e => e.StepEndTime).HasColumnType("datetime");
-
-                entity.Property(e => e.StepStartTime).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Pace)
-                    .WithMany(p => p.PointsPacesLogs)
-                    .HasForeignKey(d => d.PaceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkPointsPacesPaceId_PointsPaceLog");
-
-                entity.HasOne(d => d.StageDates)
-                    .WithMany(p => p.PointsPacesLogs)
-                    .HasForeignKey(d => d.StageDatesId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkStagesDatesStageDateId_PointsPacesLogStageDatesId");
-            });
-
             modelBuilder.Entity<Stage>(entity =>
             {
                 entity.HasIndex(e => new { e.TagId, e.StageName }, "IxTagStageName")
-                    .IsUnique()
-                    .HasFilter("([StageName] IS NOT NULL)");
+                    .IsUnique();
 
                 entity.Property(e => e.MaxValue).HasDefaultValueSql("((3.4000000000000000e+038))");
 
@@ -197,7 +195,7 @@ namespace ChambersDataModel
             modelBuilder.Entity<StagesDate>(entity =>
             {
                 entity.HasKey(e => e.StageDateId)
-                    .HasName("pkStagesDatesStageDateId");
+                    .HasName("PK__StagesDa__CBAD5D1F69D91647");
 
                 entity.HasIndex(e => new { e.StageId, e.StartDate }, "IxStagesDatesTagIdStartDate");
 

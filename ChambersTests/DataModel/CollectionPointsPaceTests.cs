@@ -33,14 +33,14 @@ namespace ChambersTests.DataModel
             () => new Tag() { TagId = NextId(), TagName = nameof(InsertPointPace) }
         );
 
-        public static Lazy<CollectionPointsPace> InsertPointsPace = new (
-            () => new CollectionPointsPace() { TagId = InsertPointPace.Value.TagId, }
+        public static Lazy<PointsPace> InsertPointsPace = new (
+            () => new PointsPace() { TagId = InsertPointPace.Value.TagId, }
         );
 
 
         [TestMethod]
         public void InstantiationTest() {
-            var target = new CollectionPointsPace();
+            var target = new PointsPace();
             Assert.IsNotNull(target);
         }
 

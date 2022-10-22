@@ -32,7 +32,7 @@ namespace ChambersTests
 
         #region DbInMemorycontext
         private static ChambersDbContext? _dbInMemorycontext;
-        public static ChambersDbContext DbInMemorycontext {
+        public static ChambersDbContext InMemoryDbcontext {
             get {
                 if (_dbInMemorycontext != null) { return _dbInMemorycontext; }
 

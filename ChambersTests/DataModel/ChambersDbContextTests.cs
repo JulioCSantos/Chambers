@@ -29,7 +29,7 @@ namespace ChambersTests.DataModel
         public void ContextFactoryTest()
         {
             Assert.IsNotNull(BootStrap.Dbcontext);
-            Assert.IsNotNull(BootStrap.DbInMemorycontext);
+            Assert.IsNotNull(BootStrap.InMemoryDbcontext);
         }
 
         [TestMethod]

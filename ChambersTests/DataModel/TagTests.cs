@@ -14,7 +14,7 @@ namespace ChambersTests.DataModel
     {
 
         #region Context
-        private static ChambersDbContext Context = BootStrap.DbInMemorycontext;
+        private static ChambersDbContext Context = BootStrap.InMemoryDbcontext;
         #endregion Context
 
         public static Tag NewTag([CallerMemberName] string? tagName = null) {

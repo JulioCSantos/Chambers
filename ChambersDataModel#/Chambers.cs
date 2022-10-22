@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ChambersDataModel
 {
-    public partial class ChambersDbContext : DbContext
+    public partial class Chambers : DbContext
     {
-        public ChambersDbContext()
+        public Chambers()
         {
         }
 
-        public ChambersDbContext(DbContextOptions<ChambersDbContext> options)
+        public Chambers(DbContextOptions<Chambers> options)
             : base(options)
         {
         }
@@ -120,7 +120,7 @@ namespace ChambersDataModel
             modelBuilder.Entity<ExcursionType>(entity =>
             {
                 entity.HasKey(e => e.ExcursionType1)
-                    .HasName("pkExcursionType");
+                    .HasName("PK__Excursio__B449CF3A168138C4");
 
                 entity.Property(e => e.ExcursionType1)
                     .ValueGeneratedNever()

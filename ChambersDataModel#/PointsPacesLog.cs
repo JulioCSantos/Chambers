@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace ChambersDataModel
 {
-    public partial class CollectionPointsPaceLog
+    public partial class PointsPacesLog
     {
-        public CollectionPointsPaceLog()
+        public PointsPacesLog()
         {
             ExcursionPoints = new HashSet<ExcursionPoint>();
         }
@@ -16,7 +16,7 @@ namespace ChambersDataModel
         public DateTime StepStartTime { get; set; }
         public DateTime StepEndTime { get; set; }
 
-        public virtual CollectionPointsPace Pace { get; set; } = null!;
+        public virtual PointsPace Pace { get; set; } = null!;
         public virtual StagesDate StageDates { get; set; } = null!;
         public virtual ICollection<ExcursionPoint> ExcursionPoints { get; set; }
     }

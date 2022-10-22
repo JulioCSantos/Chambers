@@ -13,7 +13,7 @@ namespace ChambersTests.DataModel
     public class StagesTests
     {
         #region Context
-        private static ChambersDbContext Context = BootStrap.DbInMemorycontext;
+        private static ChambersDbContext Context = BootStrap.InMemoryDbcontext;
         #endregion Context
 
         public static Stage NewStage(string stageName)

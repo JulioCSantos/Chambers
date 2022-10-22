@@ -9,18 +9,12 @@ namespace ChambersDataModel.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameTable(
-                name: nameof(CollectionPointsPace), 
-                newName: "PointsPace"
-            );
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameTable(
-                name: "PointsPace",
-                newName: nameof(CollectionPointsPace)
-            );
+
         }
     }
 }
