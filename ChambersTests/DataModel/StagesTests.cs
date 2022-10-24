@@ -13,7 +13,8 @@ namespace ChambersTests.DataModel
     public class StagesTests
     {
         #region Context
-        private static ChambersDbContext imContext = BootStrap.InMemoryDbcontext;
+        //private static ChambersDbContext imContext = BootStrap.InMemoryDbcontext;
+        private static ChambersDbContext context = BootStrap.GetNamedContext("ChambersTest");
         #endregion Context
 
         public static Stage NewStage(string stageName)
@@ -34,22 +35,22 @@ namespace ChambersTests.DataModel
             var name = NewName();
             CascadeDelete(name);
             var newStage = NewStage(name); newStage.MinValue = 10; newStage.MaxValue = 100;
-            imContext.Stages.Add(newStage);
-            imContext.SaveChanges();
-            Assert.AreEqual(1, imContext.Stages.Count());
-            Assert.AreEqual(name, imContext.Stages.First((st) => st.StageId == newStage.StageId).StageName);
+            context.Stages.Add(newStage);
+            context.SaveChanges();
+            Assert.AreEqual(1, context.Stages.Count());
+            Assert.AreEqual(name, context.Stages.First((st) => st.StageId == newStage.StageId).StageName);
             CascadeDelete(name);
         }
 
         public void CascadeDelete(string nameOnTest)
         {
-            var stage = imContext.Stages.FirstOrDefault((st) => st.StageName == nameOnTest);
-            if (stage != null) { imContext.Remove(stage); }
+            var stage = context.Stages.FirstOrDefault((st) => st.StageName == nameOnTest);
+            if (stage != null) { context.Remove(stage); }
 
-            var tag = imContext.Tags.FirstOrDefault((t) => t.TagName == nameOnTest);
-            if (tag != null) { imContext.Remove(tag); }
+            var tag = context.Tags.FirstOrDefault((t) => t.TagName == nameOnTest);
+            if (tag != null) { context.Remove(tag); }
 
-            imContext.SaveChanges();
+            context.SaveChanges();
 
         }
     }

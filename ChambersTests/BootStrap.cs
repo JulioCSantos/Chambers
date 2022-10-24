@@ -3,6 +3,7 @@ using ChambersTests.DataModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -23,8 +24,7 @@ namespace ChambersTests
             get {
                 if (_dbContext != null) { return _dbContext; }
 
-                _dbContext = new ChambersDbContext("ChambersTest");
-                _dbContext.Database.EnsureCreated();
+                _dbContext = new ChambersDbContext();
                 var sql = _dbContext.Database.GenerateCreateScript();
 
                 return _dbContext;
@@ -49,14 +49,17 @@ namespace ChambersTests
         #endregion DbInMemorycontext
 
         #region GetNamedContext
-        public static Dictionary<string, ChambersDbContext> _chambersDictionary = new ();
+        private static Dictionary<string, ChambersDbContext> contextsDictionary = new();
+        public static ReadOnlyDictionary<string, ChambersDbContext> ChambersDictionary = new (contextsDictionary);
         public static ChambersDbContext GetNamedContext(string contextName)
         {
-            if (_chambersDictionary.ContainsKey(contextName)) { return _chambersDictionary[contextName]; }
+            if (ChambersDictionary.ContainsKey(contextName)) { return ChambersDictionary[contextName]; }
 
-            _chambersDictionary.Add(contextName, new ChambersDbContext());
-
-            return _chambersDictionary[contextName];
+            var dbContext = new ChambersDbContext(contextName);
+            contextsDictionary.Add(contextName, dbContext);
+            dbContext.Database.EnsureCreated();
+            Assert.IsTrue(ChambersDictionary.ContainsKey(contextName));
+            return ChambersDictionary[contextName];
         }
         #endregion GetNamedContext
 
