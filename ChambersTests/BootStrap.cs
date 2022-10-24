@@ -19,11 +19,13 @@ namespace ChambersTests
 
         #region DbSharedcontext
         private static ChambersDbContext? _dbContext;
-        public static ChambersDbContext Dbcontext {
+        public static ChambersDbContext DbContext {
             get {
                 if (_dbContext != null) { return _dbContext; }
 
-                _dbContext = new ChambersDbContext();
+                _dbContext = new ChambersDbContext("ChambersTest");
+                _dbContext.Database.EnsureCreated();
+                var sql = _dbContext.Database.GenerateCreateScript();
 
                 return _dbContext;
             }

@@ -8,7 +8,7 @@ namespace ChambersTests.DataModel
 
         #region Context
         private static ChambersDbContext InMemoryContext = BootStrap.InMemoryDbcontext;
-        private static ChambersDbContext Context = BootStrap.Dbcontext;
+        private static ChambersDbContext Context = BootStrap.DbContext;
         #endregion Context
 
         public static Stage NewPointsPace(string stageName) {
@@ -26,7 +26,8 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void ReadTest() {
             var pointPace = Context.PointsPaces.FirstOrDefault();
-            Assert.IsNotNull(pointPace);
+            if (Context.DatabaseName == null) { Assert.IsNotNull(pointPace); }
+            else { Assert.IsNull(pointPace);}
         }
     }
 }
