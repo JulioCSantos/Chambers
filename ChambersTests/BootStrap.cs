@@ -14,9 +14,9 @@ namespace ChambersTests
 {
     public static class BootStrap
     {
-        #region TestChambers Literal
-        public const string TestChambers = nameof(TestChambers);
-        #endregion TestChambers Literal
+        #region ChambersTests Literal
+        public const string ChambersTests = nameof(ChambersTests);
+        #endregion ChambersTests Literal
 
         #region TestDbContext
         public static ChambersDbContext TestDbContext { get; }
@@ -65,7 +65,10 @@ namespace ChambersTests
 
             var dbContext = new ChambersDbContext(contextName);
             contextsDictionary.Add(contextName, dbContext);
+            dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
+            dbContext.InjectView(nameof(dbContext.StagesLimitsAndDates) + ".sql", nameof(dbContext.StagesLimitsAndDates));
+
             Assert.IsTrue(ChambersDictionary.ContainsKey(contextName));
             return ChambersDictionary[contextName];
         }
@@ -77,7 +80,7 @@ namespace ChambersTests
             Id = 1000;
             contextsDictionary = new Dictionary<string, ChambersDbContext>();
             ChambersDictionary = new ReadOnlyDictionary<string, ChambersDbContext>(contextsDictionary);
-            TestDbContext = GetNamedContext(TestChambers);
+            TestDbContext = GetNamedContext(ChambersTests);
         }
     }
 }
