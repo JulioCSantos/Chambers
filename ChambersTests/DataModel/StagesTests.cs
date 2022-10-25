@@ -66,8 +66,27 @@ namespace ChambersTests.DataModel
             stageDate.EndDate = new DateTime(2022, 02, 28);
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
-            var viewResults = TestDbContext.StagesLimitsAndDates.ToList();
+            var viewResults = TestDbContext.StagesLimitsAndDates
+                .Where(std => std.StageName == name).ToList();
             Assert.IsNotNull(viewResults);
+            Assert.AreEqual(1, viewResults.Count);
+        }
+
+        [TestMethod]
+        public void DuplicatedStageNameNegativeTest() {
+            var name = NewName();
+            var stage1 = NewStageLimits(name); stage1.MinValue = 40; stage1.MaxValue = 400;
+            var stage2 = NewStageLimits(name); stage2.MinValue = 50; stage2.MaxValue = 500;
+
+            // Duplicated StageName for the same Tag is invalid. Will test this exception
+            stage2.Tag = stage1.Tag;
+            stage2.StageName = stage1.StageName;
+
+            TestDbContext.Stages.Add(stage1);
+            TestDbContext.Stages.Add(stage2);
+
+            var ex = Assert.ThrowsException<DbUpdateException>(() => TestDbContext.SaveChanges());
+            Assert.IsTrue(ex.InnerException?.Message.Contains("duplicate"));
         }
     }
 }
