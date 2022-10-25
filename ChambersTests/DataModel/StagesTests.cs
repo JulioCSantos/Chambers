@@ -1,11 +1,7 @@
 ﻿using ChambersDataModel;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChambersTests.DataModel
 {
@@ -18,14 +14,6 @@ namespace ChambersTests.DataModel
             return stage;
         }
 
-        public static StagesDate NewStageDates(string stageName)
-        {
-            Stage stage = NewStageLimits(stageName);
-            StagesDate stageDate = new() { Stage = stage };
-
-            return stageDate;
-        }
-
         private static string NewName([CallerMemberName] string? name = null) {
             var newName = nameof(StagesTests) + "_" + name;
             return newName;
@@ -36,41 +24,13 @@ namespace ChambersTests.DataModel
             var name = NewName();
             var newStage = NewStageLimits(name); newStage.MinValue = 10; newStage.MaxValue = 100;
             TestDbContext.Stages.Add(newStage);
+            Assert.IsNull(TestDbContext.Stages.FirstOrDefault(st => st.StageName == newStage.StageName)?.Tag);
             TestDbContext.SaveChanges();
-            Assert.AreEqual(1, TestDbContext.Stages.Count());
             Assert.AreEqual(name, TestDbContext.Stages.First((st) => st.StageId == newStage.StageId).StageName);
+            Assert.IsNotNull(TestDbContext.Stages.FirstOrDefault(st => st.StageName == newStage.StageName)?.Tag);
+            var entries = TestDbContext.ChangeTracker.Entries();
         }
 
-        [TestMethod]
-        public void InsertStageDatesTest() {
-            var name = NewName();
-            var stageDate = NewStageDates(name);
-            stageDate.Stage.MinValue = 20;
-            stageDate.Stage.MaxValue = 200;
-            stageDate.StartDate = new DateTime(2022, 01, 01);
-            stageDate.EndDate = new DateTime(2022, 12, 31);
-            TestDbContext.StagesDates.Add(stageDate);
-            var savedCount = TestDbContext.SaveChanges();
-            Assert.IsTrue(TestDbContext.StagesDates.Any());
-            Assert.AreEqual(3, savedCount);
-            Assert.IsNotNull(TestDbContext.StagesDates.First(sd => sd.Stage.StageName == name));
-        }
-
-        [TestMethod]
-        public void ReadStagesLimitsAndDatesViewTest() {
-            var name = NewName();
-            var stageDate = NewStageDates(name);
-            stageDate.Stage.MinValue = 30;
-            stageDate.Stage.MaxValue = 300;
-            stageDate.StartDate = new DateTime(2022, 02, 01);
-            stageDate.EndDate = new DateTime(2022, 02, 28);
-            TestDbContext.StagesDates.Add(stageDate);
-            TestDbContext.SaveChanges();
-            var viewResults = TestDbContext.StagesLimitsAndDates
-                .Where(std => std.StageName == name).ToList();
-            Assert.IsNotNull(viewResults);
-            Assert.AreEqual(1, viewResults.Count);
-        }
 
         [TestMethod]
         public void DuplicatedStageNameNegativeTest() {
@@ -84,9 +44,17 @@ namespace ChambersTests.DataModel
 
             TestDbContext.Stages.Add(stage1);
             TestDbContext.Stages.Add(stage2);
-
+            
             var ex = Assert.ThrowsException<DbUpdateException>(() => TestDbContext.SaveChanges());
             Assert.IsTrue(ex.InnerException?.Message.Contains("duplicate"));
+            
+            //rollback
+            //var savedTag = stage1.Tag;
+            //TestDbContext.Stages.Remove(stage2);
+            //TestDbContext.Stages.Remove(stage1);
+            //TestDbContext.Tags.Remove(savedTag);
+            TestDbContext.RollBack();
+            var entries = TestDbContext.ChangeTracker.Entries();
         }
     }
 }

@@ -13,23 +13,24 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class TagTests
     {
-
         public static Tag NewTag([CallerMemberName] string? tagName = null) {
-            var tag = new Tag() { TagId = BootStrap.NextId(), TagName = tagName };
-            return tag;
+
+                var tag = new Tag() { TagId = BootStrap.NextId(), TagName = tagName };
+                return tag;
         }
 
-        public static Lazy<Tag> InsertTestTag = new Lazy<Tag>(() => NewTag(nameof(InsertTestTag)));
+        private static string NewName([CallerMemberName] string? name = null) {
+            var newName = nameof(TagTests) + "_" + name;
+            return newName;
+        }
+
 
         [TestMethod]
         public void InsertTest()
         {
-            var target = InsertTestTag.Value;
-            var prevTagsCount = TestDbContext.Tags.Count();
+            var target = NewTag(NewName());
             TestDbContext.Add(target);
             var changesCnt = TestDbContext.SaveChanges(); 
-            Assert.AreEqual(1,changesCnt);
-            Assert.AreEqual(prevTagsCount + 1, TestDbContext.Tags.Count());
             Assert.AreEqual(target.TagName, TestDbContext.Tags.First(t => t.TagId == target.TagId).TagName);
         }
     }

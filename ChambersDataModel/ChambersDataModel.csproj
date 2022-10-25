@@ -13,11 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="StoredProcs\spGetStagesLimitsAndDates.sql" />
     <None Remove="Views\CollectionPointsPaceLogCalc.sql" />
     <None Remove="Views\StagesLimitsAndDates.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="StoredProcs\spGetStagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Views\CollectionPointsPaceLogCalc.sql" />
     <EmbeddedResource Include="Views\StagesLimitsAndDates.sql" />
   </ItemGroup>

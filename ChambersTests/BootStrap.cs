@@ -23,8 +23,9 @@ namespace ChambersTests
         #endregion TestDbContext
 
         #region NextId
-        public static int Id { get; private set; }
-        public static Func<int> NextId = () => { Id++; return Id; };
+
+        private static int _id;
+        public static Func<int> NextId = () => { Interlocked.Increment(ref _id); return _id; };
         #endregion NextId
 
         #region DbSharedcontext
@@ -68,6 +69,7 @@ namespace ChambersTests
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
             dbContext.InjectView(nameof(dbContext.StagesLimitsAndDates) + ".sql", nameof(dbContext.StagesLimitsAndDates));
+            dbContext.InjectStoredProc("spGetStagesLimitsAndDates" + ".sql", "spGetStagesLimitsAndDates");
 
             Assert.IsTrue(ChambersDictionary.ContainsKey(contextName));
             return ChambersDictionary[contextName];
@@ -77,7 +79,7 @@ namespace ChambersTests
 
         static BootStrap()
         {
-            Id = 1000;
+            _id = 1000;
             contextsDictionary = new Dictionary<string, ChambersDbContext>();
             ChambersDictionary = new ReadOnlyDictionary<string, ChambersDbContext>(contextsDictionary);
             TestDbContext = GetNamedContext(ChambersTests);
