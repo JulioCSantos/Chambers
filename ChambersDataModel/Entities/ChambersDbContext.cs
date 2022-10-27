@@ -22,7 +22,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<ExcursionType> ExcursionTypes { get; set; } = null!;
         public virtual DbSet<PointsPace> PointsPaces { get; set; } = null!;
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; } = null!;
-        public virtual DbSet<PointsStespLogNextValue> PointsStespLogNextValues { get; set; } = null!;
+        public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; } = null!;
         public virtual DbSet<Stage> Stages { get; set; } = null!;
         public virtual DbSet<StagesDate> StagesDates { get; set; } = null!;
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; } = null!;
@@ -158,11 +158,11 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<PointsStespLogNextValue>(entity =>
+            modelBuilder.Entity<PointsStepsLogNextValue>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToView("PointsStespLogNextValues");
+                entity.ToView("PointsStepsLogNextValues");
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 

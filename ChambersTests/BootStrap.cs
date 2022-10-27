@@ -67,9 +67,9 @@ namespace ChambersTests
             contextsDictionary.Add(contextName, dbContext);
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
-            dbContext.InjectView(nameof(dbContext.StagesLimitsAndDates) + ".sql", nameof(dbContext.StagesLimitsAndDates));
-            dbContext.InjectStoredProc("spGetStagesLimitsAndDates" + ".sql", "spGetStagesLimitsAndDates");
-
+            //dbContext.InjectView(nameof(dbContext.StagesLimitsAndDates) + ".sql", nameof(dbContext.StagesLimitsAndDates));
+            //dbContext.InjectStoredProc("spGetStagesLimitsAndDates" + ".sql", "spGetStagesLimitsAndDates");
+            dbContext.InjectEmbededSqlResources();
             Assert.IsTrue(ChambersDictionary.ContainsKey(contextName));
             return ChambersDictionary[contextName];
         }

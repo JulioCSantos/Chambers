@@ -13,12 +13,28 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class StageDatesTests
     {
-        public static StagesDate NewStageDates(string stageName) {
+        public static StagesDate NewStageDates(string stageName, DateTime? startDate = null, DateTime? endDate = null) {
             Stage stage = StagesTests.NewStageLimits(stageName);
             StagesDate stageDate = new() { Stage = stage };
+            StagesDateSetDates(stageDate, startDate, endDate);
 
             return stageDate;
         }
+
+        public static StagesDate NewStageDates(Tag tag, DateTime? startDate = null, DateTime? endDate = null) {
+            Stage stage = StagesTests.NewStageLimits(tag);
+            StagesDate stageDate = new() { Stage = stage };
+            StagesDateSetDates(stageDate, startDate, endDate);
+
+            return stageDate;
+        }
+
+        public static void StagesDateSetDates(StagesDate stagesDate, DateTime? startDate, DateTime? endDate)
+        {
+            if (startDate != null) { stagesDate.StartDate = (DateTime)startDate; }
+            if (endDate != null) { stagesDate.EndDate = (DateTime)endDate; }
+        }
+
 
         private static string NewName([CallerMemberName] string? name = null) {
             var newName = nameof(StageDatesTests) + "_" + name;

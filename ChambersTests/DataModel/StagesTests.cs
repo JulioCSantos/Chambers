@@ -8,11 +8,24 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class StagesTests
     {
-        public static Stage NewStageLimits(string stageName) {
+        public static Stage NewStageLimits(string stageName, double? minValue = null, double? maxValue = null) {
             var tag = TagTests.NewTag(stageName);
             var stage = new Stage() { Tag = tag, StageName = stageName };
+            StageSetValues(stage, minValue, maxValue);
             return stage;
         }
+
+        public static Stage NewStageLimits(Tag tag, double? minValue = null, double? maxValue = null) {
+            var stage = new Stage() { Tag = tag, StageName = tag.TagName };
+            StageSetValues(stage, minValue, maxValue);
+            return stage;
+        }
+
+        public static void StageSetValues(Stage stage, double? minValue, double? maxValue) {
+            if (minValue != null) {stage.MinValue = (double)minValue; }
+            if (maxValue != null) {stage.MaxValue = (double)maxValue; }
+        }
+
 
         private static string NewName([CallerMemberName] string? name = null) {
             var newName = nameof(StagesTests) + "_" + name;
@@ -22,7 +35,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void InsertStageLimitsTest() {
             var name = NewName();
-            var newStage = NewStageLimits(name); newStage.MinValue = 10; newStage.MaxValue = 100;
+            var newStage = NewStageLimits(name, 10, 100);
             TestDbContext.Stages.Add(newStage);
             Assert.IsNull(TestDbContext.Stages.FirstOrDefault(st => st.StageName == newStage.StageName)?.Tag);
             TestDbContext.SaveChanges();
@@ -35,8 +48,8 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void DuplicatedStageNameNegativeTest() {
             var name = NewName();
-            var stage1 = NewStageLimits(name); stage1.MinValue = 40; stage1.MaxValue = 400;
-            var stage2 = NewStageLimits(name); stage2.MinValue = 50; stage2.MaxValue = 500;
+            var stage1 = NewStageLimits(name, 40, 400); 
+            var stage2 = NewStageLimits(name, 50 , 500); 
 
             // Duplicated StageName for the same Tag is invalid. Will test this exception
             stage2.Tag = stage1.Tag;

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[NextPointsPacesLog]
+﻿CREATE VIEW [dbo].[PointsStepsLogNextValues]
 AS
 SELECT sld.StageDateId, sld.TagId, sld.StageName, sld.StartDate AS StageStartDate
         , sld.EndDate AS StageEndDate, sld.MinValue, sld.MaxValue
@@ -9,4 +9,3 @@ FROM  dbo.StagesLimitsAndDates AS sld
         CROSS APPLY
       [dbo].[fnGetOverlappingDates](sld.StartDate, sld.EndDate, cpp.NextStepStartDate, cpp.NextStepEndDate) AS ods
 WHERE ods.StartDate IS NOT NULL OR ods.EndDate IS NOT NULL
-GO

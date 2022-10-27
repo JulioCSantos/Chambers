@@ -18,8 +18,7 @@ namespace ChambersTests.DataModel
 
 
         [TestMethod]
-        public void InsertTest()
-        {
+        public void InsertTest() {
             var target = NewTag(NewName());
             TestDbContext.Add(target);
             var changesCnt = TestDbContext.SaveChanges(); 

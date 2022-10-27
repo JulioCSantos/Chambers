@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ChambersDataModel.Entities
 {
-    public partial class PointsStespLogNextValue
+    public partial class PointsStepsLogNextValue
     {
         public int StageDateId { get; set; }
         public int TagId { get; set; }
