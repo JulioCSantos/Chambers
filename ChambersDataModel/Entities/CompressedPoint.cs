@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ChambersDataModel
+namespace ChambersDataModel.Entities
 {
-    public partial class CompValue
+    public partial class CompressedPoint
     {
         public string Tag { get; set; } = null!;
         public DateTime Time { get; set; }

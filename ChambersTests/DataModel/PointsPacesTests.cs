@@ -24,7 +24,7 @@ namespace ChambersTests.DataModel
         {
             var name = NewName();
             var pointsPace = NewPointsPace(name);
-            pointsPace.NextStepStartTime = new DateTime(2022, 01, 01);
+            pointsPace.NextStepStartDate = new DateTime(2022, 01, 01);
             pointsPace.StepSizeDays = 3;
             TestDbContext.PointsPaces.Add(pointsPace);
             var savedCount = TestDbContext.SaveChanges();

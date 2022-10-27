@@ -7,9 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ChambersDbContext.cs" />
+    <Compile Remove="ChambersDbContextPartial.cs" />
     <Compile Remove="CollectionPointsPace.cs" />
     <Compile Remove="CollectionPointsPaceLog.cs" />
+    <Compile Remove="CollectionPointsPaceLogCalc.cs" />
+    <Compile Remove="CompValue.cs" />
     <Compile Remove="ELChambersContext.cs" />
+    <Compile Remove="Excursion.cs" />
+    <Compile Remove="ExcursionPoint.cs" />
+    <Compile Remove="ExcursionType.cs" />
+    <Compile Remove="PointsPace.cs" />
+    <Compile Remove="PointsPacesLog.cs" />
+    <Compile Remove="Stage.cs" />
+    <Compile Remove="StagesDate.cs" />
+    <Compile Remove="StagesLimitsAndDate.cs" />
+    <Compile Remove="Tag.cs" />
   </ItemGroup>
 
   <ItemGroup>

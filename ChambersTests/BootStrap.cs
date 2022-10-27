@@ -1,5 +1,4 @@
-﻿using ChambersDataModel;
-using ChambersTests.DataModel;
+﻿using ChambersTests.DataModel;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -7,13 +7,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChambersDataModel
+namespace ChambersDataModel.Entities
 {
     public partial class ChambersDbContext : DbContext
     {
-        public void OnModelCreatingPartial(ModelBuilder modelBuilder)
-        {
+        public string? DatabaseName { get; }
 
+        public ChambersDbContext(string databaseName) {
+            DatabaseName = databaseName;
         }
 
         public void InjectView(string sqlFileName, string viewName)

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ChambersDataModel
+namespace ChambersDataModel.Entities
 {
-    public partial class CollectionPointsPaceLogCalc
+    public partial class StagesLimitsAndDate
     {
-        public int PaceId { get; set; }
+        public int StageDateId { get; set; }
         public int TagId { get; set; }
         public string? StageName { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
-        public DateTime StepStartTime { get; set; }
-        public DateTime? StepEndTime { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

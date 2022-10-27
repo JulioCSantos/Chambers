@@ -2,21 +2,13 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace ChambersDataModel
+namespace ChambersDataModel.Entities
 {
     public partial class ChambersDbContext : DbContext
     {
-        public string? DatabaseName { get; }
-
         public ChambersDbContext()
         {
-        }
-
-        public ChambersDbContext(string databaseName)
-        {
-            DatabaseName = databaseName;
         }
 
         public ChambersDbContext(DbContextOptions<ChambersDbContext> options)
@@ -24,13 +16,13 @@ namespace ChambersDataModel
         {
         }
 
-        public virtual DbSet<CollectionPointsPaceLogCalc> CollectionPointsPaceLogCalcs { get; set; } = null!;
-        public virtual DbSet<CompValue> CompValues { get; set; } = null!;
+        public virtual DbSet<CompressedPoint> CompressedPoints { get; set; } = null!;
         public virtual DbSet<Excursion> Excursions { get; set; } = null!;
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; } = null!;
         public virtual DbSet<ExcursionType> ExcursionTypes { get; set; } = null!;
         public virtual DbSet<PointsPace> PointsPaces { get; set; } = null!;
-        public virtual DbSet<PointsPacesLog> PointsPacesLogs { get; set; } = null!;
+        public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; } = null!;
+        public virtual DbSet<PointsStespLogNextValue> PointsStespLogNextValues { get; set; } = null!;
         public virtual DbSet<Stage> Stages { get; set; } = null!;
         public virtual DbSet<StagesDate> StagesDates { get; set; } = null!;
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; } = null!;
@@ -41,33 +33,13 @@ namespace ChambersDataModel
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-
-                if (DatabaseName == null) {
-                    optionsBuilder.UseSqlServer("Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True");
-                }
-                else {
-                    optionsBuilder.UseSqlServer($"Data Source=ASUS-Strange;Initial Catalog={DatabaseName};Integrated Security=True");
-                }
-
+                optionsBuilder.UseSqlServer("Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CollectionPointsPaceLogCalc>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("CollectionPointsPaceLogCalc");
-
-                entity.Property(e => e.StageName).HasMaxLength(255);
-
-                entity.Property(e => e.StepEndTime).HasColumnType("datetime");
-
-                entity.Property(e => e.StepStartTime).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<CompValue>(entity =>
+            modelBuilder.Entity<CompressedPoint>(entity =>
             {
                 entity.HasNoKey();
 
@@ -89,7 +61,7 @@ namespace ChambersDataModel
 
                 entity.HasIndex(e => e.RampOutPointId, "IX_Excursions_RampOutPointId");
 
-                entity.HasIndex(e => e.RampinPointId, "IX_Excursions_RampinPointId");
+                entity.HasIndex(e => e.RampInPointId, "IX_Excursions_RampinPointId");
 
                 entity.Property(e => e.ExcursionId).ValueGeneratedOnAdd();
 
@@ -97,15 +69,15 @@ namespace ChambersDataModel
 
                 entity.Property(e => e.RampOutDateTime).HasColumnType("datetime");
 
+                entity.HasOne(d => d.RampInPoint)
+                    .WithMany()
+                    .HasForeignKey(d => d.RampInPointId)
+                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampInPointId");
+
                 entity.HasOne(d => d.RampOutPoint)
                     .WithMany()
                     .HasForeignKey(d => d.RampOutPointId)
                     .HasConstraintName("fkExcursionsPointId_ExcursionsRampOutPointId");
-
-                entity.HasOne(d => d.RampinPoint)
-                    .WithMany()
-                    .HasForeignKey(d => d.RampinPointId)
-                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampInPointId");
             });
 
             modelBuilder.Entity<ExcursionPoint>(entity =>
@@ -115,7 +87,7 @@ namespace ChambersDataModel
 
                 entity.HasIndex(e => e.ExcursionType, "IX_ExcursionPoints_ExcursionType");
 
-                entity.HasIndex(e => e.PaceLogId, "IX_ExcursionPoints_PaceLogId");
+                entity.HasIndex(e => e.StepLogId, "IX_ExcursionPoints_PaceLogId");
 
                 entity.Property(e => e.ValueDate).HasColumnType("datetime");
 
@@ -125,11 +97,11 @@ namespace ChambersDataModel
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fkExcursionTypesExcursionType_ExcursionPointsExcursionType");
 
-                entity.HasOne(d => d.PaceLog)
+                entity.HasOne(d => d.StepLog)
                     .WithMany(p => p.ExcursionPoints)
-                    .HasForeignKey(d => d.PaceLogId)
+                    .HasForeignKey(d => d.StepLogId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkPointsPacesLogPaceLogId_ExcursionPointsPaceLogId");
+                    .HasConstraintName("fkPointsStepsLogStepLogId_ExcursionPointsStepLogId");
             });
 
             modelBuilder.Entity<ExcursionType>(entity =>
@@ -151,11 +123,11 @@ namespace ChambersDataModel
 
                 entity.HasIndex(e => e.TagId, "IX_CollectionPointsPace_TagId");
 
-                entity.Property(e => e.NestStepEndTime)
+                entity.Property(e => e.NextStepEndDate)
                     .HasColumnType("datetime")
-                    .HasComputedColumnSql("(dateadd(day,[StepSizeDays],[NextStepStartTime]))", false);
+                    .HasComputedColumnSql("(dateadd(day,[StepSizeDays],[NextStepStartDate]))", false);
 
-                entity.Property(e => e.NextStepStartTime).HasColumnType("datetime");
+                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Tag)
                     .WithMany(p => p.PointsPaces)
@@ -164,32 +136,47 @@ namespace ChambersDataModel
                     .HasConstraintName("fkTagsTagId_PointsPacesTagId");
             });
 
-            modelBuilder.Entity<PointsPacesLog>(entity =>
+            modelBuilder.Entity<PointsStepsLog>(entity =>
             {
-                entity.HasKey(e => e.PaceLogId)
-                    .HasName("pkPointsPacesLogPaceLogId");
+                entity.HasKey(e => e.StepLogId)
+                    .HasName("pkPointsStepsLogPaceLogId");
 
-                entity.ToTable("PointsPacesLog");
+                entity.ToTable("PointsStepsLog");
 
-                entity.HasIndex(e => e.PaceId, "IX_CollectionPointsPaceLog_PaceId");
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
 
-                entity.HasIndex(e => e.StageDatesId, "IX_CollectionPointsPaceLog_StageDatesId");
+                entity.Property(e => e.NextStepEndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.StepEndTime).HasColumnType("datetime");
+                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
 
-                entity.Property(e => e.StepStartTime).HasColumnType("datetime");
+                entity.Property(e => e.StageEndDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.Pace)
-                    .WithMany(p => p.PointsPacesLogs)
-                    .HasForeignKey(d => d.PaceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkPointsPacesPaceId_PointsPaceLog");
+                entity.Property(e => e.StageName).HasMaxLength(255);
 
-                entity.HasOne(d => d.StageDates)
-                    .WithMany(p => p.PointsPacesLogs)
-                    .HasForeignKey(d => d.StageDatesId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkStagesDatesStageDateId_PointsPacesLogStageDatesId");
+                entity.Property(e => e.StageStartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<PointsStespLogNextValue>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("PointsStespLogNextValues");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.NextStepEndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageEndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageName).HasMaxLength(255);
+
+                entity.Property(e => e.StageStartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Stage>(entity =>
@@ -244,6 +231,8 @@ namespace ChambersDataModel
 
             modelBuilder.Entity<Tag>(entity =>
             {
+                entity.HasIndex(e => e.TagName, "ixTagsTagName");
+
                 entity.Property(e => e.TagId).ValueGeneratedNever();
 
                 entity.Property(e => e.TagName).HasMaxLength(255);
@@ -252,5 +241,6 @@ namespace ChambersDataModel
             OnModelCreatingPartial(modelBuilder);
         }
 
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

@@ -1,7 +1,7 @@
 ﻿    // Created with scaffold-dbcontext "Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True"
     //      Microsoft.EntityFrameworkCore.SqlServer -context DbContextFileName
     
-scaffold-dbcontext "Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer -context ChambersDbContext -force
+scaffold-dbcontext "Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer -context ChambersDbContext -OutputDir Entities -force
 
     // .. in the Nuget Package Manager Console after adding Microsoft.EntityFrameworkCore,
     // Microsoft.EntityFrameworkCore.SqlServer and Microsoft.EntityFrameworkCore.Tools Nuget packages

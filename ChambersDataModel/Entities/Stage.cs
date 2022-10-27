@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ChambersDataModel
+namespace ChambersDataModel.Entities
 {
     public partial class Stage
     {
