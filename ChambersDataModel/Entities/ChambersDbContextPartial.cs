@@ -20,6 +20,23 @@ namespace ChambersDataModel.Entities
             DatabaseName = databaseName;
         }
 
+        public ChambersDbContext(string databaseName, DbContextOptions<ChambersDbContext> options)
+            :base(options) {
+            DatabaseName = databaseName;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+            if (!optionsBuilder.IsConfigured) {
+                if (DatabaseName == null) {
+                    optionsBuilder.UseSqlServer("Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True");
+                }
+                else {
+                    optionsBuilder.UseSqlServer($"Data Source=ASUS-Strange;Initial Catalog={DatabaseName};Integrated Security=True");
+                }
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //                optionsBuilder.UseSqlServer("Data Source=ASUS-Strange;Initial Catalog=ELChambers;Integrated Security=True");
+            }
+        }
 
         public void InjectEmbededSqlResources()
         {
@@ -79,42 +96,7 @@ namespace ChambersDataModel.Entities
 
         }
 
-        //ChambersDataModel.StoredProcs.spGetStagesLimitsAndDates.sql
-        //    ChambersDataModel.Views.PointsStepsLogNextValues.sql
-        //ChambersDataModel.Views.StagesLimitsAndDates.sql
-        //    ChambersDataModel.Functions.fnGetOverlappingDates.SQL
-
-        //public void InjectView(string sqlFileName, string viewName)
-        //{
-        //    var assembly = typeof(ChambersDbContext).Assembly;
-        //    var assemblyName = assembly.FullName?.Substring(0, assembly.FullName.IndexOf(','));
-        //    var resource = assembly.GetManifestResourceStream($"{assemblyName}.Views.{sqlFileName}");
-        //    var sqlQuery = new StreamReader(resource ??
-        //                                    throw new InvalidOperationException(
-        //                                        $"Assembly resource 'Views.{sqlFileName}' not found"))
-        //        .ReadToEnd();
-        //    //we always delete the old view, in case the sql query has changed
-        //    this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{viewName}') IS NOT NULL BEGIN DROP VIEW {viewName} END");
-        //    //creating a view based on the sql query
-        //    this.Database.ExecuteSqlRaw(sqlQuery);
-        //}
-
-        //public void InjectStoredProc(string sqlFileName, string storedProcName)
-        //{
-        //    var assembly = typeof(ChambersDbContext).Assembly;
-        //    var assemblyName = assembly.FullName?.Substring(0, assembly.FullName.IndexOf(','));
-        //    var resource = assembly.GetManifestResourceStream($"{assemblyName}.StoredProcs.{sqlFileName}");
-        //    var sqlQuery = new StreamReader(resource ??
-        //                                    throw new InvalidOperationException(
-        //                                        $"Assembly resource 'StoredProcs.{sqlFileName}' not found"))
-        //        .ReadToEnd();
-        //    //we always delete the old view, in case the sql query has changed
-        //    this.Database.ExecuteSqlRaw(
-        //        $"IF OBJECT_ID('{storedProcName}') IS NOT NULL BEGIN DROP PROCEDURE {storedProcName} END");
-        //    //creating a view based on the sql query
-        //    this.Database.ExecuteSqlRaw(sqlQuery);
-        //}
-
+  
         //https://stackoverflow.com/questions/5466677/undo-changes-in-entity-framework-entities
         public void RollBack()
         {
