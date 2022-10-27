@@ -1,5 +1,6 @@
 ﻿using ChambersDataModel;
 using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChambersTests.DataModel
 {
@@ -40,9 +41,17 @@ namespace ChambersTests.DataModel
             var pointsPace = NewPointsPace(name, new DateTime(2022, 02, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             var stageDate = StageDatesTests.NewStageDates(pointsPace.Tag, new DateTime(2022,01,01), new DateTime(2022,12,31));
+            stageDate.Stage.MinValue = 10;
+            stageDate.Stage.MaxValue = 100;
             TestDbContext.StagesDates.Add(stageDate);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
+            var result = TestDbContext.PointsStepsLogNextValues;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count());
+            var firstLogValue = result.First();
+            Assert.AreEqual(pointsPace.NextStepStartDate, firstLogValue.NextStepStartDate);
+            Assert.AreEqual(pointsPace.NextStepEndDate, firstLogValue.NextStepEndDate);
         }
     }
 }
