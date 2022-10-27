@@ -13,14 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Functions\fnGetOverlappingDates.SQL" />
     <None Remove="StoredProcs\spGetStagesLimitsAndDates.sql" />
     <None Remove="Views\CollectionPointsPaceLogCalc.sql" />
+    <None Remove="Views\NextPointsPacesLog.sql" />
     <None Remove="Views\StagesLimitsAndDates.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="StoredProcs\spGetStagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Views\CollectionPointsPaceLogCalc.sql" />
+    <EmbeddedResource Include="Views\NextPointsPacesLog.sql" />
     <EmbeddedResource Include="Views\StagesLimitsAndDates.sql" />
   </ItemGroup>
 
@@ -32,6 +35,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Functions\fnGetOverlappingDates.SQL" />
   </ItemGroup>
 
 </Project>
