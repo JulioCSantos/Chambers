@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Chambers.Common;
 
 namespace ChambersTests.DataModel
 {
@@ -9,22 +10,20 @@ namespace ChambersTests.DataModel
     public class StagesTests
     {
         public static Stage NewStageLimits(string stageName, double? minValue = null, double? maxValue = null) {
-            var tag = TagTests.NewTag(stageName);
-            var stage = new Stage() { Tag = tag, StageName = stageName };
-            StageSetValues(stage, minValue, maxValue);
+            var tag = new Tag(IntExtensions.NextId(), stageName);
+            var stage = new Stage(tag, minValue, maxValue);
             return stage;
         }
 
-        public static Stage NewStageLimits(Tag tag, double? minValue = null, double? maxValue = null) {
-            var stage = new Stage() { Tag = tag, StageName = tag.TagName };
-            StageSetValues(stage, minValue, maxValue);
-            return stage;
-        }
+        //public static Stage NewStageLimits(Tag tag, double? minValue = null, double? maxValue = null) {
+        //    var stage = new Stage(tag, minValue, maxValue);
+        //    return stage;
+        //}
 
-        public static void StageSetValues(Stage stage, double? minValue, double? maxValue) {
-            if (minValue != null) {stage.MinValue = (double)minValue; }
-            if (maxValue != null) {stage.MaxValue = (double)maxValue; }
-        }
+        //public static void StageSetValues(Stage stage, double? minValue, double? maxValue) {
+        //    if (minValue != null) {stage.MinValue = (double)minValue; }
+        //    if (maxValue != null) {stage.MaxValue = (double)maxValue; }
+        //}
 
 
         private static string NewName([CallerMemberName] string? name = null) {

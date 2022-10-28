@@ -52,4 +52,8 @@
     <EmbeddedResource Include="Functions\01_fnGetOverlappingDates.SQL" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Chambers.Common\Chambers.Common.csproj" />
+  </ItemGroup>
+
 </Project>

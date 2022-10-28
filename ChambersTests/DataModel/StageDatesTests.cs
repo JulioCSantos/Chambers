@@ -13,27 +13,27 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class StageDatesTests
     {
-        public static StagesDate NewStageDates(string stageName, DateTime? startDate = null, DateTime? endDate = null) {
-            Stage stage = StagesTests.NewStageLimits(stageName);
-            StagesDate stageDate = new() { Stage = stage };
-            StagesDateSetDates(stageDate, startDate, endDate);
+        //public static StagesDate NewStageDates(string stageName, DateTime? startDate = null, DateTime? endDate = null) {
+        //    Stage stage = StagesTests.NewStageLimits(stageName);
+        //    StagesDate stageDate = new() { Stage = stage };
+        //    StagesDateSetDates(stageDate, startDate, endDate);
 
-            return stageDate;
-        }
+        //    return stageDate;
+        //}
 
-        public static StagesDate NewStageDates(Tag tag, DateTime? startDate = null, DateTime? endDate = null) {
-            Stage stage = StagesTests.NewStageLimits(tag);
-            StagesDate stageDate = new() { Stage = stage };
-            StagesDateSetDates(stageDate, startDate, endDate);
+        //public static StagesDate NewStageDates(Tag tag, DateTime? startDate = null, DateTime? endDate = null) {
+        //    Stage stage = new Stage(tag);
+        //    StagesDate stageDate = new() { Stage = stage };
+        //    StagesDateSetDates(stageDate, startDate, endDate);
 
-            return stageDate;
-        }
+        //    return stageDate;
+        //}
 
-        public static void StagesDateSetDates(StagesDate stagesDate, DateTime? startDate, DateTime? endDate)
-        {
-            if (startDate != null) { stagesDate.StartDate = (DateTime)startDate; }
-            if (endDate != null) { stagesDate.EndDate = (DateTime)endDate; }
-        }
+        //public static void StagesDateSetDates(StagesDate stagesDate, DateTime? startDate, DateTime? endDate)
+        //{
+        //    if (startDate != null) { stagesDate.StartDate = (DateTime)startDate; }
+        //    if (endDate != null) { stagesDate.EndDate = (DateTime)endDate; }
+        //}
 
 
         private static string NewName([CallerMemberName] string? name = null) {
@@ -45,11 +45,9 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void InsertStageDatesTest() {
             var name = NewName();
-            var stageDate = NewStageDates(name);
-            stageDate.Stage.MinValue = 20;
-            stageDate.Stage.MaxValue = 200;
-            stageDate.StartDate = new DateTime(2022, 01, 01);
-            stageDate.EndDate = new DateTime(2022, 12, 31);
+            var stage = new Stage(name, 20, 200);
+            var stageDate = new StagesDate(stage, new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
+            stageDate.Stage.StageSetValues(20, 200);
             TestDbContext.StagesDates.Add(stageDate);
             var savedCount = TestDbContext.SaveChanges();
             Assert.IsTrue(TestDbContext.StagesDates.Any());
@@ -60,11 +58,10 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void ReadStagesLimitsAndDatesViewTest() {
             var name = NewName();
-            var stageDate = NewStageDates(name);
-            stageDate.Stage.MinValue = 30;
-            stageDate.Stage.MaxValue = 300;
-            stageDate.StartDate = new DateTime(2022, 02, 01);
-            stageDate.EndDate = new DateTime(2022, 02, 28);
+            var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
+            stageDate.Stage.StageSetValues(30, 300);
+            //stageDate.StartDate = new DateTime(2022, 02, 01);
+            //stageDate.EndDate = new DateTime(2022, 02, 28);
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
             var viewResults = TestDbContext.StagesLimitsAndDates
@@ -76,8 +73,8 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void SpGetStagesLimitsAndDatesTest() {
             var name = NewName();
-            var stageDate = NewStageDates(name); stageDate.Stage.MinValue = 30; stageDate.Stage.MaxValue = 300;
-            stageDate.StartDate = new DateTime(2022, 02, 01); stageDate.EndDate = new DateTime(2022, 02, 28);
+            var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
+            stageDate.Stage.StageSetValues(30, 300);
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
 

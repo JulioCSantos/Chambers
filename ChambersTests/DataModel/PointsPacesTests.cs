@@ -1,5 +1,6 @@
 ﻿using ChambersDataModel;
 using System.Runtime.CompilerServices;
+using Chambers.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChambersTests.DataModel
@@ -9,12 +10,12 @@ namespace ChambersTests.DataModel
     {
 
         private static string NewName([CallerMemberName] string? name = null) {
-            var newName = nameof(StageDatesTests) + "_" + name;
+            var newName = nameof(PointsPaceTests) + "_" + name;
             return newName;
         }
 
         public static PointsPace NewPointsPace(string stageName, DateTime? nextStartDate = null, int? stepSizeDays = null ) {
-            var tag = TagTests.NewTag(stageName);
+            var tag = new Tag(IntExtensions.NextId(), stageName);
             TestDbContext.Tags.Add(tag);
             var pointsPace = new PointsPace() { TagId = tag.TagId };
             if (nextStartDate != null) {pointsPace.NextStepStartDate = (DateTime)nextStartDate;}
@@ -36,17 +37,32 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public void PointsStepsLogNextValueTest() {
+        public void PointsStepsLogNextValueAllInclusiveTest() {
             var name = NewName();
             var pointsPace = NewPointsPace(name, new DateTime(2022, 02, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
-            var stageDate = StageDatesTests.NewStageDates(pointsPace.Tag, new DateTime(2022,01,01), new DateTime(2022,12,31));
-            stageDate.Stage.MinValue = 10;
-            stageDate.Stage.MaxValue = 100;
+            var stageDate = new StagesDate(new Stage(pointsPace.Tag, 10, 100), new DateTime(2022,01,01), new DateTime(2022,12,31));
             TestDbContext.StagesDates.Add(stageDate);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count());
+            var firstLogValue = result.First();
+            Assert.AreEqual(pointsPace.NextStepStartDate, firstLogValue.NextStepStartDate);
+            Assert.AreEqual(pointsPace.NextStepEndDate, firstLogValue.NextStepEndDate);
+        }
+
+        [TestMethod]
+        public void PointsStepsLogNextValueEarlyStartedTest() {
+            var name = NewName();
+            var pointsPace = NewPointsPace(name, new DateTime(2022, 02, 01), 3);
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var stageDate = new StagesDate(new Stage(pointsPace.Tag,10,100), new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
+            TestDbContext.StagesDates.Add(stageDate);
+            var savedCount = TestDbContext.SaveChanges();
+            Assert.AreEqual(4, savedCount);
+            var result = TestDbContext.PointsStepsLogNextValues.Where(ps => ps.StageName == name);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count());
             var firstLogValue = result.First();
