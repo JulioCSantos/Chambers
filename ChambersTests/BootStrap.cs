@@ -21,12 +21,6 @@ namespace ChambersTests
         public static ChambersDbContext TestDbContext { get; }
         #endregion TestDbContext
 
-        //#region NextId
-
-        //private static int _id;
-        //public static Func<int> NextId = () => { Interlocked.Increment(ref _id); return _id; };
-        //#endregion NextId
-
         #region DbSharedcontext
         private static ChambersDbContext? _dbContext;
         public static ChambersDbContext DbContext {
@@ -76,7 +70,6 @@ namespace ChambersTests
 
         static BootStrap()
         {
-            //_id = 1000;
             contextsDictionary = new Dictionary<string, ChambersDbContext>();
             ChambersDictionary = new ReadOnlyDictionary<string, ChambersDbContext>(contextsDictionary);
             TestDbContext = GetNamedContext(ChambersTests);
