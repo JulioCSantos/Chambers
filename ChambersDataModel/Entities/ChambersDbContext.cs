@@ -233,6 +233,13 @@ namespace ChambersDataModel.Entities
             OnModelCreatingPartial(modelBuilder);
         }
 
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+        void OnModelCreatingPartial(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<ExcursionType>().HasData(
+            //    new ExcursionType { ExcursionType1 = 0, ExcursionDescription = "RampIn" }
+            //    );
+
+            
+        }
     }
 }

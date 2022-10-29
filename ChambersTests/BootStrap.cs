@@ -61,7 +61,8 @@ namespace ChambersTests
             contextsDictionary.Add(contextName, dbContext);
             dbContext.Database.EnsureDeleted();
             dbContext.Database.EnsureCreated();
-            dbContext.InjectEmbededSqlResources();
+            dbContext.InjectEmbeddedSqlResources();
+            DbContext.SeedDb();
             Assert.IsTrue(ChambersDictionary.ContainsKey(contextName));
             return ChambersDictionary[contextName];
         }

@@ -4,4 +4,5 @@ using ChambersDataModel;
 using ChambersDataModel.Entities;
 
 var dbContext = new ChambersDbContext();
+dbContext.SeedDb();
 Console.WriteLine("Hello, " + dbContext.Database);

@@ -38,7 +38,7 @@ namespace ChambersDataModel.Entities
             }
         }
 
-        public void InjectEmbededSqlResources()
+        public void InjectEmbeddedSqlResources()
         {
             var assembly = typeof(ChambersDbContext).Assembly;
             var orderedResourcesList = new SortedList<int,NameParsed>();
@@ -93,7 +93,6 @@ namespace ChambersDataModel.Entities
                 Sequence = int.Parse(orderNameSplit[0]);
                 SqlName = orderNameSplit[1];
             }
-
         }
 
   
@@ -119,6 +118,16 @@ namespace ChambersDataModel.Entities
                         entry.State = EntityState.Unchanged;
                         break;
                 }
+            }
+        }
+
+        public void SeedDb() {
+            if (this.ExcursionTypes.Any() == false) {
+                this.ExcursionTypes.Add(new ExcursionType() { ExcursionDescription = "RampIn", ExcursionType1 = 1 });
+                this.ExcursionTypes.Add(new ExcursionType() { ExcursionDescription = "RampOut", ExcursionType1 = 2 });
+                this.ExcursionTypes.Add(new ExcursionType() { ExcursionDescription = "HiExcursion", ExcursionType1 = 3 });
+                this.ExcursionTypes.Add(new ExcursionType() { ExcursionDescription = "lowExcursion", ExcursionType1 = 4 });
+                this.SaveChanges();
             }
         }
     }
