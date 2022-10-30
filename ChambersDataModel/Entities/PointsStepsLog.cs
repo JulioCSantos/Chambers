@@ -23,6 +23,7 @@ namespace ChambersDataModel.Entities
         public DateTime? NextStepEndDate { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public string TagName { get; set; } = null!;
 
         public virtual ICollection<ExcursionPoint> ExcursionPoints { get; set; }
     }

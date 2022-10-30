@@ -148,6 +148,10 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StageStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<PointsStepsLogNextValue>(entity =>
@@ -158,9 +162,9 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.NextStepEndDate).HasColumnType("datetime");
+                entity.Property(e => e.PaceEndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
+                entity.Property(e => e.PaceStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageEndDate).HasColumnType("datetime");
 
@@ -169,6 +173,8 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StageStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName).HasMaxLength(255);
             });
 
             modelBuilder.Entity<Stage>(entity =>
@@ -233,13 +239,6 @@ namespace ChambersDataModel.Entities
             OnModelCreatingPartial(modelBuilder);
         }
 
-        void OnModelCreatingPartial(ModelBuilder modelBuilder)
-        {
-            //modelBuilder.Entity<ExcursionType>().HasData(
-            //    new ExcursionType { ExcursionType1 = 0, ExcursionDescription = "RampIn" }
-            //    );
-
-            
-        }
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
