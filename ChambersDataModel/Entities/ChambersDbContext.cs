@@ -28,7 +28,6 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CompressedPoint>(entity =>
@@ -137,9 +136,9 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.NextStepEndDate).HasColumnType("datetime");
+                entity.Property(e => e.PaceEndDate).HasColumnType("datetime");
 
-                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
+                entity.Property(e => e.PaceStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageEndDate).HasColumnType("datetime");
 
