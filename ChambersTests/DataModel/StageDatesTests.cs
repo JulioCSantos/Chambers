@@ -86,5 +86,23 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(tagId, result.AsEnumerable().FirstOrDefault()?.TagId);
 
         }
+
+        [TestMethod]
+        public async Task SpGetStagesLimitsAndDatesPowerToolTest() {
+            var name = NewName();
+            var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
+            stageDate.Stage.StageSetValues(30, 300);
+            TestDbContext.StagesDates.Add(stageDate);
+            TestDbContext.SaveChanges();
+
+            var tagId = stageDate.Stage.TagId;
+            var soughtDate = new DateTime(2022,02,15);
+            var result = await TestDbContext.Procedures
+                .spGetStagesLimitsAndDatesAsync(tagId, soughtDate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(tagId, result.FirstOrDefault()?.TagId);
+
+        }
     }
 }

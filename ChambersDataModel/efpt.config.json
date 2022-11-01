@@ -1,0 +1,93 @@
+﻿{
+   "CodeGenerationMode": 2,
+   "ContextClassName": "ChambersDbContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Entities",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "ChambersDataModel",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[dbo].[CompressedPoints]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ExcursionPoints]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Excursions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ExcursionTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PointsPaces]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PointsStepsLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Stages]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[StagesDates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Tags]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PointsStepsLogNextValues]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[StagesLimitsAndDates]",
+         "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[spGetCompressedPoints]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[spGetStagesLimitsAndDates]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[fnGetOverlappingDates]",
+         "ObjectType": 2
+      }
+   ],
+   "UiHint": "asus-strange.ELChambers.dbo",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false,
+   "UseT4": false
+}
