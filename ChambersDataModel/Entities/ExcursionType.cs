@@ -10,9 +10,9 @@ namespace ChambersDataModel.Entities
             ExcursionPoints = new HashSet<ExcursionPoint>();
         }
 
-        public string ExcursionType1 { get; set; } = null!;
-        public string Predicate { get; set; } = null!;
-        public string? ExcursionDescription { get; set; }
+        public string ExcType { get; set; } = null!;
+        public string? Predicate { get; set; }
+        public string? ExcDescription { get; set; }
 
         public virtual ICollection<ExcursionPoint> ExcursionPoints { get; set; }
     }

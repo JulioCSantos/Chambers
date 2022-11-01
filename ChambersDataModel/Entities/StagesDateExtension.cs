@@ -8,6 +8,8 @@ namespace ChambersDataModel.Entities
 {
     public partial class StagesDate
     {
+        public StagesDate() { } //must have an empty constructor
+
         public StagesDate(string stageName, DateTime? startDate = null, DateTime? endDate = null) {
             Stage = new Stage(stageName);
             SetDates(startDate, endDate);

@@ -90,7 +90,7 @@ namespace ChambersDataModel.Entities
                     .WithMany(p => p.ExcursionPoints)
                     .HasForeignKey(d => d.ExcursionType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkExcursionTypesExcursionType_ExcursionPointsExcursionType");
+                    .HasConstraintName("fkExcursionTypesExcType_ExcursionPointsExcType");
 
                 entity.HasOne(d => d.StepLog)
                     .WithMany(p => p.ExcursionPoints)
@@ -101,15 +101,14 @@ namespace ChambersDataModel.Entities
 
             modelBuilder.Entity<ExcursionType>(entity =>
             {
-                entity.HasKey(e => e.ExcursionType1)
+                entity.HasKey(e => e.ExcType)
                     .HasName("pkExcursionType");
 
-                entity.Property(e => e.ExcursionType1)
+                entity.Property(e => e.ExcType)
                     .HasMaxLength(16)
-                    .IsUnicode(false)
-                    .HasColumnName("ExcursionType");
+                    .IsUnicode(false);
 
-                entity.Property(e => e.ExcursionDescription).HasMaxLength(255);
+                entity.Property(e => e.ExcDescription).HasMaxLength(255);
 
                 entity.Property(e => e.Predicate).HasMaxLength(255);
             });

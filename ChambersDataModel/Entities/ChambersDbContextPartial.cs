@@ -123,12 +123,12 @@ namespace ChambersDataModel.Entities
 
         public void SeedDb() {
             if (this.ExcursionTypes.Any() == false) {
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "RampInToHi", ExcursionDescription = "time < Excursion.Time AND value < @HiThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "RampInToLow", ExcursionDescription = "time < Excursion.Time AND value > @LowThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "RampOutFromHi", ExcursionDescription = "time > Excursion.Time AND value < @HiThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "RampOutFromLow", ExcursionDescription = "time > Excursion.Time AND value > @LowThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "HiExcursion", ExcursionDescription = "value > &HiThreshold"});
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcursionType1 = "lowExcursion", ExcursionDescription = "value < &LowThreshold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampInToHi", ExcDescription = "time < Excursion.Time AND value < @HiThreashold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampInToLow", ExcDescription = "time < Excursion.Time AND value > @LowThreashold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOutFromHi", ExcDescription = "time > Excursion.Time AND value < @HiThreashold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOutFromLow", ExcDescription = "time > Excursion.Time AND value > @LowThreashold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "HiExcursion", ExcDescription = "value > &HiThreshold"});
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "lowExcursion", ExcDescription = "value < &LowThreshold" });
                 this.SaveChanges();
             }
         }
