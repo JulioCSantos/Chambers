@@ -9,7 +9,7 @@ namespace ChambersDataModel.Entities
         public DateTime ValueDate { get; set; }
         public double Value { get; set; }
         public int TagId { get; set; }
-        public int ExcursionType { get; set; }
+        public string ExcursionType { get; set; } = null!;
         public int StepLogId { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }

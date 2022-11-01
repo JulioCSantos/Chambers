@@ -80,6 +80,10 @@ namespace ChambersDataModel.Entities
 
                 entity.HasIndex(e => e.StepLogId, "IX_ExcursionPoints_PaceLogId");
 
+                entity.Property(e => e.ExcursionType)
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.ValueDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.ExcursionTypeNavigation)
@@ -101,10 +105,13 @@ namespace ChambersDataModel.Entities
                     .HasName("pkExcursionType");
 
                 entity.Property(e => e.ExcursionType1)
-                    .ValueGeneratedNever()
+                    .HasMaxLength(16)
+                    .IsUnicode(false)
                     .HasColumnName("ExcursionType");
 
                 entity.Property(e => e.ExcursionDescription).HasMaxLength(255);
+
+                entity.Property(e => e.Predicate).HasMaxLength(255);
             });
 
             modelBuilder.Entity<PointsPace>(entity =>
