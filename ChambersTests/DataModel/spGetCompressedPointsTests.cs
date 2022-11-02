@@ -78,6 +78,27 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
+        public async Task LowExcursionTest() {
+            var dbContext = BootStrap.TestDbContext;
+            var tag = NewName();
+
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 150 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 09), Value = 110 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 50 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 60 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 20), Value = 120 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 21), Value = 130 });
+            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+                tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+            ;
+            Assert.AreEqual(4, result.Count);
+            Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
+            Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
+            Assert.AreEqual(2, result.Count(r => r.excType == "LowExcursion"));
+        }
+
+        [TestMethod]
         public async Task TwoCyclesTest() {
             var dbContext = BootStrap.TestDbContext;
             var tag = NewName();
