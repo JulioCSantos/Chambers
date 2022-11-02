@@ -7,7 +7,7 @@ namespace ChambersDataModel.Entities
 {
     public partial class Excursion
     {
-        public int ExcursionId { get; set; }
+        public int ExcursionNbr { get; set; }
         public int TagId { get; set; }
         public DateTime RampInDateTime { get; set; }
         public DateTime RampOutDateTime { get; set; }

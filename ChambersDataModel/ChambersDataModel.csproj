@@ -28,12 +28,14 @@
   <ItemGroup>
     <None Remove="Functions\01_fnGetOverlappingDates.SQL" />
     <None Remove="StoredProcs\04_spGetStagesLimitsAndDates.sql" />
+    <None Remove="StoredProcs\05_spGetCompressedPoints.sql" />
     <None Remove="Views\02_StagesLimitsAndDates.sql" />
     <None Remove="Views\03_PointsStepsLogNextValues.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="StoredProcs\04_spGetStagesLimitsAndDates.sql" />
+    <EmbeddedResource Include="StoredProcs\05_spGetCompressedPoints.sql" />
     <EmbeddedResource Include="Views\03_PointsStepsLogNextValues.sql" />
     <EmbeddedResource Include="Views\02_StagesLimitsAndDates.sql" />
   </ItemGroup>

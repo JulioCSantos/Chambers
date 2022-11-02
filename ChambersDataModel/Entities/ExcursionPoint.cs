@@ -7,6 +7,12 @@ namespace ChambersDataModel.Entities
 {
     public partial class ExcursionPoint
     {
+        public ExcursionPoint()
+        {
+            ExcursionRampInPoints = new HashSet<Excursion>();
+            ExcursionRampOutPoints = new HashSet<Excursion>();
+        }
+
         public int PointId { get; set; }
         public DateTime ValueDate { get; set; }
         public double Value { get; set; }
@@ -18,5 +24,7 @@ namespace ChambersDataModel.Entities
 
         public virtual ExcursionType ExcursionTypeNavigation { get; set; }
         public virtual PointsStepsLog StepLog { get; set; }
+        public virtual ICollection<Excursion> ExcursionRampInPoints { get; set; }
+        public virtual ICollection<Excursion> ExcursionRampOutPoints { get; set; }
     }
 }

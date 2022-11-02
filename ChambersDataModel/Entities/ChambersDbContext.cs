@@ -34,10 +34,10 @@ namespace ChambersDataModel.Entities
         {
             modelBuilder.Entity<CompressedPoint>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.Tag, e.Time, e.Value })
+                    .HasName("pkCompressedPoints");
 
                 entity.Property(e => e.Tag)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("tag");
@@ -51,25 +51,23 @@ namespace ChambersDataModel.Entities
 
             modelBuilder.Entity<Excursion>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.ExcursionNbr);
 
                 entity.HasIndex(e => e.RampOutPointId, "IX_Excursions_RampOutPointId");
 
                 entity.HasIndex(e => e.RampInPointId, "IX_Excursions_RampinPointId");
-
-                entity.Property(e => e.ExcursionId).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.RampInDateTime).HasColumnType("datetime");
 
                 entity.Property(e => e.RampOutDateTime).HasColumnType("datetime");
 
                 entity.HasOne(d => d.RampInPoint)
-                    .WithMany()
+                    .WithMany(p => p.ExcursionRampInPoints)
                     .HasForeignKey(d => d.RampInPointId)
                     .HasConstraintName("fkExcursionsPointId_ExcursionsRampInPointId");
 
                 entity.HasOne(d => d.RampOutPoint)
-                    .WithMany()
+                    .WithMany(p => p.ExcursionRampOutPoints)
                     .HasForeignKey(d => d.RampOutPointId)
                     .HasConstraintName("fkExcursionsPointId_ExcursionsRampOutPointId");
             });
