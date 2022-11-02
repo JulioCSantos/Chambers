@@ -7,7 +7,7 @@ namespace ChambersDataModel.Entities
 {
     public partial class spGetCompressedPointsResult
     {
-        public int ExcId { get; set; }
+        public int ExcNbr { get; set; }
         public string tag { get; set; }
         public DateTime time { get; set; }
         public double value { get; set; }
