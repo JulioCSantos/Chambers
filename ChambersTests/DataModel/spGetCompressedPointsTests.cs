@@ -30,6 +30,32 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
+        public async Task EmptyTableTest() {
+            var dbContext = BootStrap.TestDbContext;
+            var tag = NewName();
+
+            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+                tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public async Task MissingTagTest() {
+            var dbContext = BootStrap.TestDbContext;
+            var tag = NewName();
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
+
+            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+                "Wrong Tag", new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
         public async Task OutOfOrderTest()
         {
             var dbContext = BootStrap.TestDbContext;
