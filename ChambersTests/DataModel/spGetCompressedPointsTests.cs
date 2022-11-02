@@ -44,7 +44,7 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(4, result.Count);
             Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
             Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
-            Assert.AreEqual(2, result.Where(r => r.excType == "HiExcursion") );
+            Assert.AreEqual(2, result.Count(r => r.excType == "HiExcursion") );
         }
     } 
 }
