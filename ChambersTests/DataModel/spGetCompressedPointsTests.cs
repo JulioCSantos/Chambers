@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
 
 namespace ChambersTests.DataModel
 {
@@ -70,7 +63,7 @@ namespace ChambersTests.DataModel
             await dbContext.SaveChangesAsync();
             var result = await dbContext.Procedures.spGetCompressedPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
-;
+
             Assert.AreEqual(4, result.Count);
             Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
             Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
@@ -91,7 +84,7 @@ namespace ChambersTests.DataModel
             await dbContext.SaveChangesAsync();
             var result = await dbContext.Procedures.spGetCompressedPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
-            ;
+            
             Assert.AreEqual(4, result.Count);
             Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
             Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
@@ -118,7 +111,7 @@ namespace ChambersTests.DataModel
             await dbContext.SaveChangesAsync();
             var result = await dbContext.Procedures.spGetCompressedPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
-            ;
+            
             Assert.AreEqual(8, result.Count);
             Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
             Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
