@@ -17,12 +17,7 @@ namespace ChambersTests.DataModel
             List<spGetCompressedPointsResult> result;
             try
             {
-                var entityType = TestDbContext.Model.FindEntityType(typeof(CompressedPoint));
-                Debug.Assert(entityType != null, nameof(entityType) + " != null");
-                //var schema = entityType.GetSchema();
-                var tableName = entityType.GetTableName();
-                var cmd = $"Truncate Table [dbo].[{tableName}]";
-                await TestDbContext.Database.ExecuteSqlRawAsync(cmd);
+                await TestDbContext.TruncateAsync<CompressedPoint>();
                 await TestDbContext.SaveChangesAsync();
 
                 TestDbContext.CompressedPoints.Add(new CompressedPoint() { Tag = "T1", Time = new DateTime(2022, 01, 09), Value = 150 });

@@ -121,6 +121,24 @@ namespace ChambersDataModel.Entities
             }
         }
 
+        public void Truncate<T>() where T : class {
+            var entityType = this.Model.FindEntityType(typeof(T));
+            Debug.Assert(entityType != null, nameof(entityType) + " != null");
+            var schema = entityType.GetSchema() ?? "dbo";
+            var tableName = entityType.GetTableName();
+            var cmd = $"Truncate Table [{schema}].[{tableName}]";
+            this.Database.ExecuteSqlRaw(cmd);
+        }
+
+        public async Task TruncateAsync<T>() where T : class {
+            var entityType = Model.FindEntityType(typeof(T));
+            Debug.Assert(entityType != null, nameof(entityType) + " != null");
+            var schema = entityType.GetSchema() ?? "dbo";
+            var tableName = entityType.GetTableName();
+            var cmd = $"Truncate Table [{schema}].[{tableName}]";
+            await Database.ExecuteSqlRawAsync(cmd);
+        }
+
         public void SeedDb() {
             if (this.ExcursionTypes.Any() == false) {
                 this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampInToHi", ExcDescription = "time < Excursion.Time AND value < @HiThreashold" });
