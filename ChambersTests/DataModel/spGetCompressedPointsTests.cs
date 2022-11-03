@@ -119,6 +119,43 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
+        public async Task MissingRampOutTest() {
+            var dbContext = BootStrap.TestDbContext;
+            var tag = NewName();
+
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 140 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 09), Value = 150 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
+            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+                tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+
+            Assert.AreEqual(3, result.Count);
+            Assert.IsTrue(result.First().excType.StartsWith("RampIn"));
+            Assert.IsFalse(result.Last().excType.StartsWith("RampOut"));
+            Assert.AreEqual(2, result.Count(r => r.excType == "HiExcursion"));
+        }
+
+        [TestMethod]
+        public async Task MissingRampInTest() {
+            var dbContext = BootStrap.TestDbContext;
+            var tag = NewName();
+
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
+            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 21), Value = 160 });
+            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+                tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+
+            Assert.AreEqual(3, result.Count);
+            Assert.IsFalse(result.First().excType.StartsWith("RampIn"));
+            Assert.IsTrue(result.Last().excType.StartsWith("RampOut"));
+            Assert.AreEqual(2, result.Count(r => r.excType == "HiExcursion"));
+        }
+
+        [TestMethod]
         public async Task GetLatestExcursionNbrTest() {
             var dbContext = BootStrap.TestDbContext;
             var tag = NewName();
