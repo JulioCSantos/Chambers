@@ -48,7 +48,7 @@ namespace ChambersDataModel.Entities
             _context = context;
         }
 
-        public virtual async Task<List<spGetCompressedPointsResult>> spGetCompressedPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreshold, double? HiThreashold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spGetCompressedPointsResult>> spGetCompressedPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -80,8 +80,8 @@ namespace ChambersDataModel.Entities
                 },
                 new SqlParameter
                 {
-                    ParameterName = "LowThreshold",
-                    Value = LowThreshold ?? Convert.DBNull,
+                    ParameterName = "LowThreashold",
+                    Value = LowThreashold ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.Float,
                 },
                 new SqlParameter
@@ -92,7 +92,7 @@ namespace ChambersDataModel.Entities
                 },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spGetCompressedPointsResult>("EXEC @returnValue = [dbo].[spGetCompressedPoints] @TagName, @StartDate, @EndDate, @LowThreshold, @HiThreashold", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spGetCompressedPointsResult>("EXEC @returnValue = [dbo].[spGetCompressedPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

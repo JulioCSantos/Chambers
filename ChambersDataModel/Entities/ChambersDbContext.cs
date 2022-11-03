@@ -51,46 +51,43 @@ namespace ChambersDataModel.Entities
 
             modelBuilder.Entity<Excursion>(entity =>
             {
-                entity.HasKey(e => e.ExcursionNbr);
+                entity.HasKey(e => e.TagId);
 
-                entity.HasIndex(e => e.RampOutPointId, "IX_Excursions_RampOutPointId");
+                entity.Property(e => e.TagId).ValueGeneratedNever();
 
-                entity.HasIndex(e => e.RampInPointId, "IX_Excursions_RampinPointId");
+                entity.Property(e => e.ExcursionNbr).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.RampInDateTime).HasColumnType("datetime");
 
                 entity.Property(e => e.RampOutDateTime).HasColumnType("datetime");
-
-                entity.HasOne(d => d.RampInPoint)
-                    .WithMany(p => p.ExcursionRampInPoints)
-                    .HasForeignKey(d => d.RampInPointId)
-                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampInPointId");
-
-                entity.HasOne(d => d.RampOutPoint)
-                    .WithMany(p => p.ExcursionRampOutPoints)
-                    .HasForeignKey(d => d.RampOutPointId)
-                    .HasConstraintName("fkExcursionsPointId_ExcursionsRampOutPointId");
             });
 
             modelBuilder.Entity<ExcursionPoint>(entity =>
             {
-                entity.HasKey(e => e.PointId)
-                    .HasName("pkExcursionPointsPointId");
+                entity.HasKey(e => e.PointNbr)
+                    .HasName("pkExcursionPointsPointNbr")
+                    .IsClustered(false);
 
-                entity.HasIndex(e => e.ExcursionType, "IX_ExcursionPoints_ExcursionType");
+                entity.HasIndex(e => new { e.TagName, e.ExcNbr }, "ixExcursionPointsTagNameExcNbr");
 
-                entity.HasIndex(e => e.StepLogId, "IX_ExcursionPoints_PaceLogId");
+                entity.HasIndex(e => new { e.TagName, e.ValueDate }, "ixExcursionPointsTagNameValueDate")
+                    .IsClustered();
 
-                entity.Property(e => e.ExcursionType)
+                entity.Property(e => e.ExcType)
                     .IsRequired()
                     .HasMaxLength(16)
                     .IsUnicode(false);
 
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
                 entity.Property(e => e.ValueDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.ExcursionTypeNavigation)
+                entity.HasOne(d => d.ExcTypeNavigation)
                     .WithMany(p => p.ExcursionPoints)
-                    .HasForeignKey(d => d.ExcursionType)
+                    .HasForeignKey(d => d.ExcType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fkExcursionTypesExcType_ExcursionPointsExcType");
 

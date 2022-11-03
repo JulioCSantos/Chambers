@@ -141,12 +141,10 @@ namespace ChambersDataModel.Entities
 
         public void SeedDb() {
             if (this.ExcursionTypes.Any() == false) {
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampInToHi", ExcDescription = "time < Excursion.Time AND value < @HiThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampInToLow", ExcDescription = "time < Excursion.Time AND value > @LowThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOutFromHi", ExcDescription = "time > Excursion.Time AND value < @HiThreashold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOutFromLow", ExcDescription = "time > Excursion.Time AND value > @LowThreashold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampIn", ExcDescription = "time < Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
                 this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "HiExcursion", ExcDescription = "value > &HiThreshold"});
                 this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "lowExcursion", ExcDescription = "value < &LowThreshold" });
+                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOut", ExcDescription = "time > Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
                 this.SaveChanges();
             }
         }
