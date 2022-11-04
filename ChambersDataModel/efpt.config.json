@@ -23,10 +23,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[Excursions]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[ExcursionTypes]",
          "ObjectType": 0
       },
@@ -49,6 +45,10 @@
       {
          "Name": "[dbo].[Tags]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Excursions]",
+         "ObjectType": 3
       },
       {
          "Name": "[dbo].[PointsStepsLogNextValues]",

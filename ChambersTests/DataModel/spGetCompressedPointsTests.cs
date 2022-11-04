@@ -155,23 +155,23 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(2, result.Count(r => r.excType == "HiExcursion"));
         }
 
-        [TestMethod]
-        public async Task GetLatestExcursionNbrTest() {
-            var dbContext = BootStrap.TestDbContext;
-            var tag = NewName();
+        //[TestMethod]
+        //public async Task GetLatestExcursionNbrTest() {
+        //    var dbContext = BootStrap.TestDbContext;
+        //    var tag = NewName();
 
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 140 });
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 09), Value = 150 });
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 20), Value = 170 });
-            dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 21), Value = 160 });
-            await dbContext.SaveChangesAsync();
-            var result = await dbContext.Procedures.spGetCompressedPointsAsync(
-                tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 140 });
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 09), Value = 150 });
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 20), Value = 170 });
+        //    dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 21), Value = 160 });
+        //    await dbContext.SaveChangesAsync();
+        //    var result = await dbContext.Procedures.spGetCompressedPointsAsync(
+        //        tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
 
-            Assert.Fail();
-        }
+        //    Assert.Fail();
+        //}
 
         [TestCleanup]
         public void CleanUpBetweenTests() {

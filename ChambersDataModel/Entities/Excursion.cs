@@ -8,10 +8,11 @@ namespace ChambersDataModel.Entities
     public partial class Excursion
     {
         public int TagId { get; set; }
-        public int ExcursionNbr { get; set; }
-        public DateTime RampInDateTime { get; set; }
-        public DateTime RampOutDateTime { get; set; }
-        public int? RampInPointId { get; set; }
-        public int? RampOutPointId { get; set; }
+        public string TagName { get; set; }
+        public int ExcNbr { get; set; }
+        public DateTime RampInDater { get; set; }
+        public DateTime RampOutDate { get; set; }
+        public int RampInPointNb { get; set; }
+        public int RampOutPointNbr { get; set; }
     }
 }

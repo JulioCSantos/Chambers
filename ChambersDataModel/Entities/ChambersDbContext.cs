@@ -51,15 +51,18 @@ namespace ChambersDataModel.Entities
 
             modelBuilder.Entity<Excursion>(entity =>
             {
-                entity.HasKey(e => e.TagId);
+                entity.HasNoKey();
 
-                entity.Property(e => e.TagId).ValueGeneratedNever();
+                entity.ToView("Excursions");
 
-                entity.Property(e => e.ExcursionNbr).ValueGeneratedOnAdd();
+                entity.Property(e => e.RampInDater).HasColumnType("datetime");
 
-                entity.Property(e => e.RampInDateTime).HasColumnType("datetime");
+                entity.Property(e => e.RampOutDate).HasColumnType("datetime");
 
-                entity.Property(e => e.RampOutDateTime).HasColumnType("datetime");
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<ExcursionPoint>(entity =>
