@@ -14,7 +14,7 @@ namespace ChambersTests
 
         [AssemblyCleanup]
         public static void AssemblyCleanup() {
-            Parallel.ForEach(BootStrap.ChambersDictionary.Values, db => { db.Database.EnsureDeleted(); });
+            Parallel.ForEach(BootStrapper.ChambersDictionary.Values, db => { db.Database.EnsureDeleted(); });
         }
     }
 }

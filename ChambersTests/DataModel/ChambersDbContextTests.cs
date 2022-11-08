@@ -28,16 +28,16 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void ContextFactoryTest()
         {
-            Assert.IsNotNull(BootStrap.DbContext);
-            Assert.IsNotNull(BootStrap.InMemoryDbcontext);
+            Assert.IsNotNull(BootStrapper.DbContext);
+            Assert.IsNotNull(BootStrapper.InMemoryDbcontext);
         }
 
         [TestMethod]
         public void NamedContextTest()
         {
-            var context = BootStrap.GetNamedContext(nameof(NamedContextTest));
+            var context = BootStrapper.GetNamedContext(nameof(NamedContextTest));
             Assert.IsNotNull(context);
-            Assert.AreEqual(context, BootStrap.GetNamedContext(nameof(NamedContextTest)));
+            Assert.AreEqual(context, BootStrapper.GetNamedContext(nameof(NamedContextTest)));
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ChambersTests
 {
-    public static class BootStrap
+    public static class BootStrapper
     {
         #region ChambersTests Literal
         public const string ChambersTests = nameof(ChambersTests);
@@ -72,7 +72,7 @@ namespace ChambersTests
         #endregion GetNamedContext
 
 
-        static BootStrap()
+        static BootStrapper()
         {
             contextsDictionary = new Dictionary<string, ChambersDbContext>();
             ChambersDictionary = new ReadOnlyDictionary<string, ChambersDbContext>(contextsDictionary);

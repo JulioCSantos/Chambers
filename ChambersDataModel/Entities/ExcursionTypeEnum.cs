@@ -8,8 +8,7 @@ namespace ChambersDataModel.Entities
 {
     public partial class ExcursionType
     {
-        public struct ExcEnum
-        {
+        public struct ExcEnum {
             public const string RampIn = nameof(RampIn);
             public const string HiExcursion = nameof(HiExcursion);
             public const string LowExcursion = nameof(LowExcursion);

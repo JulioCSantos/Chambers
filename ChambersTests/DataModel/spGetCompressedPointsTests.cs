@@ -16,7 +16,7 @@ namespace ChambersTests.DataModel
         [TestInitialize]
         public void InitializeTests()
         {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             dbContext.Truncate<CompressedPoint>();
             dbContext.SaveChanges();
 
@@ -24,7 +24,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task EmptyTableTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             await dbContext.SaveChangesAsync();
@@ -36,7 +36,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task MissingTagTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 12), Value = 220 });
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
@@ -51,7 +51,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OutOfOrderTest()
         {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 09), Value = 150 });
@@ -72,7 +72,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task LowExcursionTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 150 });
@@ -93,7 +93,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task TwoCyclesTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 140 });
@@ -120,7 +120,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task MissingRampOutTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 08), Value = 140 });
@@ -139,7 +139,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task MissingRampInTest() {
-            var dbContext = BootStrap.TestDbContext;
+            var dbContext = BootStrapper.TestDbContext;
             var tag = NewName();
 
             dbContext.CompressedPoints.Add(new CompressedPoint() { Tag = tag, Time = new DateTime(2022, 01, 10), Value = 210 });
