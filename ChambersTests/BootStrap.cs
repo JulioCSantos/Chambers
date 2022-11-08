@@ -18,6 +18,9 @@ namespace ChambersTests
         #endregion ChambersTests Literal
 
         #region TestDbContext
+        // Initialized in the constructor
+        // if SQL Views, Stored Procs, Functions ... are not added as embedded resources
+        // and named with an sequence order two digits prefix you may get an exception in this getter.
         public static ChambersDbContext TestDbContext { get; }
         #endregion TestDbContext
 

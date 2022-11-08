@@ -45,6 +45,7 @@ namespace ChambersDataModel.Entities
             assembly.GetManifestResourceNames().ToList()
                 .ForEach(name => {
                     var nameParsed = new NameParsed(name);
+                    if (orderedResourcesList.ContainsKey(nameParsed.Sequence)) { Debugger.Break(); }
                     orderedResourcesList.Add(nameParsed.Sequence, nameParsed);
                 });
 
