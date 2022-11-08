@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChambersTests.DataModel
 {
@@ -32,10 +26,14 @@ namespace ChambersTests.DataModel
                 TestDbContext.StagesDates.Add(stageDate);
                 var savedCount = TestDbContext.SaveChanges();
                 var viewResults = TestDbContext.DefaultPointsPaces.ToList();
+                TestDbContext.Remove(stageDate);
+                TestDbContext.Remove(stage);
+                TestDbContext.SaveChanges();
                 Assert.IsNotNull(viewResults);
                 Assert.AreEqual(1, viewResults.Count);
             }
-            catch (Exception e) { Monitor.Exit(syncObj); }
+            catch (Exception ) { Assert.Fail(); }
+            finally { Monitor.Exit(syncObj); }
 
         }
 
@@ -53,21 +51,26 @@ namespace ChambersTests.DataModel
                 var newRow = TestDbContext.DefaultPointsPaces.First();
                 // insert row
                 Debug.Assert(newRow.NextStepStartDate != null, "newRow.NextStepStartDate != null");
-                var pointPace = new PointsPace() { NextStepStartDate = (DateTime)newRow.NextStepStartDate, TagId = newRow.TagId };
+                var pointPace = new PointsPace()
+                    { NextStepStartDate = (DateTime)newRow.NextStepStartDate, TagId = newRow.TagId };
                 TestDbContext.PointsPaces.Add(pointPace);
                 TestDbContext.SaveChanges();
                 // try again. It should get an empty list
                 var viewResults = TestDbContext.DefaultPointsPaces.ToList();
+                TestDbContext.Remove(pointPace);
+                TestDbContext.Remove(stageDate);
+                TestDbContext.Remove(stage);
+                TestDbContext.SaveChanges();
                 Assert.IsNotNull(viewResults);
                 Assert.AreEqual(0, viewResults.Count);
             }
-            catch (Exception e) { Monitor.Exit(syncObj); }
+            catch (Exception ) { Assert.Fail(); }
+            finally { Monitor.Exit(syncObj); }
 
         }
 
         public void SyncMethods()
         {
-            
         }
     }
 }
