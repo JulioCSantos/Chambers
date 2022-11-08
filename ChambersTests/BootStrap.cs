@@ -77,6 +77,7 @@ namespace ChambersTests
             contextsDictionary = new Dictionary<string, ChambersDbContext>();
             ChambersDictionary = new ReadOnlyDictionary<string, ChambersDbContext>(contextsDictionary);
             TestDbContext = GetNamedContext(ChambersTests);
+            TestDbContext.SeedDb();
         }
     }
 }
