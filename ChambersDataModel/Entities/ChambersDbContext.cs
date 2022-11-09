@@ -26,7 +26,6 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
         public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; }
-        public virtual DbSet<RampInExcursion> RampInExcursions { get; set; }
         public virtual DbSet<Stage> Stages { get; set; }
         public virtual DbSet<StagesDate> StagesDates { get; set; }
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; }
@@ -71,6 +70,7 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.RampOutDate).HasColumnType("datetime");
 
                 entity.Property(e => e.TagName)
+                    .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false);
             });
@@ -189,27 +189,6 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.TagName).HasMaxLength(255);
-            });
-
-            modelBuilder.Entity<RampInExcursion>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("RampInExcursions");
-
-                entity.Property(e => e.ExcType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.PointNbr).ValueGeneratedOnAdd();
-
-                entity.Property(e => e.TagName)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ValueDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Stage>(entity =>

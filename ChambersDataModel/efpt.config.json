@@ -59,10 +59,6 @@
          "ObjectType": 3
       },
       {
-         "Name": "[dbo].[RampInExcursions]",
-         "ObjectType": 3
-      },
-      {
          "Name": "[dbo].[StagesLimitsAndDates]",
          "ObjectType": 3
       },
