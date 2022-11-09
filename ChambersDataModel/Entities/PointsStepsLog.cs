@@ -7,11 +7,6 @@ namespace ChambersDataModel.Entities
 {
     public partial class PointsStepsLog
     {
-        public PointsStepsLog()
-        {
-            ExcursionPoints = new HashSet<ExcursionPoint>();
-        }
-
         public int StepLogId { get; set; }
         public int StageDateId { get; set; }
         public int TagId { get; set; }
@@ -26,7 +21,5 @@ namespace ChambersDataModel.Entities
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string TagName { get; set; }
-
-        public virtual ICollection<ExcursionPoint> ExcursionPoints { get; set; }
     }
 }

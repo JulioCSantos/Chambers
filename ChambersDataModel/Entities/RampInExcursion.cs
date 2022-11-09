@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace ChambersDataModel.Entities
 {
-    public partial class ExcursionPoint
+    public partial class RampInExcursion
     {
         public int PointNbr { get; set; }
         public int TagId { get; set; }
@@ -15,7 +15,5 @@ namespace ChambersDataModel.Entities
         public int ExcNbr { get; set; }
         public string ExcType { get; set; }
         public int StepLogId { get; set; }
-
-        public virtual ExcursionType ExcTypeNavigation { get; set; }
     }
 }

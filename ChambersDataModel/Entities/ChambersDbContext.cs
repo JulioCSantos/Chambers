@@ -26,6 +26,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
         public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; }
+        public virtual DbSet<RampInExcursion> RampInExcursions { get; set; }
         public virtual DbSet<Stage> Stages { get; set; }
         public virtual DbSet<StagesDate> StagesDates { get; set; }
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; }
@@ -65,12 +66,11 @@ namespace ChambersDataModel.Entities
 
                 entity.ToView("Excursions");
 
-                entity.Property(e => e.RampInDater).HasColumnType("datetime");
+                entity.Property(e => e.RampInDate).HasColumnType("datetime");
 
                 entity.Property(e => e.RampOutDate).HasColumnType("datetime");
 
                 entity.Property(e => e.TagName)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false);
             });
@@ -81,7 +81,7 @@ namespace ChambersDataModel.Entities
                     .HasName("pkExcursionPointsPointNbr")
                     .IsClustered(false);
 
-                entity.HasIndex(e => new { e.TagName, e.ExcNbr }, "ixExcursionPointsTagNameExcNbr");
+                entity.HasIndex(e => new { e.TagName, e.ExcNbr, e.ValueDate }, "ixExcursionPointsTagNameExcNbrValueDate");
 
                 entity.HasIndex(e => new { e.TagName, e.ValueDate }, "ixExcursionPointsTagNameValueDate")
                     .IsClustered();
@@ -103,12 +103,6 @@ namespace ChambersDataModel.Entities
                     .HasForeignKey(d => d.ExcType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fkExcursionTypesExcType_ExcursionPointsExcType");
-
-                entity.HasOne(d => d.StepLog)
-                    .WithMany(p => p.ExcursionPoints)
-                    .HasForeignKey(d => d.StepLogId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkPointsStepsLogStepLogId_ExcursionPointsStepLogId");
             });
 
             modelBuilder.Entity<ExcursionType>(entity =>
@@ -195,6 +189,27 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.TagName).HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<RampInExcursion>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("RampInExcursions");
+
+                entity.Property(e => e.ExcType)
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PointNbr).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ValueDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Stage>(entity =>
