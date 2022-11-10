@@ -22,6 +22,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
         public virtual DbSet<Excursion> Excursions { get; set; }
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
+        public virtual DbSet<ExcursionPointsNew> ExcursionPointsNews { get; set; }
         public virtual DbSet<ExcursionType> ExcursionTypes { get; set; }
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
@@ -103,6 +104,28 @@ namespace ChambersDataModel.Entities
                     .HasForeignKey(d => d.ExcType)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fkExcursionTypesExcType_ExcursionPointsExcType");
+            });
+
+            modelBuilder.Entity<ExcursionPointsNew>(entity =>
+            {
+                entity.HasKey(e => e.CycleId)
+                    .HasName("pkExcursionPointsCycleId")
+                    .IsClustered(false);
+
+                entity.ToTable("ExcursionPointsNew");
+
+                entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
+
+                entity.Property(e => e.LastExcDate).HasColumnType("datetime");
+
+                entity.Property(e => e.RampInDate).HasColumnType("datetime");
+
+                entity.Property(e => e.RampOutDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<ExcursionType>(entity =>

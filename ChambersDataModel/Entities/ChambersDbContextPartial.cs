@@ -148,6 +148,8 @@ namespace ChambersDataModel.Entities
                 this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOut", ExcDescription = "time > Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
                 this.SaveChanges();
             }
+
+            //chamber_report_tag_1, chamber_report_tag_2, chamber_report_tag_3
         }
     }
 }

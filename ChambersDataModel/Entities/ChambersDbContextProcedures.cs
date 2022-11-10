@@ -36,6 +36,7 @@ namespace ChambersDataModel.Entities
         {
             modelBuilder.Entity<spGetCompressedPointsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spGetStagesLimitsAndDatesResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
         }
     }
 
@@ -125,6 +126,57 @@ namespace ChambersDataModel.Entities
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<spGetStagesLimitsAndDatesResult>("EXEC @returnValue = [dbo].[spGetStagesLimitsAndDates] @TagId, @DateTime", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
+        }
+
+        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "TagName",
+                    Size = 255,
+                    Value = TagName ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "StartDate",
+                    Value = StartDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "EndDate",
+                    Value = EndDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "LowThreashold",
+                    Value = LowThreashold ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Float,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "HiThreashold",
+                    Value = HiThreashold ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Float,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 
