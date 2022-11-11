@@ -20,10 +20,7 @@ namespace ChambersDataModel.Entities
 
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
-        public virtual DbSet<Excursion> Excursions { get; set; }
-        public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
         public virtual DbSet<ExcursionPointsNew> ExcursionPointsNews { get; set; }
-        public virtual DbSet<ExcursionType> ExcursionTypes { get; set; }
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
         public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; }
@@ -60,52 +57,6 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<Excursion>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("Excursions");
-
-                entity.Property(e => e.RampInDate).HasColumnType("datetime");
-
-                entity.Property(e => e.RampOutDate).HasColumnType("datetime");
-
-                entity.Property(e => e.TagName)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<ExcursionPoint>(entity =>
-            {
-                entity.HasKey(e => e.PointNbr)
-                    .HasName("pkExcursionPointsPointNbr")
-                    .IsClustered(false);
-
-                entity.HasIndex(e => new { e.TagName, e.ExcNbr, e.ValueDate }, "ixExcursionPointsTagNameExcNbrValueDate");
-
-                entity.HasIndex(e => new { e.TagName, e.ValueDate }, "ixExcursionPointsTagNameValueDate")
-                    .IsClustered();
-
-                entity.Property(e => e.ExcType)
-                    .IsRequired()
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.TagName)
-                    .IsRequired()
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ValueDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.ExcTypeNavigation)
-                    .WithMany(p => p.ExcursionPoints)
-                    .HasForeignKey(d => d.ExcType)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkExcursionTypesExcType_ExcursionPointsExcType");
-            });
-
             modelBuilder.Entity<ExcursionPointsNew>(entity =>
             {
                 entity.HasKey(e => e.CycleId)
@@ -126,20 +77,6 @@ namespace ChambersDataModel.Entities
                     .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false);
-            });
-
-            modelBuilder.Entity<ExcursionType>(entity =>
-            {
-                entity.HasKey(e => e.ExcType)
-                    .HasName("pkExcursionType");
-
-                entity.Property(e => e.ExcType)
-                    .HasMaxLength(16)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ExcDescription).HasMaxLength(255);
-
-                entity.Property(e => e.Predicate).HasMaxLength(255);
             });
 
             modelBuilder.Entity<PointsPace>(entity =>

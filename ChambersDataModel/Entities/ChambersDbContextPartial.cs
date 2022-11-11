@@ -54,23 +54,31 @@ namespace ChambersDataModel.Entities
             {
                 var resource = assembly.GetManifestResourceStream(parsedName.ResourceName);
                 if (resource == null) { continue; }
+                var sqlQuery = new StreamReader(resource).ReadToEnd();
 
-                var sqlQuery = new StreamReader(resource).ReadToEnd(); 
+                try {
+                    switch (parsedName.SqlType) {
+                        case ("StoredProcs"):
+                            this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP PROCEDURE {parsedName.SqlName} END");
+                            break;
+                        case ("Views"):
+                            this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP VIEW {parsedName.SqlName} END");
+                            break;
+                        case ("Functions"):
+                            this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP FUNCTION {parsedName.SqlName} END");
+                            break;
+                    }
 
-                switch (parsedName.SqlType)
+                    this.Database.ExecuteSqlRaw(sqlQuery);
+                }
+                catch (Exception e)
                 {
-                    case ("StoredProcs"):
-                        this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP PROCEDURE {parsedName.SqlName} END");
-                        break;
-                    case ("Views"):
-                        this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP VIEW {parsedName.SqlName} END");
-                        break;
-                    case ("Functions"):
-                        this.Database.ExecuteSqlRaw($"IF OBJECT_ID('{parsedName.SqlName}') IS NOT NULL BEGIN DROP FUNCTION {parsedName.SqlName} END");
-                        break;
+                    Console.WriteLine(e);
+                    Debugger.Break();
+                    throw;
                 }
 
-                this.Database.ExecuteSqlRaw(sqlQuery);
+
             }
         }
 
@@ -141,13 +149,13 @@ namespace ChambersDataModel.Entities
         }
 
         public void SeedDb() {
-            if (this.ExcursionTypes.Any() == false) {
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampIn", ExcDescription = "time < Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "HiExcursion", ExcDescription = "value > &HiThreshold"});
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "lowExcursion", ExcDescription = "value < &LowThreshold" });
-                this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOut", ExcDescription = "time > Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
-                this.SaveChanges();
-            }
+            //if (this.ExcursionTypes.Any() == false) {
+            //    this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampIn", ExcDescription = "time < Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
+            //    this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "HiExcursion", ExcDescription = "value > &HiThreshold"});
+            //    this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "lowExcursion", ExcDescription = "value < &LowThreshold" });
+            //    this.ExcursionTypes.Add(new ExcursionType() { Predicate = "", ExcType = "RampOut", ExcDescription = "time > Excursion.Time AND (value < @HiThreshold OR value >= @LowThreshold )" });
+            //    this.SaveChanges();
+            //}
 
             //chamber_report_tag_1, chamber_report_tag_2, chamber_report_tag_3
         }

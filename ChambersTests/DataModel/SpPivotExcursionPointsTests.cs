@@ -13,16 +13,15 @@ namespace ChambersTests.DataModel
     public class SpPivotExcursionPointsTests
     {
         private static string NewName([CallerMemberName] string? name = null) {
-            var newName = nameof(SpGetCompressedPointsTests) + "_" + name;
+            var newName = nameof(SpPivotExcursionPointsTests) + "_" + name;
             return newName;
         }
 
         [TestMethod]
         public async Task EmptyTest() {
-            var result = await TestDbContext.Procedures.spGetCompressedPointsAsync(
+            var result = await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                     "NO Tag", new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), 100, 200);
             Assert.AreEqual(0, result.Count);
-
         }
 
         [TestMethod]

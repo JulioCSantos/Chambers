@@ -19,15 +19,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[ExcursionPoints]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[ExcursionPointsNew]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ExcursionTypes]",
          "ObjectType": 0
       },
       {
@@ -55,20 +47,12 @@
          "ObjectType": 3
       },
       {
-         "Name": "[dbo].[Excursions]",
-         "ObjectType": 3
-      },
-      {
          "Name": "[dbo].[PointsStepsLogNextValues]",
          "ObjectType": 3
       },
       {
          "Name": "[dbo].[StagesLimitsAndDates]",
          "ObjectType": 3
-      },
-      {
-         "Name": "[dbo].[spGetCompressedPoints]",
-         "ObjectType": 1
       },
       {
          "Name": "[dbo].[spGetStagesLimitsAndDates]",
