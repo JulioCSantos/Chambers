@@ -116,5 +116,5 @@ BEGIN
 	INSERT INTO @ExcPoints Select * FROM @ExcPoint1;
 
 	PRINT 'RETURN ALL Full Excursion Cycles'
-	SELECT * FROM @ExcPoints;
+	SELECT * FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
 END
