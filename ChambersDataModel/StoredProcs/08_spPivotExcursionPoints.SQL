@@ -31,8 +31,9 @@ BEGIN
 	DECLARE  @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET initial TagExcNbr'
-	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) FROM [dbo].[ExcursionPointsNew] 
-		ORDER BY TagId, TagExcNbr Desc
+	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPointsNew] 
+		WHERE TagName = @TagName
+		ORDER BY TagName, TagExcNbr Desc
 	PRINT 'Create Output record'
 	INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
 	, NULL, NULL -- RampIn

@@ -16,6 +16,8 @@ namespace ChambersDataModel.Entities
     {
         public string? DatabaseName { get; }
 
+        public bool IsPreservedForTest { get; set; }
+
         public ChambersDbContext(string databaseName) {
             DatabaseName = databaseName;
         }

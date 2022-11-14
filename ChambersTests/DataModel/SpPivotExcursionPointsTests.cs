@@ -25,11 +25,20 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task HiExcursionTest()
+        //EXECUTE[dbo].[spPivotExcursionPoints] 'T1', '2022-01-01', '2022-03-31', 100, 200;
+        public async Task HiExcursionWithPrevTagExcNbrTest()
         {
-            var tag = "T1";
+            string tag = "T1";
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
+            var prevDt = new DateTime(2022, 01, 01);
+            var prevExcPoint = new ExcursionPointsNew() {
+                TagId = 11, TagName = tag, TagExcNbr = 22,
+                RampInDate = prevDt.AddDays(1), RampInValue = lt + 50, FirstExcDate = prevDt.AddDays(2),
+                FirstExcValue = ht + 20, LastExcDate = prevDt.AddDays(3), RampOutDate = prevDt.AddDays(4),
+                RampOutValue = lt + 50, HiPointsCt = 3, LowPointsCt = 0
+            };
+            TestDbContext.ExcursionPointsNews.Add(prevExcPoint);
             var rampInP1 = new CompressedPoint(tag,dt.AddDays(1), lt + 20);
             var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60);
             var excP1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20);
@@ -44,6 +53,7 @@ namespace ChambersTests.DataModel
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
+            Assert.AreEqual(prevExcPoint.TagExcNbr + 1, excPointNew.TagExcNbr);
             Assert.IsTrue(excPointNew.TagName == tag);
             Assert.IsTrue(excPointNew.HiPointsCt == 3);
             Assert.IsTrue(excPointNew.LowPointsCt == 0);
@@ -51,8 +61,6 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
             Assert.IsTrue(excPointNew.LastExcValue >= ht);
-
-
         }
 
         [TestMethod]
@@ -74,6 +82,7 @@ namespace ChambersTests.DataModel
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
+            Assert.AreEqual(0, excPointNew.TagExcNbr);
             Assert.IsTrue(excPointNew.TagName == tag);
             Assert.IsTrue(excPointNew.LowPointsCt == 3);
             Assert.IsTrue(excPointNew.HiPointsCt == 0);
