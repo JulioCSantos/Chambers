@@ -20,7 +20,7 @@ namespace ChambersDataModel.Entities
 
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
-        public virtual DbSet<ExcursionPointsNew> ExcursionPointsNews { get; set; }
+        public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
         public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; }
@@ -57,13 +57,14 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<ExcursionPointsNew>(entity =>
+            modelBuilder.Entity<ExcursionPoint>(entity =>
             {
                 entity.HasKey(e => e.CycleId)
                     .HasName("pkExcursionPointsCycleId")
                     .IsClustered(false);
 
-                entity.ToTable("ExcursionPointsNew");
+                entity.HasIndex(e => new { e.TagName, e.TagExcNbr }, "ixExcursionPointsTagNameTagExcNbr")
+                    .IsClustered();
 
                 entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
 

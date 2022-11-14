@@ -32,13 +32,13 @@ namespace ChambersTests.DataModel
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
             var prevDt = new DateTime(2022, 01, 01);
-            var prevExcPoint = new ExcursionPointsNew() {
+            var prevExcPoint = new ExcursionPoint() {
                 TagId = 11, TagName = tag, TagExcNbr = 22,
                 RampInDate = prevDt.AddDays(1), RampInValue = lt + 50, FirstExcDate = prevDt.AddDays(2),
                 FirstExcValue = ht + 20, LastExcDate = prevDt.AddDays(3), RampOutDate = prevDt.AddDays(4),
                 RampOutValue = lt + 50, HiPointsCt = 3, LowPointsCt = 0
             };
-            TestDbContext.ExcursionPointsNews.Add(prevExcPoint);
+            TestDbContext.ExcursionPoints.Add(prevExcPoint);
             var rampInP1 = new CompressedPoint(tag,dt.AddDays(1), lt + 20);
             var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60);
             var excP1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20);

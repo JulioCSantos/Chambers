@@ -14,5 +14,6 @@ namespace ChambersDataModel.Entities
         public double MaxValue { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public double? TimeStep { get; set; }
     }
 }

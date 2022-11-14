@@ -31,7 +31,7 @@ BEGIN
 	DECLARE  @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET initial TagExcNbr'
-	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPointsNew] 
+	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPoints] 
 		WHERE TagName = @TagName
 		ORDER BY TagName, TagExcNbr Desc
 	PRINT 'Create Output record'

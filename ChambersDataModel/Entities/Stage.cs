@@ -17,6 +17,7 @@ namespace ChambersDataModel.Entities
         public string StageName { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
+        public double? TimeStep { get; set; }
 
         public virtual Tag Tag { get; set; }
         public virtual ICollection<StagesDate> StagesDates { get; set; }
