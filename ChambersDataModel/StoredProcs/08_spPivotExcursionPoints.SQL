@@ -44,13 +44,14 @@ BEGIN
 
 	DECLARE CPoint CURSOR
 		FOR SELECT [tag], [time], [value] from  [dbo].[CompressedPoints]
-		WHERE tag = @TagName AND time >= @StartDate AND time < @EndDate 
+		WHERE tag = @TagName 
+		AND time >= FORMAT(@StartDate,'yyyy-MM-dd HH:mm:ss') AND time < FORMAT(@EndDate,'yyyy-MM-dd HH:mm:ss') 
 		AND (value >= @HiThreashold OR value < @LowThreashold)
 		ORDER BY time;
 
 	OPEN CPoint;
-	PRINT Concat('Fetch First Excursion point. Value ', @Value);
 	FETCH NEXT FROM CPoint INTO @tag, @time, @value;
+	PRINT Concat('First Excursion point. Value ', @time, @Value);
 
 	PRINT 'Loop through Excursion points in the time period if any'
 	WHILE @@FETCH_STATUS = 0  BEGIN
@@ -62,6 +63,7 @@ BEGIN
 			PRINT 'Determine if cycle is for Hi or Low Excursion'
 			IF (@FirstExcValue >= @HiThreashold) SET @IsHiExc = 1;
 			ELSE SET @IsHiExc = 0;
+			PRINT Concat('IsHiExc: ', @IsHiExc);
 		END
 
 		PRINT 'Increase Excursion Counter'
@@ -70,29 +72,29 @@ BEGIN
 		UPDATE @ExcPoint1 SET HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt;
 
 		IF (@FirstExcDate IS NOT NULL AND @RampInDate IS NULL) BEGIN
-			PRINT 'Get RampIn point'
 			SELECT TOP 1 @RampInDate = [time], @RampInValue =  [value] FROM  [dbo].[CompressedPoints]
-			WHERE tag = @TagName AND time <= @FirstExcDate 
+			WHERE tag = @TagName AND time <= FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss')
 				AND ((@IsHiExc = 1 AND value < @HiThreashold) OR (@IsHiExc = 0 AND value > @LowThreashold ))
 			ORDER BY time Desc;
 			IF (@RampInDate IS NOT NULL) UPDATE @ExcPoint1 SET RampInDate = @RampInDate, RampInValue = @RampInValue;
-		END
+			PRINT Concat('RampIn point: RampInDate RampInValue', @RampInDate, @RampInValue);
+END
 
 		PRINT 'Always Reset Last Excursion Point until end of cursor'
 		UPDATE @ExcPoint1 SET LastExcDate = @time, LastExcValue = @value;
 		SELECT TOP 1 @LastExcDate = LastExcDate, @LastExcValue = LastExcValue FROM @ExcPoint1;
-
+		
 		PRINT 'Get RampOut point'
 		IF (@RampOutDate IS NULL AND @LastExcDate IS NOT NULL ) BEGIN
 			SELECT TOP 1 @RampOutDate = [time], @RampOutValue =  [value] FROM  [dbo].[CompressedPoints]
-			WHERE tag = @TagName AND time >= @LastExcDate 
+			WHERE tag = @TagName AND time >= FORMAT(@LastExcDate,'yyyy-MM-dd HH:mm:ss') 
 				AND ((@IsHiExc = 1 AND value < @HiThreashold) OR (@IsHiExc = 0 AND value > @LowThreashold ))
 			ORDER BY time Asc;
 			IF (@RampOutDate IS NOT NULL) UPDATE @ExcPoint1 SET RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
 		END
 
-		PRINT Concat('Next High Excursion point. Value ', @Value);
 		FETCH NEXT FROM CPoint INTO @tag, @time, @value; 
+		PRINT Concat('Next Excursion point: time Value ', @time, @Value);
 
 		PRINT 'Set up a new Excursion Cycle if ..'
 		PRINT '.. Next Excursion date is after RampOut date or ..'
