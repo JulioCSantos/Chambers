@@ -16,19 +16,21 @@ BEGIN
 			, FirstExcDate DateTime, FirstExcValue float
 			, LastExcDate DateTime, LastExcValue float
 			, RampOutDate DateTime, RampOutValue float
-			, HiPointsCt int, LowPointsCt int  );
+			, HiPointsCt int, LowPointsCt int
+			, LowThreashold float, HiThreashold float);
 	DECLARE @ExcPoints as TABLE ( 
 			TagName varchar(255), TagExcNbr int
 			, RampInDate DateTime, RampInValue float
 			, FirstExcDate DateTime, FirstExcValue float
 			, LastExcDate DateTime, LastExcValue float
 			, RampOutDate DateTime, RampOutValue float
-			, HiPointsCt int, LowPointsCt int  );
+			, HiPointsCt int, LowPointsCt int  
+			, LowThreashold float, HiThreashold float);
 	DECLARE @RampInDate DateTime = NULL, @RampInValue float = NULL;
 	DECLARE @FirstExcDate DateTime = NULL, @FirstExcValue float = NULL;
 	DECLARE @LastExcDate DateTime = NULL, @LastExcValue float = NULL;
 	DECLARE @RampOutDate DateTime = NULL, @RampOutValue float = NULL;
-	DECLARE  @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
+	DECLARE @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET initial TagExcNbr'
 	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPoints] 
@@ -40,7 +42,8 @@ BEGIN
 	, NULL, NULL -- FirstExc
 	, NULL, NULL -- LastExc
 	, NULL, NULL -- RampOut
-	, @HiPointsCt, @LowPointsCt);
+	, @HiPointsCt, @LowPointsCt
+	, @LowThreashold, @HiThreashold );
 
 	DECLARE CPoint CURSOR
 		FOR SELECT [tag], [time], [value] from  [dbo].[CompressedPoints]
@@ -108,7 +111,8 @@ END
 				SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
 				INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
-					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @HiPointsCt, @LowPointsCt);
+					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold);
 			END
 		END
 	END;
