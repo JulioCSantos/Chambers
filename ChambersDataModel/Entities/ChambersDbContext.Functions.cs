@@ -16,9 +16,16 @@ namespace ChambersDataModel.Entities
             return FromExpression(() => fnGetOverlappingDates(StartDate1, endDate1, StartDate2, endDate2));
         }
 
+        [DbFunction("fnGetScheduleDates", "dbo")]
+        public IQueryable<fnGetScheduleDatesResult> fnGetScheduleDates(DateTime? ForDate, DateTime? StartDate, int? CoverageValue, string CoverageIntervalUnit, int? RepeatEveryValue, string RepeatEveryIntervalUnit)
+        {
+            return FromExpression(() => fnGetScheduleDates(ForDate, StartDate, CoverageValue, CoverageIntervalUnit, RepeatEveryValue, RepeatEveryIntervalUnit));
+        }
+
         protected void OnModelCreatingGeneratedFunctions(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<fnGetOverlappingDatesResult>().HasNoKey();
+            modelBuilder.Entity<fnGetScheduleDatesResult>().HasNoKey();
         }
     }
 }

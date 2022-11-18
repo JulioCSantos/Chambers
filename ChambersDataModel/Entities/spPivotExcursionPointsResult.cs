@@ -19,5 +19,7 @@ namespace ChambersDataModel.Entities
         public double? RampOutValue { get; set; }
         public int? HiPointsCt { get; set; }
         public int? LowPointsCt { get; set; }
+        public double? LowThreashold { get; set; }
+        public double? HiThreashold { get; set; }
     }
 }
