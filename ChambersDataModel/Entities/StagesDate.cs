@@ -11,6 +11,7 @@ namespace ChambersDataModel.Entities
         public int StageId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public DateTime? DeprecatedDate { get; set; }
 
         public virtual Stage Stage { get; set; }
     }

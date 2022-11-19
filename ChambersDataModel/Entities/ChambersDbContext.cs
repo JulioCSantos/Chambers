@@ -158,7 +158,11 @@ namespace ChambersDataModel.Entities
                     .IsUnique()
                     .HasFilter("([StageName] IS NOT NULL)");
 
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.MaxValue).HasDefaultValueSql("((3.4000000000000000e+038))");
+
+                entity.Property(e => e.ProductionDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageName).HasMaxLength(255);
 
@@ -175,6 +179,8 @@ namespace ChambersDataModel.Entities
                     .HasName("pkStagesDatesStageDateId");
 
                 entity.HasIndex(e => new { e.StageId, e.StartDate }, "IxStagesDatesTagIdStartDate");
+
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.EndDate)
                     .HasColumnType("datetime")

@@ -4,4 +4,3 @@
 AS
 	SELECT * FROM StagesLimitsAndDates
 	WHERE TagId = @TagId AND @DateTime BETWEEN [StartDate] AND [EndDate]
-RETURN 0

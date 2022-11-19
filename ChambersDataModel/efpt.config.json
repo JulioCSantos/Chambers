@@ -63,6 +63,10 @@
          "ObjectType": 1
       },
       {
+         "Name": "[dbo].[spRunTagStep]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[fnGetOverlappingDates]",
          "ObjectType": 2
       },
