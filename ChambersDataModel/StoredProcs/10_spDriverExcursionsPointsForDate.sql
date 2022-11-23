@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[spGetExcursionsPointsForDate] 
+﻿Create PROCEDURE [dbo].[spDriverExcursionsPointsForDate] 
 	-- Add the parameters for the stored procedure here
 	@ForDate datetime, -- Processing date
 	@StageDateId int = null,
@@ -9,6 +9,8 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+
+
 		-- find all (or selected by StageDateId) StagesLimitsAndDates (STADs) left join with PointsPaces
 		-- default PointsPaces will be assigned to STADs that don't have one.
 		IF (@StageDateId IS NULL AND @TagName IS NULL) 

@@ -7,10 +7,10 @@ namespace ChambersDataModel.Entities
 {
     public partial class PointsStepsLogNextValue
     {
-        public int TagId { get; set; }
-        public string TagName { get; set; }
         public int StageDateId { get; set; }
         public string StageName { get; set; }
+        public int TagId { get; set; }
+        public string TagName { get; set; }
         public DateTime StageStartDate { get; set; }
         public DateTime? StageEndDate { get; set; }
         public double MinValue { get; set; }

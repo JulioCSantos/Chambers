@@ -55,7 +55,7 @@
          "ObjectType": 3
       },
       {
-         "Name": "[dbo].[spGetExcursionsPointsForDate]",
+         "Name": "[dbo].[spDriverExcursionsPointsForDate]",
          "ObjectType": 1
       },
       {

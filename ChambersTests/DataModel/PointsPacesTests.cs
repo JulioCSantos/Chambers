@@ -39,7 +39,7 @@ namespace ChambersTests.DataModel
             TestDbContext.PointsPaces.Add(pointsPace);
             Assert.AreEqual(0,pointsPace.PaceId);
             TestDbContext.SaveChanges();
-            Assert.AreEqual(1,pointsPace.PaceId);
+            Assert.IsTrue(pointsPace.PaceId > 0);
             Assert.AreEqual(name, pointsPace.StageDate.Stage.StageName);
         }
 

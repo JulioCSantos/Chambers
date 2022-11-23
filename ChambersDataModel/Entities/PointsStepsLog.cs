@@ -9,8 +9,9 @@ namespace ChambersDataModel.Entities
     {
         public int StepLogId { get; set; }
         public int StageDateId { get; set; }
-        public int TagId { get; set; }
         public string StageName { get; set; }
+        public int TagId { get; set; }
+        public string TagName { get; set; }
         public DateTime StageStartDate { get; set; }
         public DateTime? StageEndDate { get; set; }
         public double MinValue { get; set; }
@@ -20,6 +21,5 @@ namespace ChambersDataModel.Entities
         public DateTime PaceEndDate { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public string TagName { get; set; }
     }
 }

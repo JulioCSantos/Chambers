@@ -83,9 +83,11 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<PointsPace>(entity =>
             {
                 entity.HasKey(e => e.PaceId)
-                    .HasName("pkPointsPacesPointId");
+                    .HasName("pcPointsPacesPaceId")
+                    .IsClustered(false);
 
-                entity.HasIndex(e => e.StageDateId, "IX_CollectionPointsPace_TagId");
+                entity.HasIndex(e => e.StageDateId, "ixPointsPacesStageDateId")
+                    .IsClustered();
 
                 entity.Property(e => e.NextStepEndDate)
                     .HasColumnType("datetime")
