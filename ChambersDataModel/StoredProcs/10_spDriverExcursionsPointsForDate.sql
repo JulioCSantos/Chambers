@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[spDriverExcursionsPointsForDate] 
+﻿CREATE PROCEDURE [dbo].[spDriverExcursionsPointsForDate] 
 	-- Add the parameters for the stored procedure here
 	@ForDate datetime, -- Processing date
 	@StageDateId int = null,
@@ -9,7 +9,6 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-
 
 		-- find all (or selected by StageDateId) StagesLimitsAndDates (STADs) left join with PointsPaces
 		-- default PointsPaces will be assigned to STADs that don't have one.
@@ -38,11 +37,49 @@ BEGIN
 	-- iterate all PointsPaces or just the ones associated with input StageDateId.
 	-- Iterate ends when PointsPaces' end date exceeds ForDate
 	-- each iteration creates associated PointsStepsLog
+	-- insert into [dbo].[PointsStepsLog]
+
+	DECLARE @PointsStepsLog as TABLE (
+	[StageDateId] [int] NOT NULL, [StageName] [nvarchar](255) NOT NULL, [TagId] [int] NOT NULL, [TagName] [varchar](255) NOT NULL,
+	[StageStartDate] [datetime] NOT NULL, [StageEndDate] [datetime] NULL, [MinValue] [float] NOT NULL, [MaxValue] [float] NOT NULL,
+	[PaceId] [int] NOT NULL, [PaceStartDate] [datetime] NOT NULL, [PaceEndDate] [datetime] NOT NULL,
+	[StartDate] [datetime] NULL, [EndDate] [datetime] NULL
+	)
+
+	IF (@StageDateId IS NULL AND @TagName IS NULL) 
+		INSERT INTO @PointsStepsLog
+		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
+		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
+	ELSE IF (@StageDateId Is NOT NULL AND @TagName IS NULL)
+		INSERT INTO @PointsStepsLog
+		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
+		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
+		AND nxt.StageDateId = @StageDateId
+	ELSE IF (@StageDateId Is NULL AND @TagName IS NOT NULL)
+		INSERT INTO @PointsStepsLog
+		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
+		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
+		AND nxt.TagName = @TagName
+	ELSE
+		INSERT INTO @PointsStepsLog
+		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
+		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
+		AND nxt.StageDateId = @StageDateId AND nxt.TagName = @TagName
+	
+	INSERT INTO [dbo].[PointsStepsLog]
+	SELECT * FROM @PointsStepsLog;
 
 	--spProcessSteps
 	-- each iteration populates excursionPoints
 	-- iteratations should be under the context of a transaction.
 
+	-- After Transaction completed succesfully update PointsPaces
+
 
     -- Insert statements for procedure here
-END
+
+-- UNIT TESTS
+--EXEC [dbo].[spDriverExcursionsPointsForDate] @ForDate = '2022-11-01';
+--SELECT * FROM [dbo].[PointsStepsLog];
+--DELETE FROM [dbo].[PointsStepsLog];
+END;

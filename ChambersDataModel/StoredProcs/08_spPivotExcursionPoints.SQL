@@ -124,4 +124,11 @@ END
 
 	PRINT 'RETURN ALL Full Excursion Cycles'
 	SELECT * FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
+
+-- UNIT TESTS
+--EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-03'
+--		, @LowThreashold = 100, @HiThreashold = 200;
+--EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
+--		, @LowThreashold = 100, @HiThreashold = 200;
+
 END
