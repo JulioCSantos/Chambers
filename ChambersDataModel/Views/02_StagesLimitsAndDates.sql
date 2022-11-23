@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[StagesLimitsAndDates]
 AS
-SELECT std.StageDateId, st.TagId, st.StageName, st.MinValue, st.MaxValue, std.StartDate, std.EndDate, st.TimeStep
+SELECT t.TagId, t.TagName, std.StageDateId, st.StageName, st.MinValue, st.MaxValue
+, std.StartDate, std.EndDate, st.TimeStep, st.StageId
 FROM  dbo.Stages AS st INNER JOIN
-         dbo.StagesDates AS std ON st.StageId = std.StageId
+         dbo.StagesDates AS std ON st.StageId = std.StageId INNER JOIN
+         dbo.Tags AS t ON st.TagId = t.TagId
 WHERE (std.DeprecatedDate IS NULL) AND (st.DeprecatedDate IS NULL)

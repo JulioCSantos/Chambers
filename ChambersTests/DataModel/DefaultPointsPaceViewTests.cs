@@ -22,7 +22,7 @@ namespace ChambersTests.DataModel
                 var name = NewName();
                 var stage = new Stage(name, 20, 200);
                 var stageDate = new StagesDate(stage, new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-                stageDate.Stage.StageSetValues(20, 200);
+                stageDate.Stage.SetValues(20, 200);
                 TestDbContext.StagesDates.Add(stageDate);
                 var savedCount = TestDbContext.SaveChanges();
                 var viewResults = TestDbContext.DefaultPointsPaces.ToList();
@@ -45,14 +45,14 @@ namespace ChambersTests.DataModel
                 var name = NewName();
                 var stage = new Stage(name, 20, 200);
                 var stageDate = new StagesDate(stage, new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-                stageDate.Stage.StageSetValues(20, 200);
+                stageDate.Stage.SetValues(20, 200);
                 TestDbContext.StagesDates.Add(stageDate);
                 var savedCount = TestDbContext.SaveChanges();
                 var newRow = TestDbContext.DefaultPointsPaces.First();
                 // insert row
                 Debug.Assert(newRow.NextStepStartDate != null, "newRow.NextStepStartDate != null");
                 var pointPace = new PointsPace()
-                    { NextStepStartDate = (DateTime)newRow.NextStepStartDate, TagId = newRow.TagId };
+                    { NextStepStartDate = (DateTime)newRow.NextStepStartDate, StageDate = stageDate};
                 TestDbContext.PointsPaces.Add(pointPace);
                 TestDbContext.SaveChanges();
                 // try again. It should get an empty list

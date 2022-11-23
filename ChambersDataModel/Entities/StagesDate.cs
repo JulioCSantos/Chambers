@@ -7,6 +7,11 @@ namespace ChambersDataModel.Entities
 {
     public partial class StagesDate
     {
+        public StagesDate()
+        {
+            PointsPaces = new HashSet<PointsPace>();
+        }
+
         public int StageDateId { get; set; }
         public int StageId { get; set; }
         public DateTime StartDate { get; set; }
@@ -14,5 +19,6 @@ namespace ChambersDataModel.Entities
         public DateTime? DeprecatedDate { get; set; }
 
         public virtual Stage Stage { get; set; }
+        public virtual ICollection<PointsPace> PointsPaces { get; set; }
     }
 }

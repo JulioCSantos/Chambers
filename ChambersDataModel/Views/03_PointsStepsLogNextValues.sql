@@ -10,7 +10,7 @@ Tags as t
 INNER JOIN 
 dbo.StagesLimitsAndDates AS sld ON t.TagId = sld.TagId
 INNER JOIN
-dbo.PointsPaces AS pp ON sld.TagId = pp.TagId 
+dbo.PointsPaces AS pp ON sld.StageDateId = pp.StageDateId 
 CROSS APPLY
 [dbo].[fnGetOverlappingDates](sld.StartDate, sld.EndDate, pp.NextStepStartDate, pp.NextStepEndDate) AS ods
 WHERE 

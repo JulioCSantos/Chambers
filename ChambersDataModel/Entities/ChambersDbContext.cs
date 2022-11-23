@@ -85,7 +85,7 @@ namespace ChambersDataModel.Entities
                 entity.HasKey(e => e.PaceId)
                     .HasName("pkPointsPacesPointId");
 
-                entity.HasIndex(e => e.TagId, "IX_CollectionPointsPace_TagId");
+                entity.HasIndex(e => e.StageDateId, "IX_CollectionPointsPace_TagId");
 
                 entity.Property(e => e.NextStepEndDate)
                     .HasColumnType("datetime")
@@ -93,11 +93,11 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
 
-                entity.HasOne(d => d.Tag)
+                entity.HasOne(d => d.StageDate)
                     .WithMany(p => p.PointsPaces)
-                    .HasForeignKey(d => d.TagId)
+                    .HasForeignKey(d => d.StageDateId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkTagsTagId_PointsPacesTagId");
+                    .HasConstraintName("fkPointsPacesStageDateId_StagesDatesStageDateId");
             });
 
             modelBuilder.Entity<PointsStepsLog>(entity =>
@@ -149,7 +149,9 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
-                entity.Property(e => e.TagName).HasMaxLength(255);
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255);
             });
 
             modelBuilder.Entity<Stage>(entity =>
@@ -206,6 +208,10 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.StageName).HasMaxLength(255);
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255);
             });
 
             modelBuilder.Entity<Tag>(entity =>

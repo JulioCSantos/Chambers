@@ -7,7 +7,8 @@ namespace ChambersDataModel.Entities
 {
     public partial class DefaultPointsPace
     {
-        public int TagId { get; set; }
+        public int StageDateId { get; set; }
         public DateTime? NextStepStartDate { get; set; }
+        public int StepSizeDays { get; set; }
     }
 }

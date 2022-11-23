@@ -55,15 +55,15 @@
          "ObjectType": 3
       },
       {
+         "Name": "[dbo].[spGetExcursionsPointsForDate]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[spGetStagesLimitsAndDates]",
          "ObjectType": 1
       },
       {
          "Name": "[dbo].[spPivotExcursionPoints]",
-         "ObjectType": 1
-      },
-      {
-         "Name": "[dbo].[spRunTagStep]",
          "ObjectType": 1
       },
       {

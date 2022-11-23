@@ -7,13 +7,15 @@ namespace ChambersDataModel.Entities
 {
     public partial class StagesLimitsAndDate
     {
-        public int StageDateId { get; set; }
         public int TagId { get; set; }
+        public string TagName { get; set; }
+        public int StageDateId { get; set; }
         public string StageName { get; set; }
         public double MinValue { get; set; }
         public double MaxValue { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public double? TimeStep { get; set; }
+        public int StageId { get; set; }
     }
 }
