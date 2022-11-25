@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (	
 	  @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
-	, @LowThreashold float, @HiThreashold float 
+	, @LowThreashold float, @HiThreashold float, @TagId int = null, @StepLogId int = null 
 )
 AS
 BEGIN
@@ -122,12 +122,23 @@ END
 	
 	INSERT INTO @ExcPoints Select * FROM @ExcPoint1;
 
-	PRINT 'RETURN ALL Full Excursion Cycles'
-	SELECT * FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
+	INSERT INTO [dbo].[ExcursionPoints]
+	SELECT 
+	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
+      ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
+	  , @LowThreashold as [MinValue], @HiThreashold as [MaxValue]
+	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0; -- select only full Excursions
+	PRINT 'ALL Excursion Cycles inserted'
+
+	SELECT 
+	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
+      ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
+	  , @LowThreashold as [MinValue], @HiThreashold as [MaxValue]
+	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
 
 -- UNIT TESTS
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-03'
---		, @LowThreashold = 100, @HiThreashold = 200;
+--		, @LowThreashold = 100, @HiThreashold = 200, @TagId = 111, @StepLogId = 222;
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
 --		, @LowThreashold = 100, @HiThreashold = 200;
 

@@ -8,7 +8,7 @@ namespace ChambersDataModel.Entities
     public partial class ExcursionPoint
     {
         public int CycleId { get; set; }
-        public int TagId { get; set; }
+        public int? TagId { get; set; }
         public string TagName { get; set; }
         public int TagExcNbr { get; set; }
         public int? StepLogId { get; set; }
