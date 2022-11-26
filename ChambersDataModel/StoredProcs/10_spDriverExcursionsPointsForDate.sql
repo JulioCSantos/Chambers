@@ -9,6 +9,8 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+	
+	BEGIN TRAN;
 
 		-- find all (or selected by StageDateId) StagesLimitsAndDates (STADs) left join with PointsPaces
 		-- default PointsPaces will be assigned to STADs that don't have one.
@@ -112,9 +114,13 @@ BEGIN
 	END;
 	CLOSE stepsCsr;
 	DEALLOCATE stepsCsr;
-	-- After Transaction completed succesfully update PointsPaces
 
+	-- Update PointsPaces to next iteration
+	UPDATE dbo.PointsPaces 
+	SET  NextStepStartDate = NextStepEndDate
+	WHERE PaceId IN (SELECT PaceId FROM #PointsStepsLog);
 
+	COMMIT TRAN;
 
 -- UNIT TESTS
 --EXEC [dbo].[spDriverExcursionsPointsForDate] @ForDate = '2022-11-01';
