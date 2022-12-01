@@ -11,9 +11,9 @@ namespace ChambersDataModel.Entities
     {
 
         [DbFunction("fnGetExcursionsCounts", "dbo")]
-        public IQueryable<fnGetExcursionsCountsResult> fnGetExcursionsCounts(string TagNamesList, int? MinHiCount, int? MinLowCount, DateTime? OuterStartDate, DateTime? OuterEndDate)
+        public IQueryable<fnGetExcursionsCountsResult> fnGetExcursionsCounts(string TagNamesList, int? MinHiCount, int? MinLowCount, DateTime? AfterDate, DateTime? BeforeDate)
         {
-            return FromExpression(() => fnGetExcursionsCounts(TagNamesList, MinHiCount, MinLowCount, OuterStartDate, OuterEndDate));
+            return FromExpression(() => fnGetExcursionsCounts(TagNamesList, MinHiCount, MinLowCount, AfterDate, BeforeDate));
         }
 
         [DbFunction("fnGetOverlappingDates", "dbo")]
