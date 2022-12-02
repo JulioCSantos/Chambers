@@ -12,6 +12,7 @@ namespace ChambersDataModel.Entities
         public DateTime NextStepStartDate { get; set; }
         public int StepSizeDays { get; set; }
         public DateTime? NextStepEndDate { get; set; }
+        public DateTime? ProcessedDate { get; set; }
 
         public virtual StagesDate StageDate { get; set; }
     }

@@ -95,6 +95,8 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
 
+                entity.Property(e => e.ProcessedDate).HasColumnType("datetime");
+
                 entity.HasOne(d => d.StageDate)
                     .WithMany(p => p.PointsPaces)
                     .HasForeignKey(d => d.StageDateId)
