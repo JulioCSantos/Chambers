@@ -41,66 +41,57 @@ BEGIN
 	-- each iteration creates associated PointsStepsLog
 	-- insert into [dbo].[PointsStepsLog]
 
-	CREATE TABLE #PointsStepsLog ( [StepLogId] int IDENTITY(1,1) NOT NULL,
+	DECLARE  @PointsStepsLog TABLE ( [StepLogId] [int] NULL,
 	[StageDateId] [int] NOT NULL, [StageName] [nvarchar](255) NOT NULL, [TagId] [int] NOT NULL, [TagName] [varchar](255) NOT NULL,
 	[StageStartDate] [datetime] NOT NULL, [StageEndDate] [datetime] NULL, [MinValue] [float] NOT NULL, [MaxValue] [float] NOT NULL,
 	[PaceId] [int] NOT NULL, [PaceStartDate] [datetime] NOT NULL, [PaceEndDate] [datetime] NOT NULL,
 	[StartDate] [datetime] NULL, [EndDate] [datetime] NULL
 	);
 
-	DECLARE @lastStepLogId int;
-	SELECT @lastStepLogId = ISNULL(IDENT_CURRENT('dbo.PointsStepsLog'), 1) + 1;
-	DBCC CHECKIDENT (#PointsStepsLog, RESEED, @lastStepLogId);
 
 
-	--SET IDENTITY_INSERT #PointsStepsLog OFF;
 	IF (@StageDateId IS NULL AND @TagName IS NULL) 
-		INSERT INTO #PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 	ELSE IF (@StageDateId Is NOT NULL AND @TagName IS NULL)
-		INSERT INTO #PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.StageDateId = @StageDateId
 	ELSE IF (@StageDateId Is NULL AND @TagName IS NOT NULL)
-		INSERT INTO #PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.TagName = @TagName
 	ELSE
-		INSERT INTO #PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.StageDateId = @StageDateId AND nxt.TagName = @TagName
 
-	--SET IDENTITY_INSERT #PointsStepsLog OFF;
 
-	--DECLARE @lastStepLogId int;
-	--SELECT @lastStepLogId = ISNULL(MAX(StepLogId), 1) FROM [dbo].[PointsStepsLog];
-	--UPDATE #PointsStepsLog SET StepLogId = StepLogId + @lastStepLogId;
 
-	SET IDENTITY_INSERT [dbo].[PointsStepsLog] ON;
-	--INSERT INTO [dbo].[PointsStepsLog] 
-	--SELECT * FROM #PointsStepsLog;
-	INSERT INTO [dbo].[PointsStepsLog] ([StepLogId], [StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+	INSERT INTO [dbo].[PointsStepsLog] ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
-	SELECT [StepLogId], [StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
+	--OUTPUT INSERTED.StepLogId INTO @PointsStepsLog(StepLogId)
+	SELECT [StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate] 
-	FROM #PointsStepsLog;
-	SET IDENTITY_INSERT [dbo].[PointsStepsLog] OFF;
+	FROM @PointsStepsLog;
 
 	--spProcessSteps
 	-- each iteration populates excursionPoints
 	-- iterations should be under the context of a transaction.
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 	, @stMinValue float, @stMaxValue float, @stStartDate as datetime, @stEndDate as datetime;
-	DECLARE stepsCsr CURSOR FORWARD_ONLY 
-	FOR SELECT psl.TagId, psl.TagName, psl.StepLogId, psl.MinValue, psl.MaxValue, psl.StartDate, psl.EndDate FROM #PointsStepsLog as psl;
+	DECLARE stepsCsr CURSOR 
+	FOR SELECT psl.TagId, psl.TagName, psl.StepLogId, psl.MinValue, psl.MaxValue, psl.StartDate, psl.EndDate 
+		FROM PointsStepsLog as psl
+		WHERE psl.PaceId in (SELECT vpsl.PaceId From @PointsStepsLog as vpsl);
 	OPEN stepsCsr;
 	FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinValue, @stMaxValue, @stStartDate, @stEndDate;
 	WHILE @@FETCH_STATUS = 0 BEGIN
@@ -115,10 +106,15 @@ BEGIN
 	CLOSE stepsCsr;
 	DEALLOCATE stepsCsr;
 
-	-- Update PointsPaces to next iteration
+	-- Update PointsPaces that were consumed
 	UPDATE dbo.PointsPaces 
-	SET  NextStepStartDate = NextStepEndDate
-	WHERE PaceId IN (SELECT PaceId FROM #PointsStepsLog);
+	SET  ProcessedDate = GetDate()
+	WHERE PaceId IN (SELECT PaceId FROM @PointsStepsLog);
+	-- Create new PointsPaces for next iteration
+	INSERT INTO PointsPaces (StageDateId, NextStepStartDate, StepSizeDays)
+	SELECT pps.StageDateId, pps.NextStepEndDate as NextStepStartDate, pps.StepSizeDays 
+	FROM PointsPaces as pps
+
 
 	COMMIT TRAN;
 

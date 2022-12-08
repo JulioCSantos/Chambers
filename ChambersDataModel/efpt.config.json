@@ -71,6 +71,10 @@
          "ObjectType": 2
       },
       {
+         "Name": "[dbo].[fnGetExcursionsDetails]",
+         "ObjectType": 2
+      },
+      {
          "Name": "[dbo].[fnGetOverlappingDates]",
          "ObjectType": 2
       },
