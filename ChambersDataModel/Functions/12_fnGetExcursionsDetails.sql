@@ -26,7 +26,7 @@ SELECT [CycleId], [TagId], [TagName], [TagExcNbr], [StepLogId]
 FROM [dbo].[ExcursionPoints] 
 WHERE TagName = @TagName
 AND ( @AfterDate  <= RampInDate   AND (@BeforeDate is NULL OR RampOutDate <= @BeforeDate) )
-AND ( (HiPointsCt > @MinHiCount OR LowPointsCt > @MinLowCount OR (@MinHiCount IS NULL AND @MinLowCount IS NULL)) )  
+AND ( (HiPointsCt > @MinHiCount OR LowPointsCt > @MinLowCount OR (@MinHiCount IS NULL AND @MinLowCount IS NULL)) );  
 
 RETURN
 

@@ -78,7 +78,6 @@ BEGIN
 
 	INSERT INTO [dbo].[PointsStepsLog] ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
-	--OUTPUT INSERTED.StepLogId INTO @PointsStepsLog(StepLogId)
 	SELECT [StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
 		, [MinValue], [MaxValue], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate] 
 	FROM @PointsStepsLog;
@@ -86,6 +85,15 @@ BEGIN
 	--spProcessSteps
 	-- each iteration populates excursionPoints
 	-- iterations should be under the context of a transaction.
+	DECLARE @ExcPoints as TABLE ( TagId int NULL
+		, TagName varchar(255), TagExcNbr int NULL
+		, StepLogId int NULL
+		, RampInDate DateTime NULL, RampInValue float NULl
+		, FirstExcDate DateTime NULL, FirstExcValue float NULL
+		, LastExcDate DateTime NULL, LastExcValue float NULL
+		, RampOutDate DateTime NULL, RampOutValue float NULL
+		, HiPointsCt int NULL, LowPointsCt int NULL
+		, MinValue float NULL, MaxValue float NULL);
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 	, @stMinValue float, @stMaxValue float, @stStartDate as datetime, @stEndDate as datetime;
 	DECLARE stepsCsr CURSOR 
@@ -95,10 +103,11 @@ BEGIN
 	OPEN stepsCsr;
 	FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinValue, @stMaxValue, @stStartDate, @stEndDate;
 	WHILE @@FETCH_STATUS = 0 BEGIN
-		PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ' + Convert(varchar(16), @stTagId) + Convert(varchar(16), @stStepLogId) +  '''',@stTagName, ''', '''
-		, FORMAT(@stStartDate, 'yyyy-MM-dd'), ''', ''', CONVERT(varchar(255), @stEndDate, 126), ''', '
-		, CONVERT(varchar(255), @stMinValue), ', ', CONVERT(varchar(255), @stMaxValue)
-		);
+		--PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ' + Convert(varchar(16), @stTagId) + Convert(varchar(16), @stStepLogId) +  '''',@stTagName, ''', '''
+		--, FORMAT(@stStartDate, 'yyyy-MM-dd'), ''', ''', CONVERT(varchar(255), @stEndDate, 126), ''', '
+		--, CONVERT(varchar(255), @stMinValue), ', ', CONVERT(varchar(255), @stMaxValue)
+		--);
+		INSERT INTO @ExcPoints
 		EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @stStartDate, @stEndDate, @stMinValue, @stMaxValue, @stTagId, @stStepLogId;
 
 		FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinValue, @stMaxValue, @stStartDate, @stEndDate;
@@ -106,20 +115,24 @@ BEGIN
 	CLOSE stepsCsr;
 	DEALLOCATE stepsCsr;
 
-	-- Update PointsPaces that were consumed
-	UPDATE dbo.PointsPaces 
-	SET  ProcessedDate = GetDate()
-	WHERE PaceId IN (SELECT PaceId FROM @PointsStepsLog);
-	-- Create new PointsPaces for next iteration
-	INSERT INTO PointsPaces (StageDateId, NextStepStartDate, StepSizeDays)
-	SELECT pps.StageDateId, pps.NextStepEndDate as NextStepStartDate, pps.StepSizeDays 
-	FROM PointsPaces as pps
+	IF EXISTS (SELECT PaceId FROM @PointsStepsLog) BEGIN
+		-- Update PointsPaces that were consumed
+		UPDATE dbo.PointsPaces 
+		SET  ProcessedDate = GetDate()
+		WHERE PaceId IN (SELECT PaceId FROM @PointsStepsLog);
+		-- Create new PointsPaces for next iteration
+		INSERT INTO PointsPaces (StageDateId, NextStepStartDate, StepSizeDays)
+		SELECT pps.StageDateId, pps.NextStepEndDate as NextStepStartDate, pps.StepSizeDays 
+		FROM PointsPaces as pps
+	END
 
+	SELECT * FROM @ExcPoints;
 
 	COMMIT TRAN;
 
 -- UNIT TESTS
 --EXEC [dbo].[spDriverExcursionsPointsForDate] @ForDate = '2022-11-01';
+--EXEC [dbo].[spDriverExcursionsPointsForDate] @ForDate = '2222-11-01';
 --SELECT * FROM [dbo].[PointsStepsLog];
 --DELETE FROM [dbo].[PointsStepsLog];
 END;
