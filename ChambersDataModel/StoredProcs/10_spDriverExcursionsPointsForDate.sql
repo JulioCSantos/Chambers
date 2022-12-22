@@ -20,7 +20,8 @@ BEGIN
 			FROM [dbo].[StagesLimitsAndDates] as sld LEFT JOIN PointsPaces as PPs ON sld.StageDateId = PPs.StageDateId
 			WHERE PPs.PaceId IS NULL;
 		ELSE IF (@StageDateId Is NOT NULL AND @TagName IS NULL)
-			INSERT INTO [dbo].[PointsPaces] ([StageDateId], [NextStepStartDate], [StepSizeDays])			SELECT sld.StageDateId, DATEADD(month, -1, GETDATE()) as NextStepStartDate, 2 as StepSizeDays
+			INSERT INTO [dbo].[PointsPaces] ([StageDateId], [NextStepStartDate], [StepSizeDays])			
+			SELECT sld.StageDateId, DATEADD(month, -1, GETDATE()) as NextStepStartDate, 2 as StepSizeDays
 			FROM [dbo].[StagesLimitsAndDates] as sld LEFT JOIN PointsPaces as PPs ON sld.StageDateId = PPs.StageDateId
 			WHERE PPs.PaceId IS NULL AND sld.StageDateId = @StageDateId;
 		ELSE IF (@StageDateId Is NULL AND @TagName IS NOT NULL)

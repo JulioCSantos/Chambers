@@ -15,9 +15,10 @@ namespace ChambersTests.DataModel
             return newName;
         }
 
-        public static PointsPace NewPointsPace(string stageName, DateTime? nextStartDate = null, int? stepSizeDays = null ) {
-            var tag = new Tag(IntExtensions.NextId(), stageName);
-            var stage = new Stage(tag);
+        public static PointsPace NewPointsPace(string stageName, DateTime? nextStartDate = null
+            , int? stepSizeDays = null, int? minValue = 100, int? maxValue = 200 ) {
+            var tag = new Tag(IntExtensions.NextId(), tagName: stageName);
+            var stage = new Stage(tag, minValue, maxValue);
             var stageDate = new StagesDate(stage);
             TestDbContext.Tags.Add(tag);
             TestDbContext.Stages.Add(stage);
