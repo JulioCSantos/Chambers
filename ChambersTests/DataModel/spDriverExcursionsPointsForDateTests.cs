@@ -106,5 +106,20 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(result.First().RampOutDate, rampOutPoint.Time);
             Assert.AreEqual(result.First().RampOutValue, rampOutPoint.Value);
         }
+
+        [TestMethod]
+        public async Task ExcursionOnOffDateTest() {
+            var baseDate = DateTime.Today;
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            var stage = pointsPace.StageDate.Stage;
+            var tag = stage.Tag;
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName
+                , pointsPace.NextStepStartDate.AddDays(-1), (float)(stage.MaxValue * 1.5));
+            await TestDbContext.SaveChangesAsync();
+            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+            Assert.AreEqual(0, result.Count);
+        }
     }
 }
