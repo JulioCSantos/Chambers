@@ -42,7 +42,28 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task OneHighExcursionWithRampsTest() {
+        public async Task PointsPacesUpdateWithOneHighExcursionPointTest() {
+            var baseDate = DateTime.Today;
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            var stage = pointsPace.StageDate.Stage;
+            var tag = stage.Tag;
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxValue * 1.5));
+            await TestDbContext.SaveChangesAsync();
+            Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
+            Assert.IsTrue(TestDbContext.PointsPaces.First().ProcessedDate == null);
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(2, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
+            Assert.IsTrue(TestDbContext.PointsPaces.Any(pp => pp.ProcessedDate != null));
+            Assert.IsTrue(TestDbContext.PointsPaces.Any(pp => pp.ProcessedDate == null));
+
+        }
+
+        [TestMethod]
+        public async Task OneHighExcursionPointWithRampsTest() {
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -62,12 +83,12 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task TwoLowExcursionWithRampsTest() {
+        public async Task TwoLowExcursionPointsWithRampsTest() {
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            TestDbContext.PointsPaces.Add(pointsPace);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
-            TestDbContext.PointsPaces.Add(pointsPace);
             var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MinValue * 1.1));
             var firstLowExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddMinutes(10), (float)(stage.MinValue * 0.9));
             var lastLowExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddMinutes(20), (float)(stage.MinValue * 0.8));
