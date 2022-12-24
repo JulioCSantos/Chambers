@@ -117,14 +117,16 @@ BEGIN
 	DEALLOCATE stepsCsr;
 
 	IF EXISTS (SELECT PaceId FROM @PointsStepsLog) BEGIN
-		-- Update PointsPaces that were consumed
-		UPDATE dbo.PointsPaces 
-		SET  ProcessedDate = GetDate()
-		WHERE PaceId IN (SELECT PaceId FROM @PointsStepsLog);
-		-- Create new PointsPaces for next iteration
+		-- Create a new PointsPaces row for next iteration
 		INSERT INTO PointsPaces (StageDateId, NextStepStartDate, StepSizeDays)
 		SELECT pps.StageDateId, pps.NextStepEndDate as NextStepStartDate, pps.StepSizeDays 
 		FROM PointsPaces as pps
+		WHERE pps.ProcessedDate IS NULL;
+		-- Update PointsPaces's row that was processed
+		UPDATE dbo.PointsPaces 
+		SET  ProcessedDate = GetDate()
+		WHERE PaceId IN (SELECT PaceId FROM @PointsStepsLog) AND ProcessedDate IS NULL;
+
 	END
 
 	SELECT * FROM @ExcPoints;
