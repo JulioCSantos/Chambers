@@ -66,6 +66,8 @@ namespace ChambersDataModel.Entities
                 entity.HasIndex(e => new { e.TagName, e.TagExcNbr }, "ixExcursionPointsTagNameTagExcNbr")
                     .IsClustered();
 
+                entity.Property(e => e.ExcursionLength).HasComputedColumnSql("(datediff(minute,[RampInDate],[RampOutDate]))", false);
+
                 entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
 
                 entity.Property(e => e.LastExcDate).HasColumnType("datetime");
@@ -96,6 +98,8 @@ namespace ChambersDataModel.Entities
                 entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.ProcessedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StepSizeDays).HasDefaultValueSql("((2))");
 
                 entity.HasOne(d => d.StageDate)
                     .WithMany(p => p.PointsPaces)

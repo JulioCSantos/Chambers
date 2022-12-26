@@ -24,5 +24,6 @@ namespace ChambersDataModel.Entities
         public int LowPointsCt { get; set; }
         public double? MinValue { get; set; }
         public double? MaxValue { get; set; }
+        public int? ExcursionLength { get; set; }
     }
 }
