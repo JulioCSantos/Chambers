@@ -55,15 +55,15 @@
          "ObjectType": 3
       },
       {
-         "Name": "[dbo].[MergeIncompleteCycles]",
-         "ObjectType": 1
-      },
-      {
          "Name": "[dbo].[spDriverExcursionsPointsForDate]",
          "ObjectType": 1
       },
       {
          "Name": "[dbo].[spGetStagesLimitsAndDates]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[spMergeIncompleteCycles]",
          "ObjectType": 1
       },
       {

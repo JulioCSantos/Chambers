@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChambersDataModel.Entities
 {
-    public partial class MergeIncompleteCyclesResult
+    public partial class spMergeIncompleteCyclesResult
     {
         public int? CycleId { get; set; }
         public string TagName { get; set; }
