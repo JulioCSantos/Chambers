@@ -32,7 +32,8 @@ BEGIN
 
 		-- Compute RampIn's datetime and value and Points High and Low Count
 		DECLARE  @GRampInDate DateTime, @GRampInValue float, @GLowPointsCt int, @GHiPointsCt int;
-		SELECT @GRampInDate = MIN(RampInDate), @GRampInValue= Min(RampInValue), @GLowPointsCt = SUM(LowPointsCt), @GHiPointsCt = SUM(HiPointsCt) FROM @RampInResults;
+		SELECT @GRampInDate = MIN(RampInDate), @GRampInValue= Min(RampInValue)
+		, @GLowPointsCt = IsNull(SUM(LowPointsCt),0), @GHiPointsCt = IsNull(SUM(HiPointsCt), 0) FROM @RampInResults;
 
 		-- Update the RampOut Cycle row
 		UPDATE [dbo].[ExcursionPoints]
@@ -57,4 +58,3 @@ BEGIN
     -- Insert statements for procedure here
 	SELECT * FROM @RampOutResults;
 END
-GO

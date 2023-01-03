@@ -38,5 +38,29 @@ namespace ChambersTests.DataModel.Extensions
 
             return highExcursionPoint;
         }
+
+        public static ExcursionPoint NewExcursionPoint(this ChambersDbContext context
+            , string tagName, int tagExcNbr, int hiPointsCt, int lowPointsCt) {
+            var excursionPoint = new ExcursionPoint() {
+                TagName = tagName, TagExcNbr = tagExcNbr, HiPointsCt = hiPointsCt, LowPointsCt = lowPointsCt
+            };
+            
+            context.ExcursionPoints.Add(excursionPoint);
+
+            return excursionPoint;
+        }
+
+        public static ExcursionPoint NewExcursionPoint(this ChambersDbContext context
+            , string tagName, int tagExcNbr, int hiPointsCt, int lowPointsCt
+            , DateTime? rampInDate, float? rampInValue, DateTime? rampOutDate, float? rampOutValue) {
+            var excursionPoint = new ExcursionPoint() {
+                TagName = tagName, TagExcNbr = tagExcNbr, HiPointsCt = hiPointsCt, LowPointsCt = lowPointsCt
+                , RampInDate = rampInDate, RampInValue = rampInValue, RampOutDate = rampOutDate, RampOutValue = rampOutValue
+            };
+
+            context.ExcursionPoints.Add(excursionPoint);
+
+            return excursionPoint;
+        }
     }
 }

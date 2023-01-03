@@ -31,6 +31,7 @@
     <None Remove="StoredProcs\04_spGetStagesLimitsAndDates.sql" />
     <None Remove="StoredProcs\08_spPivotExcursionPoints.SQL" />
     <None Remove="StoredProcs\10_spDriverExcursionsPointsForDate.sql" />
+    <None Remove="StoredProcs\13_spMergeIncompleteCycles.sql" />
     <None Remove="Views\02_StagesLimitsAndDates.sql" />
     <None Remove="Views\03_PointsStepsLogNextValues.sql" />
     <None Remove="Views\06_DefaultPointsPaces.sql" />
@@ -65,6 +66,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chambers.Common\Chambers.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="StoredProcs\13_spMergeIncompleteCycles.sql" />
   </ItemGroup>
 
   <ItemGroup>
