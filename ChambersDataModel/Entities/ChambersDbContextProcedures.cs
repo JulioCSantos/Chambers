@@ -34,6 +34,7 @@ namespace ChambersDataModel.Entities
 
         protected void OnModelCreatingGeneratedProcedures(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<MergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spGetStagesLimitsAndDatesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
@@ -47,6 +48,26 @@ namespace ChambersDataModel.Entities
         public ChambersDbContextProcedures(ChambersDbContext context)
         {
             _context = context;
+        }
+
+        public virtual async Task<List<MergeIncompleteCyclesResult>> MergeIncompleteCyclesAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<MergeIncompleteCyclesResult>("EXEC @returnValue = [dbo].[MergeIncompleteCycles]", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
         }
 
         public virtual async Task<List<spDriverExcursionsPointsForDateResult>> spDriverExcursionsPointsForDateAsync(DateTime? ForDate, int? StageDateId, string TagName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)

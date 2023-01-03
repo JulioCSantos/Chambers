@@ -63,8 +63,10 @@ namespace ChambersDataModel.Entities
                     .HasName("pkExcursionPointsCycleId")
                     .IsClustered(false);
 
-                entity.HasIndex(e => new { e.TagName, e.TagExcNbr }, "ixExcursionPointsTagNameTagExcNbr")
+                entity.HasIndex(e => new { e.TagName, e.TagExcNbr, e.RampInDate }, "ixExcursionPointsRampInDateTagNameTagExcNbr")
                     .IsClustered();
+
+                entity.HasIndex(e => new { e.TagName, e.TagExcNbr, e.RampOutDate }, "ixExcursionPointsRampoutDateTagNameTagExcNbr");
 
                 entity.Property(e => e.ExcursionLength).HasComputedColumnSql("(datediff(minute,[RampInDate],[RampOutDate]))", false);
 

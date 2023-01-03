@@ -55,6 +55,10 @@
          "ObjectType": 3
       },
       {
+         "Name": "[dbo].[MergeIncompleteCycles]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[spDriverExcursionsPointsForDate]",
          "ObjectType": 1
       },
