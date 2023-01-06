@@ -101,5 +101,35 @@ namespace ChambersTests.DataModel
             var expected2 = exc3.HiPointsCt + exc4.HiPointsCt + exc5.HiPointsCt;
             Assert.AreEqual(expected2, merged2.HiPointsCt);
         }
+
+        [TestMethod]
+        public async Task TwoCyclesTwoTagsTest() {
+            var dt1 = new DateTime(2022, 1, 1);
+            var dt2 = dt1.AddDays(2);
+            var tagName1 = nameof(TwoCyclesTwoTagsTest) + "_a";
+            var tagName2 = nameof(TwoCyclesTwoTagsTest) + "_b";
+
+            var excRIn1 = TestDbContext.NewExcursionPoint(tagName1, 3, 1, 0
+                , dt1, 110, null, null);
+            var excROut1 = TestDbContext.NewExcursionPoint(tagName1, 5, 2, 0
+                , null, null, dt2, 120);
+
+            var excRIn2 = TestDbContext.NewExcursionPoint(tagName2, 3, 3, 0
+                , dt1, 110, null, null);
+            var excROut2 = TestDbContext.NewExcursionPoint(tagName2, 5, 4, 0
+                , null, null, dt2, 120);
+
+            var insertedRows = await TestDbContext.SaveChangesAsync();
+            Assert.AreEqual(4, insertedRows);
+            var result = await TestDbContext.Procedures.spMergeIncompleteCyclesAsync();
+            Assert.AreEqual(2, result.Count);
+            var merged1 = result.First(e => e.TagName == tagName1);
+            var merged2 = result.First(e => e.TagName == tagName2);
+            var expected1 = excRIn1.HiPointsCt + excROut1.HiPointsCt;
+            Assert.AreEqual(expected1, merged1.HiPointsCt);
+            var expected2 = excRIn2.HiPointsCt + excROut2.HiPointsCt;
+            Assert.AreEqual(expected2, merged2.HiPointsCt);
+
+        }
     }
 }

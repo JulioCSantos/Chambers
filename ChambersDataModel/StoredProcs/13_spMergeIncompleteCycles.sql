@@ -13,7 +13,10 @@ BEGIN
 	, RampOutDate DateTime NULL, LowPointsCt int, HiPointsCt int);
 	DECLARE @OCycleId int, @OTagName varchar(255), @OTagExcNbr int, @OPrevTagExcNbr int, @ORampOutDate datetime, @OLowPointsCt int, @OHiPointsCt int;
 	DECLARE RampOutCyclesCsr CURSOR 
-	FOR SELECT CycleId,  TagName, TagExcNbr, ISNULL((lag(TagExcNbr,1) OVER (ORDER BY TagName)),0)
+	-- Get all Incomplete RampOuts. PrevTagExcNbr will contain the Excursion number of the 
+	-- previous Incomplete RampOut for the same TagName
+	FOR SELECT CycleId,  TagName, TagExcNbr
+		, LAG(TagExcNbr,1,0) OVER (PARTITION BY TagName ORDER BY TagExcNbr) as PrevTagExcNbr
 		, RampOutDate, LowPointsCt, HiPointsCt 
 		FROM [dbo].[ExcursionPoints]
 		WHERE RampInDate is null AND RampOutDate is NOT NULL;
