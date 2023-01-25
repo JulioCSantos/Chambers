@@ -36,6 +36,7 @@ namespace ChambersDataModel.Entities
         {
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spGetStagesLimitsAndDatesResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<spGetStatsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
         }
@@ -115,6 +116,39 @@ namespace ChambersDataModel.Entities
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<spGetStagesLimitsAndDatesResult>("EXEC @returnValue = [dbo].[spGetStagesLimitsAndDates] @TagId, @DateTime", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
+        }
+
+        public virtual async Task<List<spGetStatsResult>> spGetStatsAsync(string TagName, int? TagExcNbr, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "TagName",
+                    Size = 255,
+                    Value = TagName ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "TagExcNbr",
+                    Value = TagExcNbr ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Int,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<spGetStatsResult>("EXEC @returnValue = [dbo].[spGetStats] @TagName, @TagExcNbr", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

@@ -23,6 +23,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[ExcursionStats]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[PointsPaces]",
          "ObjectType": 0
       },
@@ -63,6 +67,10 @@
          "ObjectType": 1
       },
       {
+         "Name": "[dbo].[spGetStats]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[spMergeIncompleteCycles]",
          "ObjectType": 1
       },
@@ -88,6 +96,7 @@
       }
    ],
    "UiHint": "asus-strange.ELChambers.dbo",
+   "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDbContextSplitting": false,
@@ -97,9 +106,7 @@
    "UseInflector": true,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": false,
-   "UseNoConstructor": false,
    "UseNoDefaultConstructor": false,
-   "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,

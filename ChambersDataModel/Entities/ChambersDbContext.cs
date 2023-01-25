@@ -21,6 +21,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
+        public virtual DbSet<ExcursionStat> ExcursionStats { get; set; }
         public virtual DbSet<PointsPace> PointsPaces { get; set; }
         public virtual DbSet<PointsStepsLog> PointsStepsLogs { get; set; }
         public virtual DbSet<PointsStepsLogNextValue> PointsStepsLogNextValues { get; set; }
@@ -80,6 +81,15 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.TagName)
                     .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<ExcursionStat>(entity =>
+            {
+                entity.HasKey(e => new { e.TagName, e.TagExcNbr });
+
+                entity.Property(e => e.TagName)
                     .HasMaxLength(255)
                     .IsUnicode(false);
             });
