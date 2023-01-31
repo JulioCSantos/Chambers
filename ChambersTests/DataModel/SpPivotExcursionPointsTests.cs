@@ -28,7 +28,7 @@ namespace ChambersTests.DataModel
         //EXECUTE[dbo].[spPivotExcursionPoints] 'T1', '2022-01-01', '2022-03-31', 100, 200;
         public async Task HiExcursionWithPrevTagExcNbrTest()
         {
-            string tag = "T1";
+            string tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
             var prevDt = new DateTime(2022, 01, 01);
@@ -39,17 +39,15 @@ namespace ChambersTests.DataModel
                 RampOutValue = lt + 50, HiPointsCt = 3, LowPointsCt = 0
             };
             TestDbContext.ExcursionPoints.Add(prevExcPoint);
-            var rampInP1 = new CompressedPoint(tag,dt.AddDays(1), lt + 20);
-            var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60);
-            var excP1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20);
-            var excP2 = new CompressedPoint(tag, dt.AddDays(4), ht + 60);
-            var excP3 = new CompressedPoint(tag, dt.AddDays(5), ht + 40);
-            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(6), ht - 10);
-            var rampOutP2 = new CompressedPoint(tag, dt.AddDays(7), ht - 30);
-            TestDbContext.Add(rampInP1); TestDbContext.Add(rampInP2);
-            TestDbContext.Add(excP1); TestDbContext.Add(excP2); TestDbContext.Add(excP3);
-            TestDbContext.Add(rampOutP1); TestDbContext.Add(rampOutP2);
+            var rampInP1 = new CompressedPoint(tag,dt.AddDays(1), lt + 20); TestDbContext.Add(rampInP1);
+            var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60); TestDbContext.Add(rampInP2);
+            var excP1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20); TestDbContext.Add(excP1);
+            var excP2 = new CompressedPoint(tag, dt.AddDays(4), ht + 60); TestDbContext.Add(excP2);
+            var excP3 = new CompressedPoint(tag, dt.AddDays(5), ht + 40); TestDbContext.Add(excP3);
+            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(6), ht - 10); TestDbContext.Add(rampOutP1);
+            var rampOutP2 = new CompressedPoint(tag, dt.AddDays(7), ht - 30); TestDbContext.Add(rampOutP2);
             await TestDbContext.SaveChangesAsync();
+
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht, null, null)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
@@ -65,24 +63,24 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task LowExcursionTest() {
-            var tag = "T2";
+            var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
-            var rampInP1 = new CompressedPoint(tag, dt.AddDays(1), lt + 60);
-            var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 20);
-            var excP1 = new CompressedPoint(tag, dt.AddDays(3), lt - 20);
-            var excP2 = new CompressedPoint(tag, dt.AddDays(4), lt - 30);
-            var excP3 = new CompressedPoint(tag, dt.AddDays(5), lt - 10);
-            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(6), lt + 70);
-            var rampOutP2 = new CompressedPoint(tag, dt.AddDays(7), lt + 90);
-            TestDbContext.Add(rampInP1); TestDbContext.Add(rampInP2);
-            TestDbContext.Add(excP1); TestDbContext.Add(excP2); TestDbContext.Add(excP3);
-            TestDbContext.Add(rampOutP1); TestDbContext.Add(rampOutP2);
+            var rampInP1 = new CompressedPoint(tag, dt.AddDays(1), lt + 60); TestDbContext.Add(rampInP1);
+            var rampInP2 = new CompressedPoint(tag, dt.AddDays(2), lt + 20); TestDbContext.Add(rampInP2);
+            var excP1 = new CompressedPoint(tag, dt.AddDays(3), lt - 20); TestDbContext.Add(excP1);
+            var excP2 = new CompressedPoint(tag, dt.AddDays(4), lt - 30); TestDbContext.Add(excP2);
+            var excP3 = new CompressedPoint(tag, dt.AddDays(5), lt - 10); TestDbContext.Add(excP3);
+            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(6), lt + 70); TestDbContext.Add(rampOutP1);
+            var rampOutP2 = new CompressedPoint(tag, dt.AddDays(7), lt + 90); TestDbContext.Add(rampOutP2);
+            //TestDbContext.Add(rampInP1); TestDbContext.Add(rampInP2);
+            //TestDbContext.Add(excP1); TestDbContext.Add(excP2); TestDbContext.Add(excP3);
+            //TestDbContext.Add(rampOutP1); TestDbContext.Add(rampOutP2);
             await TestDbContext.SaveChangesAsync();
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht, null, null)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
-            Assert.AreEqual(0, excPointNew.TagExcNbr);
+            Assert.AreEqual(1, excPointNew.TagExcNbr);
             Assert.IsTrue(excPointNew.TagName == tag);
             Assert.IsTrue(excPointNew.LowPointsCt == 3);
             Assert.IsTrue(excPointNew.HiPointsCt == 0);
@@ -93,32 +91,28 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task HiLowExcursionTest() {
-            var tag = "T3";
+        public async Task HiLowExcursionTest()
+        {
+            var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
-            var rampInPh1 = new CompressedPoint(tag, dt.AddDays(1), lt + 20);
-            var rampInPh2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60);
-            var excPh1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20);
-            var excPh2 = new CompressedPoint(tag, dt.AddDays(4), ht + 60);
-            var excPh3 = new CompressedPoint(tag, dt.AddDays(5), ht + 40);
-            var rampOutPh1 = new CompressedPoint(tag, dt.AddDays(6), ht - 10);
-            var rampOutPh2 = new CompressedPoint(tag, dt.AddDays(7), ht - 30);
+            var rampInPh1 = new CompressedPoint(tag, dt.AddDays(1), lt + 20); TestDbContext.Add(rampInPh1);
+            var rampInPh2 = new CompressedPoint(tag, dt.AddDays(2), lt + 60); TestDbContext.Add(rampInPh2);
+            var excPh1 = new CompressedPoint(tag, dt.AddDays(3), ht + 20); TestDbContext.Add(excPh1);
+            var excPh2 = new CompressedPoint(tag, dt.AddDays(4), ht + 60); TestDbContext.Add(excPh2);
+            var excPh3 = new CompressedPoint(tag, dt.AddDays(5), ht + 40); TestDbContext.Add(excPh3);
+            var rampOutPh1 = new CompressedPoint(tag, dt.AddDays(6), ht - 10); TestDbContext.Add(rampOutPh1);
+            var rampOutPh2 = new CompressedPoint(tag, dt.AddDays(7), ht - 30); TestDbContext.Add(rampOutPh2);
             dt = dt.AddDays(10);
-            var rampInPl1 = new CompressedPoint(tag, dt.AddDays(1), lt + 60);
-            var rampInPl2 = new CompressedPoint(tag, dt.AddDays(2), lt + 20);
-            var excPl1 = new CompressedPoint(tag, dt.AddDays(3), lt - 20);
-            var excPl2 = new CompressedPoint(tag, dt.AddDays(4), lt - 30);
-            var excPl3 = new CompressedPoint(tag, dt.AddDays(5), lt - 10);
-            var rampOutPl1 = new CompressedPoint(tag, dt.AddDays(6), lt + 70);
-            var rampOutPl2 = new CompressedPoint(tag, dt.AddDays(7), lt + 90); 
-            TestDbContext.Add(rampInPh1); TestDbContext.Add(rampInPh2);
-            TestDbContext.Add(excPh1); TestDbContext.Add(excPh2); TestDbContext.Add(excPh3);
-            TestDbContext.Add(rampOutPh1); TestDbContext.Add(rampOutPh2);
-            TestDbContext.Add(rampInPl1); TestDbContext.Add(rampInPl2);
-            TestDbContext.Add(excPl1); TestDbContext.Add(excPl2); TestDbContext.Add(excPl3);
-            TestDbContext.Add(rampOutPl1); TestDbContext.Add(rampOutPl2);
+            var rampInPl1 = new CompressedPoint(tag, dt.AddDays(1), lt + 60); TestDbContext.Add(rampInPl1);
+            var rampInPl2 = new CompressedPoint(tag, dt.AddDays(2), lt + 20); TestDbContext.Add(rampInPl2);
+            var excPl1 = new CompressedPoint(tag, dt.AddDays(3), lt - 20); TestDbContext.Add(excPl1);
+            var excPl2 = new CompressedPoint(tag, dt.AddDays(4), lt - 30); TestDbContext.Add(excPl2);
+            var excPl3 = new CompressedPoint(tag, dt.AddDays(5), lt - 10); TestDbContext.Add(excPl3);
+            var rampOutPl1 = new CompressedPoint(tag, dt.AddDays(6), lt + 70); TestDbContext.Add(rampOutPl1);
+            var rampOutPl2 = new CompressedPoint(tag, dt.AddDays(7), lt + 90); TestDbContext.Add(rampOutPl2);
             await TestDbContext.SaveChangesAsync();
+
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht, null, null)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);

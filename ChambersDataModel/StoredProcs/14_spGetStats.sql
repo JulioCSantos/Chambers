@@ -4,9 +4,10 @@ CREATE PROCEDURE dbo.spGetStats
 	@TagExcNbr int NULL 
 AS
 BEGIN
-DECLARE @EPTagName varchar(255), @EPTagExcNbr int, @EPTagId int,  @EPFirstExcDate DateTime, @EPLastExcDate DateTime
+PRINT '>>> spGetStats begins'
+	DECLARE @EPTagName varchar(255), @EPTagExcNbr int, @EPTagId int,  @EPFirstExcDate DateTime, @EPLastExcDate DateTime
 
-DECLARE EPsCsr CURSOR FOR
+	DECLARE EPsCsr CURSOR FOR
 	SELECT EP.TagName, EP.TagExcNbr, EP.TagId, EP.FirstExcDate, EP.LastExcDate FROM [dbo].[ExcursionPoints] as EP
 	LEFT JOIN dbo.ExcursionStats as ES
 	On EP.TagName = ES.TagName AND EP.TagExcNbr = ES.TagExcNbr
@@ -24,6 +25,7 @@ DECLARE EPsCsr CURSOR FOR
 	END;
 	CLOSE EPsCsr;
 	DEALLOCATE EPsCsr;
+PRINT 'spGetStats ends <<<'
 
 --insert into[dbo].[ExcursionStats]
 --EXECUTE dbo.spGetStats chamber_report_tag_1, NULL

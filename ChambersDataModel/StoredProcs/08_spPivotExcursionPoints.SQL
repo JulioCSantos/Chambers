@@ -4,9 +4,10 @@
 )
 AS
 BEGIN
+PRINT '>>> spPivotExcursionPoints begins'
 
 	--Declare input cursor values
-	DECLARE  @tag varchar(255), @time DateTime, @value float, @TagExcNbr int = 0; 
+	DECLARE  @tag varchar(255), @time DateTime, @value float, @TagExcNbr int = 1; 
 	DECLARE @IsHiExc int = -1;
 
 	-- Output results
@@ -30,7 +31,7 @@ BEGIN
 	DECLARE @FirstExcDate DateTime = NULL, @FirstExcValue float = NULL;
 	DECLARE @LastExcDate DateTime = NULL, @LastExcValue float = NULL;
 	DECLARE @RampOutDate DateTime = NULL, @RampOutValue float = NULL;
-	DECLARE @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
+	DECLARE  @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET initial TagExcNbr'
 	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPoints] 
@@ -93,7 +94,9 @@ END
 			WHERE tag = @TagName AND time >= FORMAT(@LastExcDate,'yyyy-MM-dd HH:mm:ss') 
 				AND ((@IsHiExc = 1 AND value < @HiThreashold) OR (@IsHiExc = 0 AND value > @LowThreashold ))
 			ORDER BY time Asc;
-			IF (@RampOutDate IS NOT NULL) UPDATE @ExcPoint1 SET RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
+			IF (@RampOutDate IS NOT NULL) BEGIN 
+				UPDATE @ExcPoint1 SET RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
+			END
 		END
 
 		FETCH NEXT FROM CPoint INTO @tag, @time, @value; 
@@ -141,5 +144,6 @@ END
 --		, @LowThreashold = 100, @HiThreashold = 200, @TagId = 111, @StepLogId = 222;
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
 --		, @LowThreashold = 100, @HiThreashold = 200;
+PRINT 'spPivotExcursionPoints ends <<<'
 
 END

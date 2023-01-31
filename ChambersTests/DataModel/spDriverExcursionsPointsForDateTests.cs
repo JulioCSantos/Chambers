@@ -83,7 +83,8 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task TwoLowExcursionPointsWithRampsTest() {
+        public async Task TwoLowExcursionPointsWithRampsTest()
+        {
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             TestDbContext.PointsPaces.Add(pointsPace);

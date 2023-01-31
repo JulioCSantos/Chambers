@@ -6,6 +6,8 @@
 
 AS
 BEGIN
+PRINT '>>> spDriverExcursionsPointsForDate begins'
+
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
@@ -138,4 +140,6 @@ BEGIN
 --EXEC [dbo].[spDriverExcursionsPointsForDate] @ForDate = '2222-11-01';
 --SELECT * FROM [dbo].[PointsStepsLog];
 --DELETE FROM [dbo].[PointsStepsLog];
+PRINT 'spDriverExcursionsPointsForDate ends <<<'
+
 END;
