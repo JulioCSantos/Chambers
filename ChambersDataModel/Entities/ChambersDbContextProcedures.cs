@@ -36,7 +36,6 @@ namespace ChambersDataModel.Entities
         {
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spGetStagesLimitsAndDatesResult>().HasNoKey().ToView(null);
-            modelBuilder.Entity<spGetStatsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
         }
@@ -122,8 +121,36 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spGetStatsResult>> spGetStatsAsync(string TagName, int? TagExcNbr, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<int> spGetStatsAsync(string TagName, DateTime? FirstExcDate, DateTime? LastExcDate, OutputParameter<double?> MinValue, OutputParameter<double?> MaxValue, OutputParameter<double?> AvergValue, OutputParameter<double?> StdDevValue, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
+            var parameterMinValue = new SqlParameter
+            {
+                ParameterName = "MinValue",
+                Direction = System.Data.ParameterDirection.InputOutput,
+                Value = MinValue?._value ?? Convert.DBNull,
+                SqlDbType = System.Data.SqlDbType.Float,
+            };
+            var parameterMaxValue = new SqlParameter
+            {
+                ParameterName = "MaxValue",
+                Direction = System.Data.ParameterDirection.InputOutput,
+                Value = MaxValue?._value ?? Convert.DBNull,
+                SqlDbType = System.Data.SqlDbType.Float,
+            };
+            var parameterAvergValue = new SqlParameter
+            {
+                ParameterName = "AvergValue",
+                Direction = System.Data.ParameterDirection.InputOutput,
+                Value = AvergValue?._value ?? Convert.DBNull,
+                SqlDbType = System.Data.SqlDbType.Float,
+            };
+            var parameterStdDevValue = new SqlParameter
+            {
+                ParameterName = "StdDevValue",
+                Direction = System.Data.ParameterDirection.InputOutput,
+                Value = StdDevValue?._value ?? Convert.DBNull,
+                SqlDbType = System.Data.SqlDbType.Float,
+            };
             var parameterreturnValue = new SqlParameter
             {
                 ParameterName = "returnValue",
@@ -142,14 +169,28 @@ namespace ChambersDataModel.Entities
                 },
                 new SqlParameter
                 {
-                    ParameterName = "TagExcNbr",
-                    Value = TagExcNbr ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
+                    ParameterName = "FirstExcDate",
+                    Value = FirstExcDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
                 },
+                new SqlParameter
+                {
+                    ParameterName = "LastExcDate",
+                    Value = LastExcDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
+                parameterMinValue,
+                parameterMaxValue,
+                parameterAvergValue,
+                parameterStdDevValue,
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spGetStatsResult>("EXEC @returnValue = [dbo].[spGetStats] @TagName, @TagExcNbr", sqlParameters, cancellationToken);
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[spGetStats] @TagName, @FirstExcDate, @LastExcDate, @MinValue OUTPUT, @MaxValue OUTPUT, @AvergValue OUTPUT, @StdDevValue OUTPUT", sqlParameters, cancellationToken);
 
+            MinValue.SetValue(parameterMinValue.Value);
+            MaxValue.SetValue(parameterMaxValue.Value);
+            AvergValue.SetValue(parameterAvergValue.Value);
+            StdDevValue.SetValue(parameterStdDevValue.Value);
             returnValue?.SetValue(parameterreturnValue.Value);
 
             return _;

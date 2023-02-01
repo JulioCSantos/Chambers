@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 
 namespace ChambersTests.DataModel
 {
@@ -14,10 +9,17 @@ namespace ChambersTests.DataModel
             var newName = nameof(spGetStatsTests) + "_" + name;
             return newName;
         }
-        public async void EmptyTest()
+        [TestMethod]
+        public async Task EmptyTest()
         {
-            var result = await TestDbContext.Procedures.spGetStatsAsync(null, null);
-            Assert.AreEqual(0, result.Count);
+            var minValue = new OutputParameter<double?>();
+            var maxValue = new OutputParameter<double?>();
+            var avrgValue = new OutputParameter<double?>();
+            var stdDevValue = new OutputParameter<double?>();
+            var result = await TestDbContext.Procedures.spGetStatsAsync("", null, null
+                , minValue, maxValue, avrgValue, stdDevValue);
+            Assert.AreEqual(-1, result);
+            Assert.IsNull(minValue.Value);
         }
     }
 }

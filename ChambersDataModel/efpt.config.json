@@ -27,6 +27,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Interpolated]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[PointsPaces]",
          "ObjectType": 0
       },
