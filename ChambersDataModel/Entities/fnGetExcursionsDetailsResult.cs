@@ -22,7 +22,7 @@ namespace ChambersDataModel.Entities
         public double? RampOutValue { get; set; }
         public int HiPointsCt { get; set; }
         public int LowPointsCt { get; set; }
-        public double? MinValue { get; set; }
-        public double? MaxValue { get; set; }
+        public double? MinThreshold { get; set; }
+        public double? MaxThreshold { get; set; }
     }
 }

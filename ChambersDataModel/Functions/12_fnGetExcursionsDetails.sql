@@ -14,7 +14,7 @@ RETURNS @ExcsCounts TABLE (
        [LastExcDate] [datetime] NULL,     [LastExcValue] [float] NULL,
        [RampOutDate] [datetime] NULL,     [RampOutValue] [float] NULL,
        [HiPointsCt] [int] NOT NULL, [LowPointsCt] [int] NOT NULL,
-       [MinValue] [float] NULL, [MaxValue] [float] NULL
+       [MinThreshold] [float] NULL, [MaxThreshold] [float] NULL
        )
 AS
 BEGIN
@@ -22,11 +22,11 @@ INSERT INTO @ExcsCounts
 SELECT [CycleId], [TagId], [TagName], [TagExcNbr], [StepLogId]
               , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
               , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
-              ,[HiPointsCt], [LowPointsCt], [MinValue], [MaxValue]
+              ,[HiPointsCt], [LowPointsCt], [MinThreshold], [MaxThreshold]
 FROM [dbo].[ExcursionPoints] 
 WHERE TagName = @TagName
 AND ( @AfterDate  <= RampInDate   AND (@BeforeDate is NULL OR RampOutDate <= @BeforeDate) )
-AND ( (HiPointsCt > @MinHiCount OR LowPointsCt > @MinLowCount OR (@MinHiCount IS NULL AND @MinLowCount IS NULL)) );  
+AND ( (HiPointsCt > @MinHiCount OR LowPointsCt > @MinLowCount OR (@MinHiCount IS NULL AND @MinLowCount IS NULL)) )  
 
 RETURN
 
@@ -46,5 +46,6 @@ RETURN
 --chamber_report_tag_1      4      2022-11-03 14:48:00.000       100.151321411133     2022-11-03 14:52:00.000       99.6357345581055     2022-11-04 01:12:00.000       99.7263259887695     2022-11-04 01:16:00.000       100.267868041992     0      156    100    200
 --chamber_report_tag_1      5      2022-11-04 01:16:00.000       100.267868041992     2022-11-04 01:20:00.000       99.4152755737305     2022-11-04 01:20:00.000       99.4152755737305     2022-11-04 01:24:00.000       100.35848236084      0      1      100    200
 --chamber_report_tag_1      6      2022-11-04 01:24:00.000       100.35848236084      2022-11-04 01:28:00.000       99.9224014282227     2022-11-04 01:32:00.000       99.641960144043      2022-11-04 01:36:00.000       100.432075500488     0      2      100    200
+
 
 END

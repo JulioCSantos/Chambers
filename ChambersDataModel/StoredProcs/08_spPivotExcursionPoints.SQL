@@ -129,14 +129,14 @@ END
 	SELECT 
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
-	  , @LowThreashold as [MinValue], @HiThreashold as [MaxValue]
+	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0; -- select only full Excursions
 	PRINT 'ALL Excursion Cycles inserted'
 
 	SELECT 
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
-	  , @LowThreashold as [MinValue], @HiThreashold as [MaxValue]
+	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
 
 -- UNIT TESTS
