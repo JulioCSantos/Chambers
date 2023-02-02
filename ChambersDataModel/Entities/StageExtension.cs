@@ -8,20 +8,20 @@ namespace ChambersDataModel.Entities
 {
     public partial class Stage
     {
-        public Stage(Tag tag, double? minValue = null, double? maxValue = null) : this() {
+        public Stage(Tag tag, double? minThreshold = null, double? maxThreshold = null) : this() {
             Tag = tag;
             StageName = tag.TagName;
-            SetValues(minValue, maxValue);
+            SetValues(minThreshold, maxThreshold);
         }
 
-        public Stage(string stageName, double? minValue = null, double? maxValue = null) : this() {
+        public Stage(string stageName, double? minThreshold = null, double? maxThreshold = null) : this() {
             StageName = stageName;
             Tag = new Tag(stageName);
-            SetValues(minValue, maxValue);
+            SetValues(minThreshold, maxThreshold);
         }
         public void SetValues( double? minValue, double? maxValue) {
-            if (minValue != null) { MinValue = (double)minValue; }
-            if (maxValue != null) { MaxValue = (double)maxValue; }
+            if (minValue != null) { MinThreshold = (double)minValue; }
+            if (maxValue != null) { MaxThreshold = (double)maxValue; }
         }
     }
 }

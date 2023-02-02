@@ -15,8 +15,8 @@ namespace ChambersDataModel.Entities
         public int StageId { get; set; }
         public int TagId { get; set; }
         public string StageName { get; set; }
-        public double MinValue { get; set; }
-        public double MaxValue { get; set; }
+        public double MinThreshold { get; set; }
+        public double MaxThreshold { get; set; }
         public double? TimeStep { get; set; }
         public DateTime? ProductionDate { get; set; }
         public DateTime? DeprecatedDate { get; set; }

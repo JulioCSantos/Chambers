@@ -9,9 +9,9 @@ namespace ChambersTests.DataModel
     [TestClass]
     public class StagesTests
     {
-        public static Stage NewStageLimits(string stageName, double? minValue = null, double? maxValue = null) {
+        public static Stage NewStageLimits(string stageName, double? minThreshold = null, double? maxThreshold = null) {
             var tag = new Tag(IntExtensions.NextId(), stageName);
-            var stage = new Stage(tag, minValue, maxValue);
+            var stage = new Stage(tag, minThreshold, maxThreshold);
             return stage;
         }
 

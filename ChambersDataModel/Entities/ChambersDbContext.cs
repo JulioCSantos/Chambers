@@ -196,7 +196,7 @@ namespace ChambersDataModel.Entities
 
                 entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.MaxValue).HasDefaultValueSql("((3.4000000000000000e+038))");
+                entity.Property(e => e.MaxThreshold).HasDefaultValueSql("((3.4000000000000000e+038))");
 
                 entity.Property(e => e.ProductionDate).HasColumnType("datetime");
 

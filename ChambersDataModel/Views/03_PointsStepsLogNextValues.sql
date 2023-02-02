@@ -2,7 +2,7 @@
 AS
 SELECT sld.StageDateId, sld.StageName,T.TagId, T.TagName
 , sld.StartDate AS StageStartDate, sld.EndDate AS StageEndDate
-, sld.MinValue, sld.MaxValue
+, sld.MinThreshold, sld.MaxThreshold
 , pp.PaceId, pp.NextStepStartDate as PaceStartDate, pp.NextStepEndDate as PaceEndDate
 , ods.StartDate, ods.EndDate
 FROM 

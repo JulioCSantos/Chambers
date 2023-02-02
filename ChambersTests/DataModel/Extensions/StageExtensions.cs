@@ -11,8 +11,8 @@ namespace ChambersTests.DataModel.Extensions
     {
         public static double GetMidValue(this Stage stage)
         {
-            var halfStep = (stage.MaxValue - stage.MinValue) / 2;
-            var midValue = halfStep + stage.MinValue;
+            var halfStep = (stage.MaxThreshold - stage.MinThreshold) / 2;
+            var midValue = halfStep + stage.MinThreshold;
             return midValue;
         }
     }

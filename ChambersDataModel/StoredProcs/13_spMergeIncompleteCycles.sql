@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE spMergeIncompleteCycles 
+﻿CREATE PROCEDURE [dbo].[spMergeIncompleteCycles] 
 	---- Add the parameters for the stored procedure here
 	--@p1 int = 0, 
 	--@p2 int = 0

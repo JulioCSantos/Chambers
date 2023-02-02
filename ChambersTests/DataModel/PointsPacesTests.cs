@@ -16,9 +16,9 @@ namespace ChambersTests.DataModel
         }
 
         public static PointsPace NewPointsPace(string stageName, DateTime? nextStartDate = null
-            , int? stepSizeDays = null, int? minValue = 100, int? maxValue = 200 ) {
+            , int? stepSizeDays = null, int? minThreshold = 100, int? maxThreshold = 200 ) {
             var tag = new Tag(IntExtensions.NextId(), tagName: stageName);
-            var stage = new Stage(tag, minValue, maxValue);
+            var stage = new Stage(tag, minThreshold, maxThreshold);
             var stageDate = new StagesDate(stage);
             TestDbContext.Tags.Add(tag);
             TestDbContext.Stages.Add(stage);
