@@ -67,10 +67,6 @@
          "ObjectType": 1
       },
       {
-         "Name": "[dbo].[spGetStagesLimitsAndDates]",
-         "ObjectType": 1
-      },
-      {
          "Name": "[dbo].[spGetStats]",
          "ObjectType": 1
       },

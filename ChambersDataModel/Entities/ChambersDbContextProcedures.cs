@@ -35,7 +35,6 @@ namespace ChambersDataModel.Entities
         protected void OnModelCreatingGeneratedProcedures(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
-            modelBuilder.Entity<spGetStagesLimitsAndDatesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
         }
@@ -83,38 +82,6 @@ namespace ChambersDataModel.Entities
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<spDriverExcursionsPointsForDateResult>("EXEC @returnValue = [dbo].[spDriverExcursionsPointsForDate] @ForDate, @StageDateId, @TagName", sqlParameters, cancellationToken);
-
-            returnValue?.SetValue(parameterreturnValue.Value);
-
-            return _;
-        }
-
-        public virtual async Task<List<spGetStagesLimitsAndDatesResult>> spGetStagesLimitsAndDatesAsync(int? TagId, DateTime? DateTime, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
-        {
-            var parameterreturnValue = new SqlParameter
-            {
-                ParameterName = "returnValue",
-                Direction = System.Data.ParameterDirection.Output,
-                SqlDbType = System.Data.SqlDbType.Int,
-            };
-
-            var sqlParameters = new []
-            {
-                new SqlParameter
-                {
-                    ParameterName = "TagId",
-                    Value = TagId ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
-                },
-                new SqlParameter
-                {
-                    ParameterName = "DateTime",
-                    Value = DateTime ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.DateTime,
-                },
-                parameterreturnValue,
-            };
-            var _ = await _context.SqlQueryAsync<spGetStagesLimitsAndDatesResult>("EXEC @returnValue = [dbo].[spGetStagesLimitsAndDates] @TagId, @DateTime", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

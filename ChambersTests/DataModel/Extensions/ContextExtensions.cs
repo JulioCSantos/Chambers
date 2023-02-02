@@ -10,12 +10,6 @@ namespace ChambersTests.DataModel.Extensions
 {
     public static class ContextExtensions
     {
-        public static async Task<List<spGetStagesLimitsAndDatesResult>> GetStagesLimitsAndDates(
-            this ChambersDbContext context, int tagId, DateTime? forDate = null) {
-            var result = await context.Procedures.spGetStagesLimitsAndDatesAsync(tagId, forDate);
-            return result;
-        }
-
         public static PointsPace NewPointsPace(this ChambersDbContext context, string stageName, DateTime? nextStartDate = null
             , int? stepSizeDays = null, int? minThreshold = 100, int? maxThreshold = 200) {
             var tag = new Tag(IntExtensions.NextId(), tagName: stageName);

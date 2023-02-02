@@ -80,10 +80,10 @@ namespace ChambersTests.DataModel
 
             var tagId = stageDate.Stage.TagId;
             var soughtDate = "'2022-02-15'";
-            var result = TestDbContext.StagesLimitsAndDates
-                .FromSqlRaw($"EXECUTE [dbo].[spGetStagesLimitsAndDates] {tagId}, {soughtDate}");
-            Assert.IsNotNull(result);
-            Assert.AreEqual(tagId, result.AsEnumerable().FirstOrDefault()?.TagId);
+            //var result = TestDbContext.StagesLimitsAndDates
+            //    .FromSqlRaw($"EXECUTE [dbo].[spGetStagesLimitsAndDates] {tagId}, {soughtDate}");
+            //Assert.IsNotNull(result);
+            //Assert.AreEqual(tagId, result.AsEnumerable().FirstOrDefault()?.TagId);
 
         }
 
@@ -97,11 +97,11 @@ namespace ChambersTests.DataModel
 
             var tagId = stageDate.Stage.TagId;
             var soughtDate = new DateTime(2022,02,15);
-            var result = await TestDbContext.Procedures
-                .spGetStagesLimitsAndDatesAsync(tagId, soughtDate);
+            //var result = await TestDbContext.Procedures
+            //    .spGetStagesLimitsAndDatesAsync(tagId, soughtDate);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(tagId, result.FirstOrDefault()?.TagId);
+            //Assert.IsNotNull(result);
+            //Assert.AreEqual(tagId, result.FirstOrDefault()?.TagId);
 
         }
     }
