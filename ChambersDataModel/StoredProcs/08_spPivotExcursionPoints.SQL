@@ -18,7 +18,9 @@ PRINT '>>> spPivotExcursionPoints begins'
 			, LastExcDate DateTime, LastExcValue float
 			, RampOutDate DateTime, RampOutValue float
 			, HiPointsCt int, LowPointsCt int
-			, LowThreashold float, HiThreashold float);
+			, LowThreashold float, HiThreashold float
+			, MinValue float, MaxValue float
+			, AvergValue float, StdDevValue float);
 	DECLARE @ExcPoints as TABLE ( 
 			TagName varchar(255), TagExcNbr int
 			, RampInDate DateTime, RampInValue float
@@ -26,12 +28,14 @@ PRINT '>>> spPivotExcursionPoints begins'
 			, LastExcDate DateTime, LastExcValue float
 			, RampOutDate DateTime, RampOutValue float
 			, HiPointsCt int, LowPointsCt int  
-			, LowThreashold float, HiThreashold float);
+			, LowThreashold float, HiThreashold float
+			, MinValue float, MaxValue float
+			, AvergValue float, StdDevValue float);
 	DECLARE @RampInDate DateTime = NULL, @RampInValue float = NULL;
 	DECLARE @FirstExcDate DateTime = NULL, @FirstExcValue float = NULL;
 	DECLARE @LastExcDate DateTime = NULL, @LastExcValue float = NULL;
 	DECLARE @RampOutDate DateTime = NULL, @RampOutValue float = NULL;
-	DECLARE  @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
+	DECLARE @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET initial TagExcNbr'
 	SELECT TOP 1 @TagExcNbr = ISNULL(TagExcNbr,0) + 1 FROM [dbo].[ExcursionPoints] 
@@ -44,7 +48,10 @@ PRINT '>>> spPivotExcursionPoints begins'
 	, NULL, NULL -- LastExc
 	, NULL, NULL -- RampOut
 	, @HiPointsCt, @LowPointsCt
-	, @LowThreashold, @HiThreashold );
+	, @LowThreashold, @HiThreashold
+	, NULL, NULL --MinValue, MaxValue
+	, NULL, NULL --AvergValue, StdDevValue
+	);
 
 	DECLARE CPoint CURSOR
 		FOR SELECT [tag], [time], [value] from  [dbo].[CompressedPoints]
@@ -87,7 +94,15 @@ END
 		PRINT 'Always Reset Last Excursion Point until end of cursor'
 		UPDATE @ExcPoint1 SET LastExcDate = @time, LastExcValue = @value;
 		SELECT TOP 1 @LastExcDate = LastExcDate, @LastExcValue = LastExcValue FROM @ExcPoint1;
-		
+
+		PRINT 'Update aggregated values (Min, Max, Averg, StdDev)'
+		DECLARE @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
+		EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
+			, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
+			, @AvergValue = @OAvergValue OUTPUT, @StdDevValue = @OStdDevValue OUTPUT;
+		UPDATE @ExcPoint1 SET MinValue = @OMinValue, MaxValue = @OMaxValue
+				, AvergValue = @OAvergValue, StdDevValue = @OStdDevValue;
+
 		PRINT 'Get RampOut point'
 		IF (@RampOutDate IS NULL AND @LastExcDate IS NOT NULL ) BEGIN
 			SELECT TOP 1 @RampOutDate = [time], @RampOutValue =  [value] FROM  [dbo].[CompressedPoints]
@@ -115,7 +130,7 @@ END
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
 				INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold);
+					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL, NULL, NULL);
 			END
 		END
 	END;
@@ -130,6 +145,7 @@ END
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
 	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
+	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0; -- select only full Excursions
 	PRINT 'ALL Excursion Cycles inserted'
 
@@ -137,6 +153,7 @@ END
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
 	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
+	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
 
 -- UNIT TESTS

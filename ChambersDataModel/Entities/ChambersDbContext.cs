@@ -103,7 +103,7 @@ namespace ChambersDataModel.Entities
                 entity.ToTable("Interpolated");
 
                 entity.Property(e => e.Tag)
-                    .HasMaxLength(20)
+                    .HasMaxLength(255)
                     .IsUnicode(false)
                     .HasColumnName("tag");
             });

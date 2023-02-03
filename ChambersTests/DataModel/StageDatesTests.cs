@@ -1,12 +1,4 @@
-﻿using ChambersDataModel;
-using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
 
 namespace ChambersTests.DataModel
 {
@@ -79,7 +71,7 @@ namespace ChambersTests.DataModel
             TestDbContext.SaveChanges();
 
             var tagId = stageDate.Stage.TagId;
-            var soughtDate = "'2022-02-15'";
+            //var soughtDate = "'2022-02-15'";
             //var result = TestDbContext.StagesLimitsAndDates
             //    .FromSqlRaw($"EXECUTE [dbo].[spGetStagesLimitsAndDates] {tagId}, {soughtDate}");
             //Assert.IsNotNull(result);
@@ -88,7 +80,7 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task SpGetStagesLimitsAndDatesPowerToolTest() {
+        public void SpGetStagesLimitsAndDatesPowerToolTest() {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
             stageDate.Stage.SetValues(30, 300);
@@ -98,11 +90,16 @@ namespace ChambersTests.DataModel
             var tagId = stageDate.Stage.TagId;
             var soughtDate = new DateTime(2022,02,15);
 
+            var result = TestDbContext.StagesLimitsAndDates
+                .Where(sld => sld.TagId == tagId);
+
             //var result = await TestDbContext.Procedures
             //    .spGetStagesLimitsAndDatesAsync(tagId, soughtDate);
 
-            //Assert.IsNotNull(result);
-            //Assert.AreEqual(tagId, result.FirstOrDefault()?.TagId);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count());
+            Assert.AreEqual(stageDate.StartDate, result.First().StartDate);
+            Assert.AreEqual(stageDate.EndDate, result.First().EndDate);
 
         }
     }

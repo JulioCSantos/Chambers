@@ -47,6 +47,8 @@ namespace ChambersTests.DataModel
             var rampOutP1 = new CompressedPoint(tag, dt.AddDays(6), ht - 10); TestDbContext.Add(rampOutP1);
             var rampOutP2 = new CompressedPoint(tag, dt.AddDays(7), ht - 30); TestDbContext.Add(rampOutP2);
             await TestDbContext.SaveChangesAsync();
+            TestDbContext.Interpolateds.AddRange(TestDbContext.CompressedPoints.ToInterpolatedPoints());
+            await TestDbContext.SaveChangesAsync();
 
             var excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht, null, null)).FirstOrDefault();
@@ -59,6 +61,11 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
             Assert.IsTrue(excPointNew.LastExcValue >= ht);
+            var excPoints = new[] { excP1.Value, excP2.Value, excP3.Value };
+            Assert.AreEqual(excPoints.Min(), excPointNew.MinValue);
+            Assert.AreEqual(excPoints.Max(), excPointNew.MaxValue);
+            Assert.AreEqual(excPoints.Average(), excPointNew.AvergValue);
+            Assert.AreEqual(excPoints.StandardDeviationSample(), excPointNew.StdDevValue);
         }
 
         [TestMethod]

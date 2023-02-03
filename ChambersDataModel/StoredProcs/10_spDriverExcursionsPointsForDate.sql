@@ -96,7 +96,9 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, LastExcDate DateTime NULL, LastExcValue float NULL
 		, RampOutDate DateTime NULL, RampOutValue float NULL
 		, HiPointsCt int NULL, LowPointsCt int NULL
-		, MinThreshold float NULL, MaxThreshold float NULL);
+		, MinThreshold float NULL, MaxThreshold float NULL
+		, MinValue float, MaxValue float
+		, AvergValue float, StdDevValue float);
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 	, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime;
 	DECLARE stepsCsr CURSOR 
