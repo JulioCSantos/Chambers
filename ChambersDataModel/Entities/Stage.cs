@@ -20,6 +20,8 @@ namespace ChambersDataModel.Entities
         public double? TimeStep { get; set; }
         public DateTime? ProductionDate { get; set; }
         public DateTime? DeprecatedDate { get; set; }
+        public int? ThresholdDuration { get; set; }
+        public double? SetPoint { get; set; }
 
         public virtual Tag Tag { get; set; }
         public virtual ICollection<StagesDate> StagesDates { get; set; }

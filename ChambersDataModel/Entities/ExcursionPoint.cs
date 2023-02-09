@@ -29,5 +29,7 @@ namespace ChambersDataModel.Entities
         public double? AvergValue { get; set; }
         public double? StdDevValue { get; set; }
         public int? Duration { get; set; }
+        public int? ThresholdDuration { get; set; }
+        public double? SetPoint { get; set; }
     }
 }

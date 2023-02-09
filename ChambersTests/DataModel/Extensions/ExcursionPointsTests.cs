@@ -27,7 +27,6 @@ namespace ChambersTests.DataModel.Extensions
             TestDbContext.ExcursionPoints.Add(excPoint);
             var result = await TestDbContext.SaveChangesAsync();
             Assert.IsTrue(excPoint.Duration > 0);
-            //var duration = excPoint.LastExcDate
             Assert.AreEqual(90, excPoint.Duration);
         }
     }

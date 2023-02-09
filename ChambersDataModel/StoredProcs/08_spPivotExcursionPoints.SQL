@@ -20,7 +20,8 @@ PRINT '>>> spPivotExcursionPoints begins'
 			, HiPointsCt int, LowPointsCt int
 			, LowThreashold float, HiThreashold float
 			, MinValue float, MaxValue float
-			, AvergValue float, StdDevValue float);
+			, AvergValue float, StdDevValue float
+			, ThresholdDuration int, SetPoint float);
 	DECLARE @ExcPoints as TABLE ( 
 			TagName varchar(255), TagExcNbr int
 			, RampInDate DateTime, RampInValue float
@@ -30,7 +31,8 @@ PRINT '>>> spPivotExcursionPoints begins'
 			, HiPointsCt int, LowPointsCt int  
 			, LowThreashold float, HiThreashold float
 			, MinValue float, MaxValue float
-			, AvergValue float, StdDevValue float);
+			, AvergValue float, StdDevValue float
+			, ThresholdDuration int, SetPoint float);
 	DECLARE @RampInDate DateTime = NULL, @RampInValue float = NULL;
 	DECLARE @FirstExcDate DateTime = NULL, @FirstExcValue float = NULL;
 	DECLARE @LastExcDate DateTime = NULL, @LastExcValue float = NULL;
@@ -51,6 +53,7 @@ PRINT '>>> spPivotExcursionPoints begins'
 	, @LowThreashold, @HiThreashold
 	, NULL, NULL --MinValue, MaxValue
 	, NULL, NULL --AvergValue, StdDevValue
+	, NULL, NULL --ThresholdDuration, SetPoint
 	);
 
 	DECLARE CPoint CURSOR
@@ -130,7 +133,7 @@ END
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
 				INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL, NULL, NULL);
+					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL, NULL, NULL, NULL, NULL);
 			END
 		END
 	END;
@@ -145,7 +148,7 @@ END
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
 	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
-	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
+	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue], [ThresholdDuration], [SetPoint]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0; -- select only full Excursions
 	PRINT 'ALL Excursion Cycles inserted'
 
@@ -153,7 +156,7 @@ END
 	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
 	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
-	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
+	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue], [ThresholdDuration], [SetPoint]
 	FROM @ExcPoints WHERE HiPointsCt > 0 OR LowPointsCt > 0;
 
 -- UNIT TESTS
