@@ -28,6 +28,8 @@
   <ItemGroup>
     <None Remove="Functions\01_fnGetOverlappingDates.SQL" />
     <None Remove="Functions\11_fnGetExcursionsCounts.sql" />
+    <None Remove="Functions\15_fnToStructDuration.sql" />
+    <None Remove="Functions\16_fnToDuration.sql" />
     <None Remove="StoredProcs\08_spPivotExcursionPoints.SQL" />
     <None Remove="StoredProcs\10_spDriverExcursionsPointsForDate.sql" />
     <None Remove="StoredProcs\13_spMergeIncompleteCycles.sql" />
@@ -40,6 +42,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Functions\11_fnGetExcursionsCounts.sql" />
+    <EmbeddedResource Include="Functions\15_fnToStructDuration.sql" />
+    <EmbeddedResource Include="Functions\16_fnToDuration.sql" />
     <EmbeddedResource Include="StoredProcs\08_spPivotExcursionPoints.SQL" />
     <EmbeddedResource Include="StoredProcs\10_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\14_spGetStats.sql" />

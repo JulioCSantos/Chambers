@@ -70,7 +70,7 @@ namespace ChambersDataModel.Entities
 
                 entity.HasIndex(e => new { e.TagName, e.TagExcNbr, e.RampOutDate }, "ixExcursionPointsRampoutDateTagNameTagExcNbr");
 
-                entity.Property(e => e.ExcursionLength).HasComputedColumnSql("(datediff(minute,[RampInDate],[RampOutDate]))", false);
+                entity.Property(e => e.Duration).HasComputedColumnSql("(datediff(second,[FirstExcDate],[LastExcDate]))", true);
 
                 entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
 

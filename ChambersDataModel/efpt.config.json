@@ -93,6 +93,14 @@
       {
          "Name": "[dbo].[fnGetScheduleDates]",
          "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[fnToDuration]",
+         "ObjectType": 2
+      },
+      {
+         "Name": "[dbo].[fnToStructDuration]",
+         "ObjectType": 2
       }
    ],
    "UiHint": "asus-strange.ELChambers.dbo",

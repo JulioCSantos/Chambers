@@ -34,6 +34,18 @@ namespace ChambersDataModel.Entities
             return FromExpression(() => fnGetScheduleDates(ForDate, StartDate, CoverageValue, CoverageIntervalUnit, RepeatEveryValue, RepeatEveryIntervalUnit));
         }
 
+        [DbFunction("fnToDuration", "dbo")]
+        public static int? fnToDuration(string SDuration)
+        {
+            throw new NotSupportedException("This method can only be called from Entity Framework Core queries");
+        }
+
+        [DbFunction("fnToStructDuration", "dbo")]
+        public static string fnToStructDuration(int? totalSeconds)
+        {
+            throw new NotSupportedException("This method can only be called from Entity Framework Core queries");
+        }
+
         protected void OnModelCreatingGeneratedFunctions(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<fnGetExcursionsCountsResult>().HasNoKey();

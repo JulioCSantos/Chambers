@@ -28,6 +28,6 @@ namespace ChambersDataModel.Entities
         public double? MaxValue { get; set; }
         public double? AvergValue { get; set; }
         public double? StdDevValue { get; set; }
-        public int? ExcursionLength { get; set; }
+        public int? Duration { get; set; }
     }
 }
