@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (	
 	  @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
 	, @LowThreashold float, @HiThreashold float, @TagId int = null, @StepLogId int = null 
+	, @ThresholdDuration int = null, @SetPoint float = null
 )
 AS
 BEGIN
@@ -53,7 +54,7 @@ PRINT '>>> spPivotExcursionPoints begins'
 	, @LowThreashold, @HiThreashold
 	, NULL, NULL --MinValue, MaxValue
 	, NULL, NULL --AvergValue, StdDevValue
-	, NULL, NULL --ThresholdDuration, SetPoint
+	, @ThresholdDuration, @SetPoint --ThresholdDuration, SetPoint
 	);
 
 	DECLARE CPoint CURSOR

@@ -17,5 +17,7 @@ namespace ChambersDataModel.Entities
         public DateTime? EndDate { get; set; }
         public double? TimeStep { get; set; }
         public int StageId { get; set; }
+        public int? ThresholdDuration { get; set; }
+        public double? SetPoint { get; set; }
     }
 }

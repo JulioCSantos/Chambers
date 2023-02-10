@@ -48,31 +48,31 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	[StageDateId] [int] NOT NULL, [StageName] [nvarchar](255) NOT NULL, [TagId] [int] NOT NULL, [TagName] [varchar](255) NOT NULL,
 	[StageStartDate] [datetime] NOT NULL, [StageEndDate] [datetime] NULL, [MinThreshold] [float] NOT NULL, [MaxThreshold] [float] NOT NULL,
 	[PaceId] [int] NOT NULL, [PaceStartDate] [datetime] NOT NULL, [PaceEndDate] [datetime] NOT NULL,
-	[StartDate] [datetime] NULL, [EndDate] [datetime] NULL
+	[StartDate] [datetime] NULL, [EndDate] [datetime] NULL, [ThresholdDuration] int NULL, SetPoint float NULL
 	);
 
 
 
 	IF (@StageDateId IS NULL AND @TagName IS NULL) 
 		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 	ELSE IF (@StageDateId Is NOT NULL AND @TagName IS NULL)
 		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.StageDateId = @StageDateId
 	ELSE IF (@StageDateId Is NULL AND @TagName IS NOT NULL)
 		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.TagName = @TagName
 	ELSE
 		INSERT INTO @PointsStepsLog ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint])
 		SELECT * FROM [dbo].[PointsStepsLogNextValues] as nxt
 		WHERE nxt.StartDate <= @ForDate AND @ForDate < nxt.EndDate
 		AND nxt.StageDateId = @StageDateId AND nxt.TagName = @TagName
@@ -80,9 +80,9 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 
 	INSERT INTO [dbo].[PointsStepsLog] ([StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate])
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint])
 	SELECT [StageDateId], [StageName], [TagId], [TagName], [StageStartDate], [StageEndDate]
-		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate] 
+		, [MinThreshold], [MaxThreshold], [PaceId], [PaceStartDate], [PaceEndDate], [StartDate], [EndDate], [ThresholdDuration], [SetPoint] 
 	FROM @PointsStepsLog;
 
 	--spProcessSteps
@@ -101,22 +101,26 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, AvergValue float, StdDevValue float
 		, ThresholdDuration int, SetPoint float);
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
-	, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime;
+	, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime
+	, @stThresholdDuration int, @stSetPoint float;
 	DECLARE stepsCsr CURSOR 
-	FOR SELECT psl.TagId, psl.TagName, psl.StepLogId, psl.MinThreshold, psl.MaxThreshold, psl.StartDate, psl.EndDate 
+	FOR SELECT psl.TagId, psl.TagName, psl.StepLogId, psl.MinThreshold, psl.MaxThreshold, psl.StartDate, psl.EndDate, psl.ThresholdDuration, psl.SetPoint 
 		FROM PointsStepsLog as psl
 		WHERE psl.PaceId in (SELECT vpsl.PaceId From @PointsStepsLog as vpsl);
 	OPEN stepsCsr;
-	FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinThreshold, @stMaxThreshold, @stStartDate, @stEndDate;
+	FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinThreshold, @stMaxThreshold
+	, @stStartDate, @stEndDate, @stThresholdDuration, @stSetPoint;
 	WHILE @@FETCH_STATUS = 0 BEGIN
 		--PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ' + Convert(varchar(16), @stTagId) + Convert(varchar(16), @stStepLogId) +  '''',@stTagName, ''', '''
 		--, FORMAT(@stStartDate, 'yyyy-MM-dd'), ''', ''', CONVERT(varchar(255), @stEndDate, 126), ''', '
 		--, CONVERT(varchar(255), @stMinThreshold), ', ', CONVERT(varchar(255), @stMaxThreshold)
 		--);
 		INSERT INTO @ExcPoints
-		EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @stStartDate, @stEndDate, @stMinThreshold, @stMaxThreshold, @stTagId, @stStepLogId;
+		EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @stStartDate, @stEndDate, @stMinThreshold, @stMaxThreshold
+		, @stTagId, @stStepLogId, @stThresholdDuration, @stSetPoint;
 
-		FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinThreshold, @stMaxThreshold, @stStartDate, @stEndDate;
+		FETCH NEXT FROM stepsCsr INTO @stTagId, @stTagName, @stStepLogId, @stMinThreshold, @stMaxThreshold
+		, @stStartDate, @stEndDate, @stThresholdDuration, @stSetPoint;
 	END;
 	CLOSE stepsCsr;
 	DEALLOCATE stepsCsr;
