@@ -18,6 +18,7 @@ namespace ChambersDataModel.Entities
         {
         }
 
+        public virtual DbSet<BuildingsAreasUnit> BuildingsAreasUnits { get; set; }
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
@@ -33,6 +34,36 @@ namespace ChambersDataModel.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<BuildingsAreasUnit>(entity =>
+            {
+                entity.HasKey(e => new { e.LBuildingId, e.LAreaId, e.LUnitId, e.LTagId })
+                    .HasName("PK_BuildingAreasUnits");
+
+                entity.Property(e => e.LBuildingId).HasColumnName("lBuildingID");
+
+                entity.Property(e => e.LAreaId).HasColumnName("lAreaID");
+
+                entity.Property(e => e.LUnitId).HasColumnName("lUnitID");
+
+                entity.Property(e => e.LTagId).HasColumnName("lTagID");
+
+                entity.Property(e => e.Area).IsUnicode(false);
+
+                entity.Property(e => e.Building).IsUnicode(false);
+
+                entity.Property(e => e.SEgu)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false)
+                    .HasColumnName("sEGU");
+
+                entity.Property(e => e.Tag).IsUnicode(false);
+
+                entity.Property(e => e.TagDesc).IsUnicode(false);
+
+                entity.Property(e => e.Unit).IsUnicode(false);
+            });
+
             modelBuilder.Entity<CompressedPoint>(entity =>
             {
                 entity.HasKey(e => new { e.Tag, e.Time, e.Value })
