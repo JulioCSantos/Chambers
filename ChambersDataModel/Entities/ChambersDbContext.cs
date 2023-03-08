@@ -30,6 +30,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<Stage> Stages { get; set; }
         public virtual DbSet<StagesDate> StagesDates { get; set; }
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; }
+        public virtual DbSet<StagesLimitsAndDatesCore> StagesLimitsAndDatesCores { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -269,6 +270,29 @@ namespace ChambersDataModel.Entities
                 entity.ToView("StagesLimitsAndDates");
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageName).HasMaxLength(255);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<StagesLimitsAndDatesCore>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("StagesLimitsAndDatesCore");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ProductionDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageDateDeprecatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageDeprecatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageName).HasMaxLength(255);
 

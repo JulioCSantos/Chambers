@@ -67,6 +67,10 @@
          "ObjectType": 3
       },
       {
+         "Name": "[dbo].[StagesLimitsAndDatesCore]",
+         "ObjectType": 3
+      },
+      {
          "Name": "[dbo].[spDriverExcursionsPointsForDate]",
          "ObjectType": 1
       },

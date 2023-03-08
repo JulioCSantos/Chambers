@@ -52,8 +52,6 @@ namespace ChambersTests.DataModel
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
             stageDate.Stage.SetValues(30, 300);
-            //stageDate.StartDate = new DateTime(2022, 02, 01);
-            //stageDate.EndDate = new DateTime(2022, 02, 28);
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
             var viewResults = TestDbContext.StagesLimitsAndDates

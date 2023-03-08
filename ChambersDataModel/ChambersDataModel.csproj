@@ -38,6 +38,7 @@
     <None Remove="Views\03_PointsStepsLogNextValues.sql" />
     <None Remove="Views\06_DefaultPointsPaces.sql" />
     <None Remove="Views\09_GetScheduleDates.SQL" />
+    <None Remove="Views\17_StagesLimitsAndDatesCore.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,6 +75,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="StoredProcs\13_spMergeIncompleteCycles.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Views\17_StagesLimitsAndDatesCore.sql" />
   </ItemGroup>
 
   <ItemGroup>
