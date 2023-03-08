@@ -135,6 +135,7 @@ END
 				INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL, NULL, NULL, NULL, NULL);
+					, NULL, NULL, @ThresholdDuration, @SetPoint);
 			END
 		END
 	END;
