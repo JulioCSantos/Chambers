@@ -57,6 +57,7 @@ PRINT '>>> spPivotExcursionPoints begins'
 	, @ThresholdDuration, @SetPoint --ThresholdDuration, SetPoint
 	);
 
+	--FOR SELECT [tag], [time], [value] from  PI.piarchive..picomp
 	DECLARE CPoint CURSOR
 		FOR SELECT [tag], [time], [value] from  [dbo].[CompressedPoints]
 		WHERE tag = @TagName 
@@ -134,7 +135,7 @@ END
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
 				INSERT INTO @ExcPoint1 VALUES (@TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
-					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL, NULL, NULL, NULL, NULL);
+					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
 					, NULL, NULL, @ThresholdDuration, @SetPoint);
 			END
 		END
