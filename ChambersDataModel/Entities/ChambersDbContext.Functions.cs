@@ -10,6 +10,12 @@ namespace ChambersDataModel.Entities
     public partial class ChambersDbContext
     {
 
+        [DbFunction("fn_SplitJoin", "dbo")]
+        public static string fn_SplitJoin(string StringWithDelimiters, string Delimiter, string Prefix, string Sufix, string NewDelimiter)
+        {
+            throw new NotSupportedException("This method can only be called from Entity Framework Core queries");
+        }
+
         [DbFunction("fnGetBAUExcursions", "dbo")]
         public IQueryable<fnGetBAUExcursionsResult> fnGetBAUExcursions(DateTime? AfterDate, DateTime? BeforeDate, string TagIdsList, int? MinDurationInSecs, int? ActiveOnly)
         {
