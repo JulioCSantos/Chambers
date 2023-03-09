@@ -14,7 +14,6 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void Exec1Test()
         {
-            TestDbContext.IsPreservedForTest = false;
             //This function (fnToStructDuration) can only be called from Entity Framework Core queries"
         }
     }

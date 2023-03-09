@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 namespace ChambersTests.DataModel
 {
     [TestClass]
+    //TODO: fnToDurationTests
     // ReSharper disable once InconsistentNaming
-    public class fn_SplitJoinTests
+    public class fnToDurationTests
     {
         [TestMethod]
-        public void Test1()
+        public void Exec1Test()
         {
-            //This function (fn_SplitJoin) can only be called from Entity Framework Core queries"
+            //This function (fnToDuration) can only be called from Entity Framework Core queries"
         }
     }
 }

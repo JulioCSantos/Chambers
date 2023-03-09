@@ -1,4 +1,4 @@
-﻿CREATE Function dbo.fnToDuration 
+﻿CREATE Function [dbo].[fnToDuration] 
 	( @SDuration varchar(12) )
 	RETURNS int WITH RETURNS NULL ON NULL INPUT
 AS BEGIN
@@ -46,7 +46,6 @@ AS BEGIN
 	SET @Result = @ss + @mm * 60 + @hh * (60 * 60) + @days * (24 * 60 * 60);
 
 	RETURN @Result;
-END
 
 --SELECT dbo.fnToDuration('000d00:01:30');-- result 90
 --SELECT dbo.fnToDuration('000d01:00:00');-- result 3600
@@ -55,5 +54,5 @@ END
 --SELECT dbo.fnToDuration('1d');-- result NULL
 --SELECT dbo.fnToDuration('0d00:01:00');-- result 60
 --SELECT dbo.fnToDuration('0d0:1:00');-- result 60
---SELECT dbo.fnToDuration('000d00:01:40');-- result 100
 
+END
