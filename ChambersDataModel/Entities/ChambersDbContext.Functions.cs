@@ -16,6 +16,12 @@ namespace ChambersDataModel.Entities
             throw new NotSupportedException("This method can only be called from Entity Framework Core queries");
         }
 
+        [DbFunction("fnCalcTimeStep", "dbo")]
+        public static TimeSpan? fnCalcTimeStep(DateTime? StartDate, DateTime? EndDate, int? NbrOfPoints)
+        {
+            throw new NotSupportedException("This method can only be called from Entity Framework Core queries");
+        }
+
         [DbFunction("fnGetBAUExcursions", "dbo")]
         public IQueryable<fnGetBAUExcursionsResult> fnGetBAUExcursions(DateTime? AfterDate, DateTime? BeforeDate, string TagIdsList, int? MinDurationInSecs, int? ActiveOnly)
         {

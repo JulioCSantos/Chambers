@@ -99,6 +99,10 @@
          "ObjectType": 2
       },
       {
+         "Name": "[dbo].[fnCalcTimeStep]",
+         "ObjectType": 2
+      },
+      {
          "Name": "[dbo].[fnGetBAUExcursions]",
          "ObjectType": 2
       },
