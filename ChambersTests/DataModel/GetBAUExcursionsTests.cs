@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 namespace ChambersTests.DataModel
 {
     [TestClass]
+    //TODO: Complete test GetBAUExcursionsTests
+    // ReSharper disable once InconsistentNaming
     public class GetBAUExcursionsTests
     {
         [TestMethod]
         public void GetExcursions1Test()
         {
-            //TODO: Complete test GetBAUExcursions
             //var tagIds = TestDbContext.ExcursionPoints.Select(ep => ep.TagId).Distinct().ToList();
             var tagIds = TestDbContext.ExcursionPoints.Select(ep => ep.TagId).ToList();
         }

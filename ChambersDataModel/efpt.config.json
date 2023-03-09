@@ -95,6 +95,10 @@
          "ObjectType": 1
       },
       {
+         "Name": "[dbo].[fnGetBAUExcursions]",
+         "ObjectType": 2
+      },
+      {
          "Name": "[dbo].[fnGetExcursionsCounts]",
          "ObjectType": 2
       },

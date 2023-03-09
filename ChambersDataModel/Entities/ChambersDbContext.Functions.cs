@@ -10,6 +10,12 @@ namespace ChambersDataModel.Entities
     public partial class ChambersDbContext
     {
 
+        [DbFunction("fnGetBAUExcursions", "dbo")]
+        public IQueryable<fnGetBAUExcursionsResult> fnGetBAUExcursions(DateTime? AfterDate, DateTime? BeforeDate, string TagIdsList, int? MinDurationInSecs, int? ActiveOnly)
+        {
+            return FromExpression(() => fnGetBAUExcursions(AfterDate, BeforeDate, TagIdsList, MinDurationInSecs, ActiveOnly));
+        }
+
         [DbFunction("fnGetExcursionsCounts", "dbo")]
         public IQueryable<fnGetExcursionsCountsResult> fnGetExcursionsCounts(string TagNamesList, int? MinHiCount, int? MinLowCount, DateTime? AfterDate, DateTime? BeforeDate)
         {
@@ -48,6 +54,7 @@ namespace ChambersDataModel.Entities
 
         protected void OnModelCreatingGeneratedFunctions(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<fnGetBAUExcursionsResult>().HasNoKey();
             modelBuilder.Entity<fnGetExcursionsCountsResult>().HasNoKey();
             modelBuilder.Entity<fnGetExcursionsDetailsResult>().HasNoKey();
             modelBuilder.Entity<fnGetOverlappingDatesResult>().HasNoKey();
