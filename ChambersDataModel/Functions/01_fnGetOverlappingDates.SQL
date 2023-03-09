@@ -30,4 +30,16 @@ BEGIN
 		BEGIN INSERT @OverlappingSates SELECT @StartDate, @EndDate END
 
 	RETURN;
+	--Unit Tests
+--SELECT * FROM [dbo].[fnGetOverlappingDates]('2023-01-01', '2023-03-31','2023-02-01','2023-02-27') 
+	--> 2023-02-01 00:00:00.000 | 2023-02-27 00:00:00.000
+--SELECT * FROM [dbo].[fnGetOverlappingDates]('2023-01-01', '2023-03-31','2023-02-01',NULL) 
+	--> 2023-02-01 00:00:00.000 | 2023-03-31 00:00:00.000
+--SELECT * FROM [dbo].[fnGetOverlappingDates]('2023-01-01', '2023-01-31','2023-02-01','2023-02-27') 
+	--> NULL | NULL
+
+--SELECT StartDate From (SELECT * FROM [dbo].[fnGetOverlappingDates]('2023-01-01', '2023-03-31','2023-02-01',NULL)) as ovr
+	-->2023-02-01 00:00:00.000
+--SELECT CASE WHEN StartDate IS NULL THEN 'True' ELSE ' false' END From (SELECT * FROM [dbo].[fnGetOverlappingDates]('2023-01-01', '2023-01-31','2023-02-01','2023-02-27')) as ovr
+	-->True
 END;

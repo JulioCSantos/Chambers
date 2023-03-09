@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace ChambersTests.DataModel
 {
     [TestClass]
-    public class GetScheduleDatesTests
+    // ReSharper disable once InconsistentNaming
+    public class fnGetScheduleDatesTests
     {
         [TestMethod]
         public void WeekMonthTest()

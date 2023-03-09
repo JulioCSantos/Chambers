@@ -1,0 +1,8 @@
+﻿1 - create a stored proc to facilitate configuring Tags for capture
+2 - manufacture a very long excursion for tests
+3 - Confirm that long lived Excursions will be properly captured.
+4 - Create a stored proc that will initiate (Invoke the Driver) the capture of individual Tags from a DateTime point.
+5 - Include StageId, StageDateId (or just PaceId) and DeprecatedDate in the ExcursionPoints
+6 - Extend the report to include Decommission date.
+7 - Validate report dates
+8 - fix bug that is not selecting Decommissioned tag

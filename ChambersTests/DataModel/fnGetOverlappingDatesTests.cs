@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace ChambersTests.DataModel
 {
     [TestClass]
-    public class GetOverlappingDatesTests
+    // ReSharper disable once InconsistentNaming
+    public class fnGetOverlappingDatesTests
     {
         [TestMethod]
         public void IntersectionTest1() {
