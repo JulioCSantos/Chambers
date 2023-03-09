@@ -18,6 +18,7 @@ namespace ChambersDataModel.Entities
         {
         }
 
+        public virtual DbSet<Bauexcursion> Bauexcursions { get; set; }
         public virtual DbSet<BuildingsAreasUnit> BuildingsAreasUnits { get; set; }
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
         public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
@@ -35,6 +36,61 @@ namespace ChambersDataModel.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Bauexcursion>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("BAUExcursions");
+
+                entity.Property(e => e.Area).IsUnicode(false);
+
+                entity.Property(e => e.Building).IsUnicode(false);
+
+                entity.Property(e => e.ExcType)
+                    .IsRequired()
+                    .HasMaxLength(3)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
+
+                entity.Property(e => e.LAreaId).HasColumnName("lAreaID");
+
+                entity.Property(e => e.LUnitId).HasColumnName("lUnitID");
+
+                entity.Property(e => e.LastExcDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ProductionDate).HasColumnType("datetime");
+
+                entity.Property(e => e.RampInDate).HasColumnType("datetime");
+
+                entity.Property(e => e.RampOutDate).HasColumnType("datetime");
+
+                entity.Property(e => e.SEgu)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false)
+                    .HasColumnName("sEGU");
+
+                entity.Property(e => e.STagDesc)
+                    .IsUnicode(false)
+                    .HasColumnName("sTagDesc");
+
+                entity.Property(e => e.StageDateDeprecatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageDeprecatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StructDuration)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Unit).IsUnicode(false);
+            });
+
             modelBuilder.Entity<BuildingsAreasUnit>(entity =>
             {
                 entity.HasKey(e => new { e.LBuildingId, e.LAreaId, e.LUnitId, e.LTagId })
@@ -58,9 +114,11 @@ namespace ChambersDataModel.Entities
                     .IsUnicode(false)
                     .HasColumnName("sEGU");
 
-                entity.Property(e => e.Tag).IsUnicode(false);
+                entity.Property(e => e.STagDesc)
+                    .IsUnicode(false)
+                    .HasColumnName("sTagDesc");
 
-                entity.Property(e => e.TagDesc).IsUnicode(false);
+                entity.Property(e => e.Tag).IsUnicode(false);
 
                 entity.Property(e => e.Unit).IsUnicode(false);
             });

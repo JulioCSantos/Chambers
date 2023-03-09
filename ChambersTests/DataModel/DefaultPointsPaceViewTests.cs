@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 namespace ChambersTests.DataModel
 {
     [TestClass]
+    //TODO: DefaultPointsPaceView may not be needed. It is not being used at this time
     public class DefaultPointsPaceViewTests
     {
         private static string NewName([CallerMemberName] string? name = null) {
@@ -69,6 +70,7 @@ namespace ChambersTests.DataModel
 
         }
 
+        //TODO: Revisit if it is necessary
         public void SyncMethods()
         {
         }

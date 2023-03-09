@@ -1,5 +1,4 @@
-﻿using ChambersTests.DataModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -7,12 +6,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChambersTests
+namespace ChambersTests.DataModel
 {
     [TestClass]
     public class StagesLimitsAndDatesCoreTests
     {
-        private static string NewName([CallerMemberName] string? name = null) {
+        private static string NewName([CallerMemberName] string? name = null)
+        {
             var newName = nameof(StagesLimitsAndDatesCoreTests) + "_" + name;
             return newName;
         }
@@ -33,7 +33,8 @@ namespace ChambersTests
         }
 
         [TestMethod]
-        public void StageDeprecatedTest() {
+        public void StageDeprecatedTest()
+        {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
             stageDate.Stage.SetValues(30, 300);
@@ -50,7 +51,8 @@ namespace ChambersTests
         }
 
         [TestMethod]
-        public void StageDateDeprecatedTest() {
+        public void StageDateDeprecatedTest()
+        {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
             stageDate.Stage.SetValues(30, 300);

@@ -39,6 +39,7 @@
     <None Remove="Views\06_DefaultPointsPaces.sql" />
     <None Remove="Views\09_GetScheduleDates.SQL" />
     <None Remove="Views\17_StagesLimitsAndDatesCore.sql" />
+    <None Remove="Views\18_BAUExcursions.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,6 +53,7 @@
     <EmbeddedResource Include="Views\06_DefaultPointsPaces.sql" />
     <EmbeddedResource Include="Views\02_StagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Functions\09_fnGetScheduleDates.SQL" />
+    <EmbeddedResource Include="Views\18_BAUExcursions.sql" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,6 +16,6 @@ namespace ChambersDataModel.Entities
         public int LTagId { get; set; }
         public string Tag { get; set; }
         public string SEgu { get; set; }
-        public string TagDesc { get; set; }
+        public string STagDesc { get; set; }
     }
 }

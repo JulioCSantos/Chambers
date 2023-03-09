@@ -34,6 +34,7 @@ namespace ChambersDataModel.Entities
 
         protected void OnModelCreatingGeneratedProcedures(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
@@ -47,6 +48,51 @@ namespace ChambersDataModel.Entities
         public ChambersDbContextProcedures(ChambersDbContext context)
         {
             _context = context;
+        }
+
+        public virtual async Task<List<GetBAUExcursionsResult>> GetBAUExcursionsAsync(string TagsList, DateTime? AfterDate, DateTime? BeforeDate, int? DurationThreshold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "TagsList",
+                    Size = -1,
+                    Value = TagsList ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "AfterDate",
+                    Value = AfterDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "BeforeDate",
+                    Value = BeforeDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "DurationThreshold",
+                    Value = DurationThreshold ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Int,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<GetBAUExcursionsResult>("EXEC @returnValue = [dbo].[GetBAUExcursions] @TagsList, @AfterDate, @BeforeDate, @DurationThreshold", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
         }
 
         public virtual async Task<List<spDriverExcursionsPointsForDateResult>> spDriverExcursionsPointsForDateAsync(DateTime? ForDate, int? StageDateId, string TagName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)

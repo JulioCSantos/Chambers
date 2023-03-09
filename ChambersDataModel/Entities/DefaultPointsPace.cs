@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 namespace ChambersDataModel.Entities
 {
+    //TODO: DefaultPointsPace may not be needed. It is not being used at this time
+
     public partial class DefaultPointsPace
     {
         public int StageDateId { get; set; }

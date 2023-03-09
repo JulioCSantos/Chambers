@@ -55,6 +55,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[BAUExcursions]",
+         "ObjectType": 3
+      },
+      {
          "Name": "[dbo].[DefaultPointsPaces]",
          "ObjectType": 3
       },
@@ -69,6 +73,10 @@
       {
          "Name": "[dbo].[StagesLimitsAndDatesCore]",
          "ObjectType": 3
+      },
+      {
+         "Name": "[dbo].[GetBAUExcursions]",
+         "ObjectType": 1
       },
       {
          "Name": "[dbo].[spDriverExcursionsPointsForDate]",
