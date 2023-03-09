@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChambersTests
+namespace ChambersTests.DataModel
 {
     [TestClass]
     public class fn_SplitJoinTests

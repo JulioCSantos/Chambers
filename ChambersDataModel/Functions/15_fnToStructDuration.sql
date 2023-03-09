@@ -1,4 +1,4 @@
-﻿Create FUNCTION [dbo].[fnToStructDuration] 
+﻿CREATE FUNCTION [dbo].[fnToStructDuration] 
 (
 	-- Add the parameters for the function here
 	@totalSeconds int
@@ -27,15 +27,16 @@ BEGIN
 
 	SET @Result = CONCAT(':', RIGHT('00' + CAST(@seconds as varchar(2)),2));
 	SET @Result = CONCAT(':', RIGHT('00' + CAST(@minutes as varchar(2)),2),@Result); 
-	SET @Result = CONCAT('d', RIGHT('00' + CAST(@hours as varchar(2)),2),@Result); 
-	SET @Result = CONCAT(RIGHT('000' + CAST(@days as varchar(3)),3),@Result); 
+	SET @Result = CONCAT(':', RIGHT('00' + CAST(@hours as varchar(2)),2),@Result); 
+	SET @Result = CONCAT(RIGHT('00' + CAST(@days as varchar(3)),2),@Result); 
+	
 	RETURN @Result;
-
-
-END
 
 --select [dbo].[fnToStructDuration](31539690);
 --select [dbo].[fnToStructDuration](DATEDIFF(second,'2022-01-01 00:00:00', '2022-01-01 01:01:30'));
+--select [dbo].[fnToStructDuration](DATEDIFF(second,'2022-01-01 00:00:00', '2022-01-01 00:2:1'));
+--select [dbo].[fnToStructDuration](DATEDIFF(second,'2022-01-01 00:00:00', '2022-01-03 01:01:30'));
 --select [dbo].[fnToStructDuration](DATEDIFF(second,'2022-01-01 00:00:00', '2023-01-01 01:01:30'));
 --SELECT DATEDIFF(second,'2022-01-01 00:00:00', '2023-01-01 01:01:30');
 
+END
