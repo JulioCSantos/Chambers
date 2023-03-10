@@ -17,5 +17,6 @@ namespace ChambersDataModel.Entities
         Task<int> spGetStatsAsync(string TagName, DateTime? FirstExcDate, DateTime? LastExcDate, OutputParameter<double?> MinValue, OutputParameter<double?> MaxValue, OutputParameter<double?> AvergValue, OutputParameter<double?> StdDevValue, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<spMergeIncompleteCyclesResult>> spMergeIncompleteCyclesAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, int? TagId, int? StepLogId, int? ThresholdDuration, double? SetPoint, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<int> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
     }
 }

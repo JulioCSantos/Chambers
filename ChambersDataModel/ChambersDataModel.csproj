@@ -40,7 +40,6 @@
     <None Remove="Views\02_StagesLimitsAndDatesCore.sql" />
     <None Remove="Views\03_StagesLimitsAndDates.sql" />
     <None Remove="Views\05_PointsStepsLogNextValues.sql" />
-    <None Remove="Views\08_DefaultPointsPaces.sql" />
     <None Remove="Views\09_GetScheduleDates.SQL" />
     <None Remove="Views\18_BAUExcursions.sql" />
   </ItemGroup>
@@ -56,7 +55,6 @@
     <EmbeddedResource Include="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
     <EmbeddedResource Include="Views\05_PointsStepsLogNextValues.sql" />
-    <EmbeddedResource Include="Views\08_DefaultPointsPaces.sql" />
     <EmbeddedResource Include="Views\03_StagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Functions\10_fnGetScheduleDates.SQL" />
     <EmbeddedResource Include="Views\18_BAUExcursions.sql" />

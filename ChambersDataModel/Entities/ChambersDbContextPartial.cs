@@ -159,9 +159,12 @@ namespace ChambersDataModel.Entities
             //    this.SaveChanges();
             //}
 
-            //chamber_report_tag_1, chamber_report_tag_2, chamber_report_tag_3
 
-            //if (this.DatabaseName!.StartsWith("Test")) { }
+            //if (DatabaseName != null && DatabaseName.EndsWith("Tests"))
+            //{
+            //    this.Procedures.spSeedForTestsAsync();
+            //}
+
         }
     }
 }
