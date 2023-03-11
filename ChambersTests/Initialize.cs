@@ -10,7 +10,11 @@ namespace ChambersTests
     public class Initialize
     {
         [AssemblyInitialize]
-        public static void AssemblyInitialize(TestContext context) { }
+        public static void AssemblyInitialize(TestContext msTestContext) {
+            if (TestDbContext.DatabaseName != null && TestDbContext.DatabaseName.EndsWith("Tests")) {
+                var _ = TestDbContext.Procedures.spSeedForTestsAsync().Result;
+            }
+        }
 
         [AssemblyCleanup]
         public static void AssemblyCleanup() {

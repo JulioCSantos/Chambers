@@ -7,6 +7,11 @@ BEGIN
 	-------- THIS IS NOT AN EMBEDDED RESOURCE - wont be found on test database
 	-----------------------------------------------
 	
+	INSERT INTO [ChambersTests].[dbo].[BuildingsAreasUnits] 
+		([lBuildingID],[lAreaID], [lUnitID], [lTagID], [Building], [Area], [Unit] ,[Tag] ,[sEGU] ,[sTagDesc])
+	SELECT [lBuildingID],[lAreaID], [lUnitID], [lTagID], [Building], [Area], [Unit] ,[Tag] ,[sEGU] ,[sTagDesc]
+		FROM  [ElChambers].[dbo].[BuildingsAreasUnits]; 
+
 	INSERT INTO [ChambersTests].[dbo].[Tags]
 	select * from [ELChambers].[dbo].[Tags];
 

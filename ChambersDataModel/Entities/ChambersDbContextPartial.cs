@@ -160,9 +160,8 @@ namespace ChambersDataModel.Entities
             //}
 
 
-            //if (DatabaseName != null && DatabaseName.EndsWith("Tests"))
-            //{
-            //    this.Procedures.spSeedForTestsAsync();
+            //if (DatabaseName != null && DatabaseName.EndsWith("Tests")) {
+            //    var result =  this.Procedures.spSeedForTestsAsync().Result;
             //}
 
         }

@@ -37,6 +37,7 @@
     <None Remove="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <None Remove="StoredProcs\14_spMergeIncompleteCycles.sql" />
     <None Remove="StoredProcs\15_spGetStats.sql" />
+    <None Remove="StoredProcs\90_spSeedForTests.sql" />
     <None Remove="Views\02_StagesLimitsAndDatesCore.sql" />
     <None Remove="Views\03_StagesLimitsAndDates.sql" />
     <None Remove="Views\05_PointsStepsLogNextValues.sql" />
@@ -54,6 +55,7 @@
     <EmbeddedResource Include="StoredProcs\09_spPivotExcursionPoints.SQL" />
     <EmbeddedResource Include="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
+    <EmbeddedResource Include="StoredProcs\90_spSeedForTests.sql" />
     <EmbeddedResource Include="Views\05_PointsStepsLogNextValues.sql" />
     <EmbeddedResource Include="Views\03_StagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Functions\10_fnGetScheduleDates.SQL" />
