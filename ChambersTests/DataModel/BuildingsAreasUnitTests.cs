@@ -39,7 +39,21 @@ namespace ChambersTests.DataModel
             await TestDbContext.SaveChangesAsync();
             var currCount = await TestDbContext.BuildingsAreasUnits.CountAsync();
             Assert.IsTrue(currCount > prevCount);
+        }
 
+        [TestMethod]
+        public async Task CreateDuplicatedRecord2Test() {
+            var bauRec = await TestDbContext.BuildingsAreasUnits
+                .OrderByDescending(b => b.LTagId).FirstOrDefaultAsync();
+            Assert.IsNotNull(bauRec);
+            var prevCount = await TestDbContext.BuildingsAreasUnits.CountAsync();
+            var newBauRec = bauRec.AddCopy(TestDbContext, bauRec.LTagId * 10, bauRec.Tag = "_" + NewName());
+            if (TestDbContext.BuildingsAreasUnits.Any(b => b.LTagId == newBauRec.LTagId) == true) {
+                Assert.Inconclusive(); /* record already inserted */
+            }
+            await TestDbContext.SaveChangesAsync();
+            var currCount = await TestDbContext.BuildingsAreasUnits.CountAsync();
+            Assert.IsTrue(currCount > prevCount);
         }
     }
 }
