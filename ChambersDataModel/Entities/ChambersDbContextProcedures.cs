@@ -34,6 +34,7 @@ namespace ChambersDataModel.Entities
 
         protected void OnModelCreatingGeneratedProcedures(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CreateCompressedPointResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
@@ -48,6 +49,46 @@ namespace ChambersDataModel.Entities
         public ChambersDbContextProcedures(ChambersDbContext context)
         {
             _context = context;
+        }
+
+        public virtual async Task<List<CreateCompressedPointResult>> CreateCompressedPointAsync(string CurveName, string tagName, int? offsetDays, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "CurveName",
+                    Size = 32,
+                    Value = CurveName ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "tagName",
+                    Size = 256,
+                    Value = tagName ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "offsetDays",
+                    Value = offsetDays ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Int,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<CreateCompressedPointResult>("EXEC @returnValue = [BB50PCSjsantos].[CreateCompressedPoint] @CurveName, @tagName, @offsetDays", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
         }
 
         public virtual async Task<List<GetBAUExcursionsResult>> GetBAUExcursionsAsync(string TagsList, DateTime? AfterDate, DateTime? BeforeDate, int? DurationThreshold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
@@ -317,7 +358,7 @@ namespace ChambersDataModel.Entities
             {
                 parameterreturnValue,
             };
-            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[spSeedForTests]", sqlParameters, cancellationToken);
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [BB50PCSjsantos].[spSeedForTests]", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

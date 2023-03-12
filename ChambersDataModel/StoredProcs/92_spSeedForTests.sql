@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[spSeedForTests] 
+﻿CREATE PROCEDURE [BB50PCSjsantos].[spSeedForTests] 
 AS
 BEGIN
 	SET NOCOUNT ON;

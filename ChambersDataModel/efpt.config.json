@@ -75,6 +75,14 @@
          "ObjectType": 3
       },
       {
+         "Name": "[BB50PCSjsantos].[CreateCompressedPoint]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[BB50PCSjsantos].[spSeedForTests]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[GetBAUExcursions]",
          "ObjectType": 1
       },
@@ -92,10 +100,6 @@
       },
       {
          "Name": "[dbo].[spPivotExcursionPoints]",
-         "ObjectType": 1
-      },
-      {
-         "Name": "[dbo].[spSeedForTests]",
          "ObjectType": 1
       },
       {
