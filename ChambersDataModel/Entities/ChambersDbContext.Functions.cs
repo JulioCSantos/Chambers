@@ -40,6 +40,12 @@ namespace ChambersDataModel.Entities
             return FromExpression(() => fnGetExcursionsDetails(TagName, AfterDate, BeforeDate, MinHiCount, MinLowCount));
         }
 
+        [DbFunction("fnGetInterp2", "dbo")]
+        public IQueryable<fnGetInterp2Result> fnGetInterp2(string TagName, DateTime? StartDate, DateTime? EndDate, TimeSpan? TimeStep)
+        {
+            return FromExpression(() => fnGetInterp2(TagName, StartDate, EndDate, TimeStep));
+        }
+
         [DbFunction("fnGetOverlappingDates", "dbo")]
         public IQueryable<fnGetOverlappingDatesResult> fnGetOverlappingDates(DateTime? StartDate1, DateTime? endDate1, DateTime? StartDate2, DateTime? endDate2)
         {
@@ -69,6 +75,7 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<fnGetBAUExcursionsResult>().HasNoKey();
             modelBuilder.Entity<fnGetExcursionsCountsResult>().HasNoKey();
             modelBuilder.Entity<fnGetExcursionsDetailsResult>().HasNoKey();
+            modelBuilder.Entity<fnGetInterp2Result>().HasNoKey();
             modelBuilder.Entity<fnGetOverlappingDatesResult>().HasNoKey();
             modelBuilder.Entity<fnGetScheduleDatesResult>().HasNoKey();
         }

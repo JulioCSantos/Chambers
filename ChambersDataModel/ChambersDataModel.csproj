@@ -33,6 +33,7 @@
     <None Remove="Functions\20_fnGetBAUExcursions.sql" />
     <None Remove="Functions\21_fn_SplitJoin.sql" />
     <None Remove="Functions\22_fnCalcTimeStep.sql" />
+    <None Remove="Functions\23_ fnGetInterp2.sql" />
     <None Remove="StoredProcs\09_spPivotExcursionPoints.SQL" />
     <None Remove="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <None Remove="StoredProcs\14_spMergeIncompleteCycles.sql" />
@@ -54,6 +55,7 @@
     <EmbeddedResource Include="Functions\20_fnGetBAUExcursions.sql" />
     <EmbeddedResource Include="Functions\21_fn_SplitJoin.sql" />
     <EmbeddedResource Include="Functions\22_fnCalcTimeStep.sql" />
+    <EmbeddedResource Include="Functions\23_ fnGetInterp2.sql" />
     <EmbeddedResource Include="StoredProcs\09_spPivotExcursionPoints.SQL" />
     <EmbeddedResource Include="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
