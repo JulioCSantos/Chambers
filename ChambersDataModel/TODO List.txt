@@ -7,3 +7,4 @@
 7 - Validate report dates
 8 - fix bug that is not selecting Decommissioned tag
 9 - spGetStats must replace the hard code 10 minutes timestep
+10 - spGetInterop2 must convert from dynamic SQL to classic SQL
