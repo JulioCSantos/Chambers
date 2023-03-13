@@ -31,14 +31,16 @@ namespace ChambersTests.DataModel
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold * 1.5));
+            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold * 0.8));
+            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold * 1.5));
+            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold * 0.5));
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(result.First().FirstExcDate, highExcursionPoint.Time);
-            Assert.AreEqual(result.First().LastExcDate, highExcursionPoint.Time);
+            Assert.AreEqual(result.First().FirstExcDate, hiExcPoint.Time);
+            Assert.AreEqual(result.First().LastExcDate, hiExcPoint.Time);
         }
 
         [TestMethod]
@@ -48,7 +50,9 @@ namespace ChambersTests.DataModel
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold * 1.5));
+            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold * 0.8));
+            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold * 1.5));
+            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold * 0.5));
             await TestDbContext.SaveChangesAsync();
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
             Assert.IsTrue(TestDbContext.PointsPaces.First().ProcessedDate == null);
@@ -59,7 +63,6 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(2, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
             Assert.IsTrue(TestDbContext.PointsPaces.Any(pp => pp.ProcessedDate != null));
             Assert.IsTrue(TestDbContext.PointsPaces.Any(pp => pp.ProcessedDate == null));
-
         }
 
         [TestMethod]

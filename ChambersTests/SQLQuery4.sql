@@ -3,5 +3,7 @@
 
 
 
-exec spPivotExcursionPoints 'SpPivotExcursionPointsTests_HiExcursionWithPrevTagExcNbrTest', '2022-01-01', '2022-03-31'
-			, 100, 200, null, null, 120, 150 
+--exec spPivotExcursionPoints 'SpPivotExcursionPointsTests_HiExcursionWithPrevTagExcNbrTest', '2022-01-01', '2022-03-31'
+--			, 100, 200, null, null, 120, 150 
+
+EXEC spDriverExcursionsPointsForDate '2023-03-13',	15,  'spDriverExcursionsPointsForDateTests_PointsPacesUpdateWithOneHighExcursionPointTest'
