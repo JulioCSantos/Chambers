@@ -58,6 +58,12 @@ namespace ChambersDataModel.Entities
             return FromExpression(() => fnGetScheduleDates(ForDate, StartDate, CoverageValue, CoverageIntervalUnit, RepeatEveryValue, RepeatEveryIntervalUnit));
         }
 
+        [DbFunction("fnSplit", "dbo")]
+        public IQueryable<fnSplitResult> fnSplit(string Line, string SplitOn)
+        {
+            return FromExpression(() => fnSplit(Line, SplitOn));
+        }
+
         [DbFunction("fnToDuration", "dbo")]
         public static int? fnToDuration(string SDuration)
         {
@@ -78,6 +84,7 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<fnGetInterp2Result>().HasNoKey();
             modelBuilder.Entity<fnGetOverlappingDatesResult>().HasNoKey();
             modelBuilder.Entity<fnGetScheduleDatesResult>().HasNoKey();
+            modelBuilder.Entity<fnSplitResult>().HasNoKey();
         }
     }
 }

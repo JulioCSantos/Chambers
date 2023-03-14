@@ -36,9 +36,23 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		FROM [dbo].[StagesLimitsAndDatesCore]
 		WHERE (@StageDateIds IS NULL OR StageDateId in (SELECT StageDateId From @StageDateIdsTable));
 
+	DECLARE @ExcPoints as TABLE ( TagId int NULL
+	, TagName varchar(255), TagExcNbr int NULL
+	, StepLogId int NULL
+	, RampInDate DateTime NULL, RampInValue float NULl
+	, FirstExcDate DateTime NULL, FirstExcValue float NULL
+	, LastExcDate DateTime NULL, LastExcValue float NULL
+	, RampOutDate DateTime NULL, RampOutValue float NULL
+	, HiPointsCt int NULL, LowPointsCt int NULL
+	, MinThreshold float NULL, MaxThreshold float NULL
+	, MinValue float, MaxValue float
+	, AvergValue float, StdDevValue float
+	, ThresholdDuration int, SetPoint float);
+
 	-- If no Tag details found abort (details are not configured).
 	IF (NOT EXISTS(SELECT * FROM @StagesLimitsAndDatesCore)) BEGIN
-		PRINT '<<< spDriverExcursionsPointsForDate aborted'
+		PRINT '<<< spDriverExcursionsPointsForDate aborted';
+		SELECT * FROM @ExcPoints;
 		RETURN;
 	END;
 
@@ -69,18 +83,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	END
 
 
-	DECLARE @ExcPoints as TABLE ( TagId int NULL
-	, TagName varchar(255), TagExcNbr int NULL
-	, StepLogId int NULL
-	, RampInDate DateTime NULL, RampInValue float NULl
-	, FirstExcDate DateTime NULL, FirstExcValue float NULL
-	, LastExcDate DateTime NULL, LastExcValue float NULL
-	, RampOutDate DateTime NULL, RampOutValue float NULL
-	, HiPointsCt int NULL, LowPointsCt int NULL
-	, MinThreshold float NULL, MaxThreshold float NULL
-	, MinValue float, MaxValue float
-	, AvergValue float, StdDevValue float
-	, ThresholdDuration int, SetPoint float);
+
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 		, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime
 		, @stThresholdDuration int, @stSetPoint float;
@@ -316,3 +319,4 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 PRINT 'spDriverExcursionsPointsForDate ends <<<'
 
 END;
+

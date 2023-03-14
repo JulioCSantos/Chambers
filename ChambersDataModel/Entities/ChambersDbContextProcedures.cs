@@ -137,7 +137,7 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spDriverExcursionsPointsForDateResult>> spDriverExcursionsPointsForDateAsync(DateTime? ForDate, int? StageDateId, string TagName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spDriverExcursionsPointsForDateResult>> spDriverExcursionsPointsForDateAsync(DateTime? FromDate, DateTime? ToDate, string StageDateIds, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -150,26 +150,26 @@ namespace ChambersDataModel.Entities
             {
                 new SqlParameter
                 {
-                    ParameterName = "ForDate",
-                    Value = ForDate ?? Convert.DBNull,
+                    ParameterName = "FromDate",
+                    Value = FromDate ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.DateTime,
                 },
                 new SqlParameter
                 {
-                    ParameterName = "StageDateId",
-                    Value = StageDateId ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
+                    ParameterName = "ToDate",
+                    Value = ToDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
                 },
                 new SqlParameter
                 {
-                    ParameterName = "TagName",
-                    Size = 255,
-                    Value = TagName ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.VarChar,
+                    ParameterName = "StageDateIds",
+                    Size = -1,
+                    Value = StageDateIds ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.NVarChar,
                 },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spDriverExcursionsPointsForDateResult>("EXEC @returnValue = [dbo].[spDriverExcursionsPointsForDate] @ForDate, @StageDateId, @TagName", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spDriverExcursionsPointsForDateResult>("EXEC @returnValue = [dbo].[spDriverExcursionsPointsForDate] @FromDate, @ToDate, @StageDateIds", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

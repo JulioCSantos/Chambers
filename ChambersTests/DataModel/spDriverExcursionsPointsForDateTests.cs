@@ -20,7 +20,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task EmptyResultsTest() {
            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-               ForDate: new DateTime(2222, 1, 22), StageDateId: -1, TagName: "");
+                new DateTime(2222, 1, 22), new DateTime(2222, 1, 23),"-1");
             Assert.AreEqual(0, result.Count);
         }
 
@@ -38,7 +38,7 @@ namespace ChambersTests.DataModel
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1), pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(result.First().FirstExcDate, hiExcPoint.Time);
             Assert.AreEqual(result.First().LastExcDate, hiExcPoint.Time);
@@ -59,7 +59,7 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(TestDbContext.PointsPaces.First().ProcessedDate == null);
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1),pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(2, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
             Assert.IsTrue(TestDbContext.PointsPaces.Any(pp => pp.ProcessedDate != null));
@@ -78,7 +78,7 @@ namespace ChambersTests.DataModel
             var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold * 0.8));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1), pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(result.First().RampInDate, rampInPoint.Time);
             Assert.AreEqual(result.First().FirstExcDate, highExcursionPoint.Time);
@@ -100,7 +100,7 @@ namespace ChambersTests.DataModel
             var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MinThreshold * 1.2));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1), pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(result.First().RampInDate, rampInPoint.Time);
             Assert.AreEqual(result.First().RampInValue, rampInPoint.Value);
@@ -123,7 +123,7 @@ namespace ChambersTests.DataModel
                 , pointsPace.NextStepStartDate.AddDays(-1), (float)(stage.MaxThreshold * 1.5));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1),pointsPace.StageDateId.ToString());
             Assert.AreEqual(0, result.Count);
         }
 
@@ -147,7 +147,7 @@ namespace ChambersTests.DataModel
             var rampOutPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2.AddHours(+1), (float)(stage.MaxThreshold * 0.8));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate, StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate, baseDate.AddDays(1), pointsPace.StageDateId.ToString());
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual(result.First().RampInDate, rampInPoint1.Time);
             Assert.AreEqual(result.First().FirstExcDate, highExcursionPoint1.Time);
@@ -185,7 +185,7 @@ namespace ChambersTests.DataModel
             // Driver run for first day. One NOT Processed PaceStep
             Assert.AreEqual(0, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             var day1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate1.AddDays(0), StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate1.AddDays(0), baseDate1.AddDays(2),pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, day1.Count);
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             Assert.AreEqual(1, TestDbContext.PointsStepsLogs.Count(psl => psl.StageDateId == pointsPace.StageDateId));
@@ -193,20 +193,20 @@ namespace ChambersTests.DataModel
             // Driver run for second day. One Processed and one not processed (Next) PaceStep
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             var day2 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate1.AddDays(1), StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate1.AddDays(1), baseDate1.AddDays(2), pointsPace.StageDateId.ToString());
             Assert.AreEqual(0, day2.Count);
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             Assert.AreEqual(1, TestDbContext.PointsStepsLogs.Count(psl => psl.StageDateId == pointsPace.StageDateId));
             // Driver run for third day. One Processed and one not processed (Next) PaceStep
             var day3 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate2.AddDays(0), StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate2.AddDays(0), baseDate2.AddDays(1),pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, day3.Count);
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             Assert.AreEqual(2, TestDbContext.PointsStepsLogs.Count(psl => psl.StageDateId == pointsPace.StageDateId));
 
             // Driver run for third day. One Processed and one not processed (Next) PaceStep
             var day4 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                ForDate: baseDate2.AddDays(1), StageDateId: pointsPace.StageDateId, TagName: tag.TagName);
+                baseDate2.AddDays(1), baseDate2.AddDays(2), pointsPace.StageDateId.ToString());
             Assert.AreEqual(0, day4.Count);
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.PaceId == pointsPace.PaceId && pp.ProcessedDate != null));
             Assert.AreEqual(2, TestDbContext.PointsStepsLogs.Count(psl => psl.StageDateId == pointsPace.StageDateId));

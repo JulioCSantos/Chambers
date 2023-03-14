@@ -135,6 +135,10 @@
          "ObjectType": 2
       },
       {
+         "Name": "[dbo].[fnSplit]",
+         "ObjectType": 2
+      },
+      {
          "Name": "[dbo].[fnToDuration]",
          "ObjectType": 2
       },
