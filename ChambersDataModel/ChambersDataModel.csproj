@@ -34,11 +34,12 @@
     <None Remove="Functions\21_fn_SplitJoin.sql" />
     <None Remove="Functions\22_fnCalcTimeStep.sql" />
     <None Remove="Functions\23_ fnGetInterp2.sql" />
+    <None Remove="Functions\25_fnSplit.SQL" />
     <None Remove="StoredProcs\09_spPivotExcursionPoints.SQL" />
-    <None Remove="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
     <None Remove="StoredProcs\14_spMergeIncompleteCycles.sql" />
     <None Remove="StoredProcs\15_spGetStats.sql" />
     <None Remove="StoredProcs\24_spGetInterop2.sql" />
+    <None Remove="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
     <None Remove="StoredProcs\90_CreateSchemas.sql" />
     <None Remove="StoredProcs\91_CreateCompressedPoint.sql" />
     <None Remove="StoredProcs\92_spSeedForTests.sql" />
@@ -57,8 +58,9 @@
     <EmbeddedResource Include="Functions\21_fn_SplitJoin.sql" />
     <EmbeddedResource Include="Functions\22_fnCalcTimeStep.sql" />
     <EmbeddedResource Include="Functions\23_ fnGetInterp2.sql" />
+    <EmbeddedResource Include="Functions\25_fnSplit.SQL" />
     <EmbeddedResource Include="StoredProcs\09_spPivotExcursionPoints.SQL" />
-    <EmbeddedResource Include="StoredProcs\11_spDriverExcursionsPointsForDate.sql" />
+    <EmbeddedResource Include="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
     <EmbeddedResource Include="StoredProcs\24_spGetInterop2.sql" />
     <EmbeddedResource Include="StoredProcs\90_CreateSchemas.sql" />

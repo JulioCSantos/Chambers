@@ -25,7 +25,8 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task OneHighExcursionPointTest() {
+        public async Task OneHighExcursionPointTest()
+        {
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
