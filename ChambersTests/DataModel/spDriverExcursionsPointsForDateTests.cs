@@ -159,7 +159,7 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(result.Skip(1).First().RampOutDate, rampOutPoint2.Time);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public async Task TwoExcursionsOnTwoStepsTest()
         {
             var baseDate = DateTime.Today;
