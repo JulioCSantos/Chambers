@@ -59,10 +59,6 @@
          "ObjectType": 3
       },
       {
-         "Name": "[dbo].[DefaultPointsPaces]",
-         "ObjectType": 3
-      },
-      {
          "Name": "[dbo].[PointsStepsLogNextValues]",
          "ObjectType": 3
       },

@@ -21,7 +21,6 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<Bauexcursion> Bauexcursions { get; set; }
         public virtual DbSet<BuildingsAreasUnit> BuildingsAreasUnits { get; set; }
         public virtual DbSet<CompressedPoint> CompressedPoints { get; set; }
-        public virtual DbSet<DefaultPointsPace> DefaultPointsPaces { get; set; }
         public virtual DbSet<ExcursionPoint> ExcursionPoints { get; set; }
         public virtual DbSet<ExcursionStat> ExcursionStats { get; set; }
         public virtual DbSet<Interpolated> Interpolateds { get; set; }
@@ -138,15 +137,6 @@ namespace ChambersDataModel.Entities
                     .HasColumnName("time");
 
                 entity.Property(e => e.Value).HasColumnName("value");
-            });
-
-            modelBuilder.Entity<DefaultPointsPace>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("DefaultPointsPaces");
-
-                entity.Property(e => e.NextStepStartDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<ExcursionPoint>(entity =>
