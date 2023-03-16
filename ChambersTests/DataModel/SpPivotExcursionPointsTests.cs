@@ -1,11 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 
 namespace ChambersTests.DataModel
 {
@@ -97,6 +90,44 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue < lt);
             Assert.IsTrue(excPointNew.LastExcValue < lt);
+        }
+
+        [TestMethod]
+        public async Task NullableHighExcursionTest() {
+            var tag = NewName();
+            var dt = new DateTime(2023, 02, 01);
+            float lt = 100; float? ht = null;
+            var rampInPl1 = new CompressedPoint(tag, dt.AddDays(1), lt + 60); TestDbContext.Add(rampInPl1);
+            var excPl1 = new CompressedPoint(tag, dt.AddDays(3), lt - 50); TestDbContext.Add(excPl1);
+            var rampOutPl1 = new CompressedPoint(tag, dt.AddDays(6), lt + 70); TestDbContext.Add(rampOutPl1);
+            await TestDbContext.SaveChangesAsync();
+            var excPnt = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(-30), dt.AddDays(+30), lt, ht, null, null, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(excPnt);
+            Assert.IsTrue(excPnt.LowPointsCt == 1);
+            Assert.IsTrue(excPnt.HiPointsCt == 0);
+            Assert.IsNotNull(excPnt.MinThreshold);
+            Assert.AreEqual(excPnt.MinThreshold,lt);
+            Assert.IsNull(excPnt.MaxThreshold);
+        }
+
+        [TestMethod]
+        public async Task NullableLowExcursionTest() {
+            var tag = NewName();
+            var dt = new DateTime(2023, 02, 01);
+            float? lt = null; float? ht = 200;
+            var rampInPl1 = new CompressedPoint(tag, dt.AddDays(1), (float)(ht - 60)); TestDbContext.Add(rampInPl1);
+            var excPl1 = new CompressedPoint(tag, dt.AddDays(3), (float)(ht + 50)); TestDbContext.Add(excPl1);
+            var rampOutPl1 = new CompressedPoint(tag, dt.AddDays(6), (float)(ht - 70)); TestDbContext.Add(rampOutPl1);
+            await TestDbContext.SaveChangesAsync();
+            var excPnt = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(-30), dt.AddDays(+30), lt, ht, null, null, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(excPnt);
+            Assert.IsTrue(excPnt.LowPointsCt == 0);
+            Assert.IsTrue(excPnt.HiPointsCt == 1);
+            Assert.IsNull(excPnt.MinThreshold);
+            Assert.AreEqual(excPnt.MaxThreshold, ht);
+            Assert.IsNotNull(excPnt.MaxThreshold);
         }
 
         [TestMethod]
