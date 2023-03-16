@@ -21,7 +21,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public void InsertTest()
         {
-            TestDbContext.IsPreservedForTest = true;
+            //TestDbContext.IsPreservedForTest = true;
             var target = new Tag(IntExtensions.NextId(), NewName());
             TestDbContext.Add(target);
             var changesCnt = TestDbContext.SaveChanges(); 

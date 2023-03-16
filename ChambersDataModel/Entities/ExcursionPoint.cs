@@ -12,6 +12,7 @@ namespace ChambersDataModel.Entities
         public string TagName { get; set; }
         public int TagExcNbr { get; set; }
         public int? StepLogId { get; set; }
+        public int? StageDateId { get; set; }
         public DateTime? RampInDate { get; set; }
         public double? RampInValue { get; set; }
         public DateTime? FirstExcDate { get; set; }
@@ -31,5 +32,7 @@ namespace ChambersDataModel.Entities
         public int? Duration { get; set; }
         public int? ThresholdDuration { get; set; }
         public double? SetPoint { get; set; }
+        public DateTime? DeprecatedDate { get; set; }
+        public bool? IsDeprecated { get; set; }
     }
 }

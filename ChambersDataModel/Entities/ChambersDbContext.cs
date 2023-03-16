@@ -150,9 +150,13 @@ namespace ChambersDataModel.Entities
 
                 entity.HasIndex(e => new { e.TagName, e.TagExcNbr, e.RampOutDate }, "ixExcursionPointsRampoutDateTagNameTagExcNbr");
 
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.Duration).HasComputedColumnSql("(datediff(second,[FirstExcDate],[LastExcDate]))", true);
 
                 entity.Property(e => e.FirstExcDate).HasColumnType("datetime");
+
+                entity.Property(e => e.IsDeprecated).HasComputedColumnSql("(case when [DeprecatedDate] IS NULL then CONVERT([bit],(0)) else CONVERT([bit],(1)) end)", false);
 
                 entity.Property(e => e.LastExcDate).HasColumnType("datetime");
 
