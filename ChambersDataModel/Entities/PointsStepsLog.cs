@@ -14,8 +14,8 @@ namespace ChambersDataModel.Entities
         public string TagName { get; set; }
         public DateTime StageStartDate { get; set; }
         public DateTime? StageEndDate { get; set; }
-        public double MinThreshold { get; set; }
-        public double MaxThreshold { get; set; }
+        public double? MinThreshold { get; set; }
+        public double? MaxThreshold { get; set; }
         public int PaceId { get; set; }
         public DateTime PaceStartDate { get; set; }
         public DateTime PaceEndDate { get; set; }

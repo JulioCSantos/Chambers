@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[StagesLimitsAndDates]
 AS
-SELECT TagId, TagName, StageDateId, StageName, MinThreshold, MaxThreshold
-, StartDate, EndDate, TimeStep, StageId, ThresholdDuration, SetPoint
-FROM  [dbo].[StagesLimitsAndDatesCore]
-WHERE (StageDateDeprecatedDate IS NULL) AND (StageDeprecatedDate IS NULL)
+SELECT std.TagId, std.TagName, std.StageDateId, std.StageName, std.MinThreshold, std.MaxThreshold, std.StartDate, std.EndDate
+, std.TimeStep, std.StageId, std.ThresholdDuration, std.SetPoint
+FROM  StagesLimitsAndDatesCore as std
+WHERE (std.StageDeprecatedDate IS NULL) AND (std.StageDateDeprecatedDate IS NULL)

@@ -29,7 +29,7 @@ namespace ChambersTests.DataModel
                 .Where(std => std.StageName == name).ToList();
             Assert.IsNotNull(viewResults);
             Assert.AreEqual(1, viewResults.Count);
-            Assert.AreEqual(0, viewResults.First().IsDeprecated);
+            Assert.IsFalse(viewResults.First().IsDeprecated);
         }
 
         [TestMethod]
@@ -45,7 +45,7 @@ namespace ChambersTests.DataModel
                 .Where(std => std.StageName == name).ToList();
             Assert.IsNotNull(viewResults);
             Assert.AreEqual(1, viewResults.Count);
-            Assert.AreEqual(1, viewResults.First().IsDeprecated);
+            Assert.IsTrue(viewResults.First().IsDeprecated);
             Assert.AreEqual(stageDate.Stage.DeprecatedDate.Value.Date, viewResults.First().StageDeprecatedDate!.Value.Date);
 
         }
@@ -63,7 +63,7 @@ namespace ChambersTests.DataModel
                 .Where(std => std.StageName == name).ToList();
             Assert.IsNotNull(viewResults);
             Assert.AreEqual(1, viewResults.Count);
-            Assert.AreEqual(1, viewResults.First().IsDeprecated);
+            Assert.IsTrue(viewResults.First().IsDeprecated);
             Assert.AreEqual(stageDate.DeprecatedDate.Value.Date, viewResults.First().StageDateDeprecatedDate!.Value.Date);
         }
     }
