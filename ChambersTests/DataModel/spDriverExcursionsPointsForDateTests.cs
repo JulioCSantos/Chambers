@@ -119,7 +119,7 @@ namespace ChambersTests.DataModel
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
             var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName
-                , pointsPace.NextStepStartDate.AddDays(-1), (float)(stage.MaxThreshold * 1.5));
+                , pointsPace.NextStepStartDate.AddDays(-1), (float)(stage.MaxThreshold! * 1.5));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(1),pointsPace.StageDateId.ToString());
