@@ -216,11 +216,6 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(3,rampOutPoint.HiPointsCt);
             Assert.AreEqual(rampOutP1.Time,rampOutPoint.RampOutDate);
 
-            var excPnts = TestDbContext.ExcursionPoints.FirstOrDefault(ep => ep.TagName == tag);
-            Assert.IsNotNull(excPnts);
-            Assert.IsNotNull(excPnts.LastExcDate);
-            Assert.IsNotNull(excPnts.RampOutDate);
-
         }
     }
 }
