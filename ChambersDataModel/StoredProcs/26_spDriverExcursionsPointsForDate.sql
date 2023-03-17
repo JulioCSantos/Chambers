@@ -7,9 +7,8 @@ AS
 BEGIN
 PRINT '>>> spDriverExcursionsPointsForDate begins'
 
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+	DECLARE @debugStr NVARCHAR(max)  ;
 	
 	-- Processing StageDates
 	DECLARE @StageDateIdsTable TABLE (StageDateId int);
@@ -18,7 +17,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		SELECT value from STRING_SPLIT(@StageDateIds, ',')
 	END;
 
-	-- Processing Tag details
+	--  Tag details
 	DECLARE @StagesLimitsAndDatesCore TABLE (
 		TagId int, TagName nvarchar(255), StageDateId int, StageName nvarchar(255) NULL
 		, MinThreshold float, MaxThreshold float, StartDate datetime, EndDate datetime
@@ -27,6 +26,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, ProductionDate datetime NULL, IsDeprecated int 
 	)
 
+	PRINT 'Get Tag details'
 	INSERT INTO @StagesLimitsAndDatesCore
 	SELECT TagId, TagName, StageDateId, StageName 
 		, MinThreshold, MaxThreshold, StartDate, EndDate
@@ -35,6 +35,15 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, ProductionDate, IsDeprecated 
 		FROM [dbo].[StagesLimitsAndDatesCore]
 		WHERE (@StageDateIds IS NULL OR StageDateId in (SELECT StageDateId From @StageDateIdsTable));
+
+	DECLARE @SavedExcPoints as TABLE ( TagId int NULL
+	, TagName varchar(255), TagExcNbr int NULL
+	, StepLogId int NULL
+	, RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
+	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
+	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
+	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
+	, ThresholdDuration int, SetPoint float);
 
 	DECLARE @ExcPoints as TABLE ( TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
@@ -47,6 +56,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 	-- If no Tag details found abort (details are not configured).
 	IF (NOT EXISTS(SELECT * FROM @StagesLimitsAndDatesCore)) BEGIN
+		PRINT '+++ Tags are not configured +++';
 		PRINT '<<< spDriverExcursionsPointsForDate aborted';
 		SELECT * FROM @ExcPoints;
 		RETURN;
@@ -57,15 +67,18 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, PaceId int, StageDateId int, NextStepStartDate datetime, StepSizeDays int, NextStepEndDate datetime, ProcessedDate datetime NULL
 	  );
 
-	BEGIN TRAN;
-	--
+	
+	PRINT 'All PointsPaces that are awaiting to be processed (ProcessedDate is null) '
 	INSERT INTO @PointsPacesTbl (PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate)
 	SELECT PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate 
 	FROM [dbo].[PointsPaces]
 	WHERE (@StageDateIds IS NULL OR StageDateId in (SELECT StageDateId From @StageDateIdsTable))
 	AND ProcessedDate IS NULL;
+	SELECT @debugStr = COALESCE(@debugStr + '''|''', '|''') + Cast(PaceId as varchar(10)) + '-' + Format(NextStepStartDate, 'yy/MM/dd') 
+		FROM @PointsPacesTbl;
+	PRINT CONCAT('ROWS CNT:',@@ROWCOUNT,  @debugStr);
 	
-	--
+	PRINT 'Insert PointsPaces that have never been processed before'
 	IF (@StageDateIds IS NULL) BEGIN
 		INSERT INTO @PointsPacesTbl (PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate)
 		SELECT -1 as PaceId, StageDateId, @FromDate as NextStepStartDate, 2 as StepSizeDays
@@ -78,6 +91,9 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			, DateAdd(day,2,@FromDate) as NextStepEndDate, NULL as ProcessedDate 
 		FROM (SELECT StageDateID from @StageDateIdsTable WHERE StageDateId Not IN (SELECT StageDateId FROM @PointsPacesTbl)) as ppsTbl
 	END
+		SELECT @debugStr = COALESCE(@debugStr + '''|''', '|''') + Cast(StageDateId as varchar(10)) + '-' + Format(NextStepStartDate, 'yy/MM/dd') 
+		FROM @PointsPacesTbl WHERE PaceId < 0 ;
+	PRINT CONCAT('ROWS CNT:',@@ROWCOUNT,  @debugStr)
 
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 		, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime
@@ -94,7 +110,10 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		WHERE RowID = @CurrPaceRow;
 		PRINT 'PROCESS Tag through the date date range'
 		WHILE @StepEndDate < @ToDate BEGIN
-			PRINT Concat('@CurrStageDateId:', @CurrStageDateId, ' @StepStartDate:', @StepStartDate,' @StepEndDate:', @StepEndDate);
+
+			BEGIN TRAN;
+
+			PRINT Concat('@StageDateId:', @CurrStageDateId, ' @StepStartDate:', @StepStartDate,' @StepEndDate:', @StepEndDate);
 
 			SELECT @stTagId = TagId, @stTagName = TagName, @stMinThreshold = MinThreshold, @stMaxThreshold = MaxThreshold
 				, @stThresholdDuration = ThresholdDuration , @stSetPoint = SetPoint
@@ -118,6 +137,9 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			)
 			EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @StepStartDate, @StepEndDate, @stMinThreshold, @stMaxThreshold
 				, @stThresholdDuration, @stSetPoint;
+			SELECT @debugStr = COALESCE(@debugStr + '''|''', '|''') + Cast(TagExcNbr as varchar(10)) + '-' + Format(FirstExcDate, 'yy/MM/dd') + '-' + Format(LastExcDate, 'yy/MM/dd') 
+				FROM @ExcPoints;
+			PRINT CONCAT('spPivot ROWS CNT:',@@ROWCOUNT,  @debugStr);
 
 			Insert into ExcursionPoints ( 
 			TagName, TagExcNbr
@@ -135,6 +157,24 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			, ThresholdDuration, SetPoint
 			FROM @ExcPoints;
 
+			Insert into @SavedExcPoints ( 
+			TagName, TagExcNbr
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, ThresholdDuration, SetPoint
+			)
+			SELECT TagName, TagExcNbr
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, ThresholdDuration, SetPoint
+			FROM @ExcPoints;
+
+			Delete from @ExcPoints;
+
 			IF (@PaceId <= 0) BEGIN
 				INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
 					 VALUES (@CurrStageDateId, @StepStartDate, @StepSizedays, GetDate() ); 
@@ -149,17 +189,25 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			SET @StepEndDate = DateAdd(day, @StepSizedays, @StepEndDate) ;
 			SET @PaceId = -1;
 
+			if (@StepEndDate >= @ToDate) BEGIN
+				-- Last PointsPace row of the date range
+				INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
+				VALUES (@CurrStageDateId, @StepStartDate, @StepSizedays, NULL ); 
+
+				SELECT @debugStr = COALESCE(@debugStr + '''|''', '|''') + Cast(TagExcNbr as varchar(10)) + '-' + Format(FirstExcDate, 'yy/MM/dd') + '-' + Format(LastExcDate, 'yy/MM/dd') 
+						FROM @SavedExcPoints;
+				PRINT CONCAT('SavedExcPoints ROWS CNT:',@@ROWCOUNT,  @debugStr);
+			END
+
+			COMMIT TRAN;
+
 		END
 
-		-- Last PointsPace row of the date range
-		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
-		VALUES (@CurrStageDateId, @StepStartDate, @StepSizedays, NULL ); 
+		SELECT * FROM @SavedExcPoints;
 
-		SELECT * FROM @ExcPoints;
 
 	END
 
-	COMMIT TRAN;
 
 	--UNIT TESTS
 	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL

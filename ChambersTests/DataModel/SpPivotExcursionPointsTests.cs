@@ -13,6 +13,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task EmptyTest() {
+            TestDbContext.IsPreservedForTest = true;
             var result = await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                     "NO Tag", new DateTime(2018, 01, 01), new DateTime(2018, 03, 31), 100, 200, 120, 150);
             Assert.AreEqual(0, result.Count);
@@ -184,6 +185,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task LengthyHiExcursionTest()
         {
+            TestDbContext.IsPreservedForTest = true;
             var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
@@ -213,6 +215,11 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(rampOutPoint);
             Assert.AreEqual(3,rampOutPoint.HiPointsCt);
             Assert.AreEqual(rampOutP1.Time,rampOutPoint.RampOutDate);
+
+            var excPnts = TestDbContext.ExcursionPoints.FirstOrDefault(ep => ep.TagName == tag);
+            Assert.IsNotNull(excPnts);
+            Assert.IsNotNull(excPnts.LastExcDate);
+            Assert.IsNotNull(excPnts.RampOutDate);
 
         }
     }
