@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (	
 	  @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
-	, @LowThreashold float, @HiThreashold float, @TagId int = null, @StepLogId int = null 
+	, @LowThreashold float, @HiThreashold float 
 	, @ThresholdDuration int = null, @SetPoint float = null
 )
 AS
 BEGIN
 PRINT '>>> spPivotExcursionPoints begins'
-PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate:', @EndDate, ' @TagId:', @TagId,' @StepLogId:'
-			, @StepLogId, ' @ThresholdDuration:', @ThresholdDuration, ' @SetPoint:', @SetPoint);
+PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate:', @EndDate
+		, ' @ThresholdDuration:', @ThresholdDuration, ' @SetPoint:', @SetPoint);
 
 	--Declare input cursor values
 	DECLARE  @tag varchar(255), @time DateTime, @value float, @TagExcNbr int = 1; 
@@ -221,16 +221,18 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 	INSERT INTO @ExcPoints Select * FROM @ExcPoint1;
 
 	SELECT 
-	 @TagId as [TagId], [TagName], [TagExcNbr], @StepLogId as [StepLogId], [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
-      ,[LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue], [HiPointsCt], [LowPointsCt]
-	  , @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
-	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue], [ThresholdDuration], [SetPoint]
+	  [TagName], [TagExcNbr]
+	  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
+      , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
+	  , [HiPointsCt], [LowPointsCt], @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
+	  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
+	  , [ThresholdDuration], [SetPoint]
 	FROM @ExcPoints 
 	WHERE (HiPointsCt > 0 OR LowPointsCt > 0) AND RampInDate IS NOT NULL;
 
 -- UNIT TESTS
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-03'
---		, @LowThreashold = 100, @HiThreashold = 200, @TagId = 111, @StepLogId = 222;
+--		, @LowThreashold = 100, @HiThreashold = 200;
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
 --		, @LowThreashold = 100, @HiThreashold = 200;
 PRINT 'spPivotExcursionPoints ends <<<'

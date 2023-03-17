@@ -36,7 +36,6 @@
     <None Remove="Functions\23_ fnGetInterp2.sql" />
     <None Remove="Functions\25_fnSplit.SQL" />
     <None Remove="StoredProcs\09_spPivotExcursionPoints.SQL" />
-    <None Remove="StoredProcs\14_spMergeIncompleteCycles.sql" />
     <None Remove="StoredProcs\15_spGetStats.sql" />
     <None Remove="StoredProcs\24_spGetInterop2.sql" />
     <None Remove="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
@@ -89,10 +88,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Chambers.Common\Chambers.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="StoredProcs\14_spMergeIncompleteCycles.sql" />
   </ItemGroup>
 
   <ItemGroup>

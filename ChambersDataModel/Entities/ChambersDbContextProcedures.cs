@@ -37,7 +37,6 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<CreateCompressedPointResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
-            modelBuilder.Entity<spMergeIncompleteCyclesResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spSeedForTestsResult>().HasNoKey().ToView(null);
         }
@@ -251,27 +250,7 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spMergeIncompleteCyclesResult>> spMergeIncompleteCyclesAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
-        {
-            var parameterreturnValue = new SqlParameter
-            {
-                ParameterName = "returnValue",
-                Direction = System.Data.ParameterDirection.Output,
-                SqlDbType = System.Data.SqlDbType.Int,
-            };
-
-            var sqlParameters = new []
-            {
-                parameterreturnValue,
-            };
-            var _ = await _context.SqlQueryAsync<spMergeIncompleteCyclesResult>("EXEC @returnValue = [dbo].[spMergeIncompleteCycles]", sqlParameters, cancellationToken);
-
-            returnValue?.SetValue(parameterreturnValue.Value);
-
-            return _;
-        }
-
-        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, int? TagId, int? StepLogId, int? ThresholdDuration, double? SetPoint, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, int? ThresholdDuration, double? SetPoint, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -315,18 +294,6 @@ namespace ChambersDataModel.Entities
                 },
                 new SqlParameter
                 {
-                    ParameterName = "TagId",
-                    Value = TagId ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
-                },
-                new SqlParameter
-                {
-                    ParameterName = "StepLogId",
-                    Value = StepLogId ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
-                },
-                new SqlParameter
-                {
                     ParameterName = "ThresholdDuration",
                     Value = ThresholdDuration ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.Int,
@@ -339,7 +306,7 @@ namespace ChambersDataModel.Entities
                 },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @TagId, @StepLogId, @ThresholdDuration, @SetPoint", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @ThresholdDuration, @SetPoint", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

@@ -91,10 +91,6 @@
          "ObjectType": 1
       },
       {
-         "Name": "[dbo].[spMergeIncompleteCycles]",
-         "ObjectType": 1
-      },
-      {
          "Name": "[dbo].[spPivotExcursionPoints]",
          "ObjectType": 1
       },

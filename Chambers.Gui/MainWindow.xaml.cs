@@ -33,12 +33,14 @@ namespace Chambers.Gui
             foreach (Table myTable in chambers.Tables) {
                 /* Generating IF EXISTS and DROP command for tables */
                 StringCollection tableScripts = myTable.Script(scriptOptions);
-                foreach (string script in tableScripts)
+                foreach (string? script in tableScripts)
+                {
                     Console.WriteLine(script);
+                }
 
                 /* Generating CREATE TABLE command */
                 tableScripts = myTable.Script();
-                foreach (string script in tableScripts)
+                foreach (string? script in tableScripts)
                     Console.WriteLine(script);
             }
 

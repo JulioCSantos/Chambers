@@ -15,7 +15,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	DECLARE @StageDateIdsTable TABLE (StageDateId int);
 	IF (@StageDateIds IS NOT NULL) BEGIN
 		INSERT INTO @StageDateIdsTable
-		SELECT cast(DATA as int) from dbo.fnSplit(@StageDateIds, ',')
+		SELECT value from STRING_SPLIT(@StageDateIds, ',')
 	END;
 
 	-- Processing Tag details
@@ -39,14 +39,10 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	DECLARE @ExcPoints as TABLE ( TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
 	, StepLogId int NULL
-	, RampInDate DateTime NULL, RampInValue float NULl
-	, FirstExcDate DateTime NULL, FirstExcValue float NULL
-	, LastExcDate DateTime NULL, LastExcValue float NULL
-	, RampOutDate DateTime NULL, RampOutValue float NULL
-	, HiPointsCt int NULL, LowPointsCt int NULL
-	, MinThreshold float NULL, MaxThreshold float NULL
-	, MinValue float, MaxValue float
-	, AvergValue float, StdDevValue float
+	, RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
+	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
+	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
+	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
 	, ThresholdDuration int, SetPoint float);
 
 	-- If no Tag details found abort (details are not configured).
@@ -61,7 +57,8 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, PaceId int, StageDateId int, NextStepStartDate datetime, StepSizeDays int, NextStepEndDate datetime, ProcessedDate datetime NULL
 	  );
 
-	-- 
+	BEGIN TRAN;
+	--
 	INSERT INTO @PointsPacesTbl (PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate)
 	SELECT PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate 
 	FROM [dbo].[PointsPaces]
@@ -82,8 +79,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		FROM (SELECT StageDateID from @StageDateIdsTable WHERE StageDateId Not IN (SELECT StageDateId FROM @PointsPacesTbl)) as ppsTbl
 	END
 
-
-
 	DECLARE @stTagId int, @stTagName varchar(255), @stStepLogId int
 		, @stMinThreshold float, @stMaxThreshold float, @stStartDate as datetime, @stEndDate as datetime
 		, @stThresholdDuration int, @stSetPoint float;
@@ -97,7 +92,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			, @StepEndDate = NextStepEndDate, @StepSizedays = StepSizeDays
 		FROM @PointsPacesTbl
 		WHERE RowID = @CurrPaceRow;
-		BEGIN TRAN;
 		PRINT 'PROCESS Tag through the date date range'
 		WHILE @StepEndDate < @ToDate BEGIN
 			PRINT Concat('@CurrStageDateId:', @CurrStageDateId, ' @StepStartDate:', @StepStartDate,' @StepEndDate:', @StepEndDate);
@@ -114,9 +108,16 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, Convert(varchar(16), @stThresholdDuration), ', ', Convert(varchar(16), @stSetPoint)
 				);
 
-			INSERT INTO @ExcPoints
+			INSERT INTO @ExcPoints (
+				[TagName], [TagExcNbr]
+			  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
+			  , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
+			  , [HiPointsCt], [LowPointsCt], [MinThreshold], [MaxThreshold]
+			  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
+			  , [ThresholdDuration], [SetPoint]
+			)
 			EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @StepStartDate, @StepEndDate, @stMinThreshold, @stMaxThreshold
-				, @stTagId, @stStepLogId, @stThresholdDuration, @stSetPoint;
+				, @stThresholdDuration, @stSetPoint;
 
 			Insert into ExcursionPoints ( 
 			TagName, TagExcNbr
@@ -154,12 +155,11 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
 		VALUES (@CurrStageDateId, @StepStartDate, @StepSizedays, NULL ); 
 
-		COMMIT TRAN;
-
-
 		SELECT * FROM @ExcPoints;
 
 	END
+
+	COMMIT TRAN;
 
 	--UNIT TESTS
 	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
@@ -319,4 +319,3 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 PRINT 'spDriverExcursionsPointsForDate ends <<<'
 
 END;
-

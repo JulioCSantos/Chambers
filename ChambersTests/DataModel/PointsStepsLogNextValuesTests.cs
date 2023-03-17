@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChambersTests.DataModel
 {
+    [TestClass]
     public class PointsStepsLogNextValuesTests
     {
     }
