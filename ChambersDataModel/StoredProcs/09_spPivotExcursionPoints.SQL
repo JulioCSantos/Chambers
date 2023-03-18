@@ -202,7 +202,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 				SET @RampInDate = NULL; SET @RampInValue = NULL; SET @FirstExcDate = NULL; SET @FirstExcValue = NULL;
 				SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
-				INSERT INTO @ExcPoint1 VALUES (0, -1, @TagName, @TagExcNbr
+				INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
 					, NULL, NULL, @ThresholdDuration, @SetPoint);
@@ -242,4 +242,4 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 --		, @LowThreashold = 100, @HiThreashold = 200;
 PRINT 'spPivotExcursionPoints ends <<<'
 
-END
+END 

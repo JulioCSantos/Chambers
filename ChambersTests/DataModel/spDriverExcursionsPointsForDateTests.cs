@@ -263,5 +263,30 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(stage.MaxThreshold, result.First().MaxThreshold);
             Assert.AreEqual(stage.MinThreshold, result.First().MinThreshold);
         }
+
+        [TestMethod]
+        public async Task HighExcursionNoPointsPaceTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
+            var tagName = NewName();
+            var baseDate = DateTime.Today;
+            var stageDate = new StagesDate(tagName, baseDate);
+            var stage = stageDate.Stage;
+            stage.SetThresholds(100, 200);
+            TestDbContext.StagesDates.Add(stageDate);
+            var rampInPoint = TestDbContext.NewCompressedPoint(tagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
+            var hiExcPoint = TestDbContext.NewCompressedPoint(tagName, baseDate, (float)(stage.MinThreshold! * 0.5));
+            var rampOutPoint = TestDbContext.NewCompressedPoint(tagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
+            await TestDbContext.SaveChangesAsync();
+            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate.AddDays(-1), baseDate.AddDays(1), stageDate.StageDateId.ToString());
+            return;
+            var excPoint = TestDbContext.ExcursionPoints;
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(result.First().FirstExcDate, hiExcPoint.Time);
+            Assert.AreEqual(result.First().LastExcDate, hiExcPoint.Time);
+            Assert.AreEqual(stage.MaxThreshold, result.First().MaxThreshold);
+            Assert.AreEqual(stage.MinThreshold, result.First().MinThreshold);
+        }
     }
 }

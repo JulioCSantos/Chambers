@@ -50,7 +50,7 @@ namespace ChambersTests.DataModel
             var pointsPace = NewPointsPace(name, new DateTime(2022, 02, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             pointsPace.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace.StageDate.Stage.SetValues(80, 100);
+            pointsPace.StageDate.Stage.SetThresholds(80, 100);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues
@@ -68,7 +68,7 @@ namespace ChambersTests.DataModel
             var pointsPace = NewPointsPace(name, new DateTime(2021, 12, 31), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             pointsPace.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace.StageDate.Stage.SetValues(10, 100);
+            pointsPace.StageDate.Stage.SetThresholds(10, 100);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues
@@ -86,7 +86,7 @@ namespace ChambersTests.DataModel
             var pointsPace = NewPointsPace(name, new DateTime(2022, 12, 31), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             pointsPace.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace.StageDate.Stage.SetValues(10, 100);
+            pointsPace.StageDate.Stage.SetThresholds(10, 100);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues
@@ -104,7 +104,7 @@ namespace ChambersTests.DataModel
             var pointsPace = NewPointsPace(name, new DateTime(2020, 01, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             pointsPace.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace.StageDate.Stage.SetValues(10, 100);
+            pointsPace.StageDate.Stage.SetThresholds(10, 100);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(4, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues
@@ -120,12 +120,12 @@ namespace ChambersTests.DataModel
             var pointsPace1 = NewPointsPace(name1, new DateTime(2022, 02, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace1);
             pointsPace1.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace1.StageDate.Stage.SetValues(10, 100);
+            pointsPace1.StageDate.Stage.SetThresholds(10, 100);
             var name2 = newName + 2;
             var pointsPace2 = NewPointsPace(name2, new DateTime(2022, 03, 01), 3);
             TestDbContext.PointsPaces.Add(pointsPace2);
             pointsPace2.StageDate.SetDates(new DateTime(2022, 01, 01), new DateTime(2022, 12, 31));
-            pointsPace2.StageDate.Stage.SetValues(10, 100);
+            pointsPace2.StageDate.Stage.SetThresholds(10, 100);
             var savedCount = TestDbContext.SaveChanges();
             Assert.AreEqual(8, savedCount);
             var result = TestDbContext.PointsStepsLogNextValues

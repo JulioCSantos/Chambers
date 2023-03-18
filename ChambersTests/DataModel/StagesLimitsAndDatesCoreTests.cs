@@ -22,7 +22,7 @@ namespace ChambersTests.DataModel
         {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
-            stageDate.Stage.SetValues(30, 300);
+            stageDate.Stage.SetThresholds(30, 300);
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
             var viewResults = TestDbContext.StagesLimitsAndDatesCores
@@ -37,7 +37,7 @@ namespace ChambersTests.DataModel
         {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
-            stageDate.Stage.SetValues(30, 300);
+            stageDate.Stage.SetThresholds(30, 300);
             stageDate.Stage.DeprecatedDate = DateTime.Now;
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
@@ -55,7 +55,7 @@ namespace ChambersTests.DataModel
         {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
-            stageDate.Stage.SetValues(30, 300);
+            stageDate.Stage.SetThresholds(30, 300);
             stageDate.DeprecatedDate = DateTime.Now;
             TestDbContext.StagesDates.Add(stageDate);
             TestDbContext.SaveChanges();
