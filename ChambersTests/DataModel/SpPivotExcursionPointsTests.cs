@@ -184,7 +184,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task LengthyHiExcursionTest()
         {
-            TestDbContext.IsPreservedForTest = true;
+            //TestDbContext.IsPreservedForTest = true;
             var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;

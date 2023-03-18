@@ -7,6 +7,7 @@ namespace ChambersDataModel.Entities
 {
     public partial class spPivotExcursionPointsResult
     {
+        public int? CycleId { get; set; }
         public string TagName { get; set; }
         public int? TagExcNbr { get; set; }
         public DateTime? RampInDate { get; set; }

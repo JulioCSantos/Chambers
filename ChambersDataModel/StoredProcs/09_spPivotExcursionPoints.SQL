@@ -14,7 +14,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 	DECLARE @IsHiExc int = -1;
 
 	-- Currently in-process Excursion in date range for Tag (TagName)
-	DECLARE @ExcPoint1 as TABLE ( ExcPriority int, 
+	DECLARE @ExcPoint1 as TABLE ( ExcPriority int, CycleId int,
 			TagName varchar(255), TagExcNbr int
 			, RampInDate DateTime, RampInValue float
 			, FirstExcDate DateTime, FirstExcValue float
@@ -26,7 +26,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 			, AvergValue float, StdDevValue float
 			, ThresholdDuration int, SetPoint float);
 	-- Finished processed (saved) Excursions in date range
-	DECLARE @ExcPoints as TABLE ( ExcPriority int,
+	DECLARE @ExcPoints as TABLE ( ExcPriority int, CycleId int,
 			TagName varchar(255), TagExcNbr int
 			, RampInDate DateTime, RampInValue float
 			, FirstExcDate DateTime, FirstExcValue float
@@ -37,6 +37,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 			, MinValue float, MaxValue float
 			, AvergValue float, StdDevValue float
 			, ThresholdDuration int, SetPoint float);
+	DECLARE @CycleId int;
 	DECLARE @RampInDate DateTime = NULL, @RampInValue float = NULL;
 	DECLARE @FirstExcDate DateTime = NULL, @FirstExcValue float = NULL;
 	DECLARE @LastExcDate DateTime = NULL, @LastExcValue float = NULL;
@@ -44,17 +45,17 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 	DECLARE @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
 	PRINT 'GET LAST Excursion or Empty (start up) Excursion row'
-	INSERT INTO @ExcPoint1 (ExcPriority, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+	INSERT INTO @ExcPoint1 (ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 		, HiPointsCt, LowPointsCt, LowThreashold, HiThreashold
 		, MinValue, MaxValue, AvergValue, StdDevValue
 		, ThresholdDuration, SetPoint)
-		SELECT TOP 1 ExcPriority, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+		SELECT TOP 1 ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 		, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
 		, MinValue, MaxValue, AvergValue, StdDevValue
 		, ThresholdDuration, SetPoint
 		FROM (
 			-- get last incomplete Excursion (RampIn only) if one exists
-			SELECT TOP 1 3 as ExcPriority, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			SELECT TOP 1 3 as ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 			, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
 			, NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
 			, 120 as ThresholdDuration, 150 as SetPoint FROM [dbo].[ExcursionPoints] 
@@ -62,14 +63,15 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 			ORDER BY TagName, TagExcNbr Desc
 			UNION ALL
 			-- get completed Excursion (RampIn and RampOut populated) if one exists
-			SELECT TOP 1 2 as ExcPriority, TagName, TagExcNbr, NULL as RampInDate, NULL as RampInValue, NULL as FirstExcDate, NULL as FirstExcValue
+			SELECT TOP 1 2 as ExcPriority, CycleId, TagName, TagExcNbr, NULL as RampInDate, NULL as RampInValue, NULL as FirstExcDate, NULL as FirstExcValue
 			, 0 as HiPointsCt, 0 as LowPointsCt, 100 as MinThreshold, 200 as MaxThreshold
 			, NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
 			, 120 as ThresholdDuration, 150 as SetPoint FROM [dbo].[ExcursionPoints] 
 			WHERE TagName = @TagName AND RampInDate is NOT NULL AND RampOutDate is NOT NULL
 			ORDER BY TagName, TagExcNbr Desc
 			UNION ALL
-			SELECT 1 as ExcPriority, @TagName as TagName, 1 as TagExcNbr, NULL, NULL, NULL, NULL
+			-- Create a new Excursion 
+			SELECT 1 as ExcPriority, -1 as  CycleId, @TagName as TagName, 1 as TagExcNbr, NULL, NULL, NULL, NULL
 			, 0, 0, 100, 200
 			, NULL, NULL, NULL, NULL
 			, 120, 150
@@ -78,20 +80,23 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 
 	PRINT '@TagExcNbr to latest (or empty) Excursion number'
 	DECLARE @ExcPriority int;
-	SELECT  @ExcPriority = ExcPriority, @TagExcNbr = TagExcNbr
+	SELECT  @ExcPriority = ExcPriority, @CycleId = CycleId, @TagExcNbr = TagExcNbr
 	, @RampInDate = RampInDate, @RampInValue = RampInValue, @FirstExcDate = FirstExcDate, @FirstExcValue = FirstExcValue
 	, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue
 	, @LowPointsCt = LowPointsCt, @HiPointsCt = HiPointsCt
 	FROM @ExcPoint1;
 	IF (@ExcPriority = 3) BEGIN
+		Print 'In-Progress Excursion found'
 		IF (@FirstExcValue >= @HiThreashold) SET @IsHiExc = 1;
 		ELSE SET @IsHiExc = 0;
 		PRINT Concat('IsHiExc: ', @IsHiExc);
 	END
-	IF (@ExcPriority = 2) BEGIN
+	ELSE IF (@ExcPriority = 2) BEGIN
+		Print 'Completed Excursion found'
 		SET @TagExcNbr = @TagExcNbr + 1;
 		UPDATE @ExcPoint1 SET TagExcNbr = @TagExcNbr;
 	END
+	ELSE IF (@ExcPriority = 1) Print 'First Excursion for StageDate (tag) created'
 
 
 
@@ -197,7 +202,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 				SET @RampInDate = NULL; SET @RampInValue = NULL; SET @FirstExcDate = NULL; SET @FirstExcValue = NULL;
 				SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
 				SET @HiPointsCt = 0; SET @LowPointsCt = 0;
-				INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @TagName, @TagExcNbr
+				INSERT INTO @ExcPoint1 VALUES (0, -1, @TagName, @TagExcNbr
 					, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 					, @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
 					, NULL, NULL, @ThresholdDuration, @SetPoint);
@@ -221,7 +226,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 	INSERT INTO @ExcPoints Select * FROM @ExcPoint1;
 
 	SELECT 
-	  [TagName], [TagExcNbr]
+		[CycleId], [TagName], [TagExcNbr]
 	  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
       , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
 	  , [HiPointsCt], [LowPointsCt], @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
