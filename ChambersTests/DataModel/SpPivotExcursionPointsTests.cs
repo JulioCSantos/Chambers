@@ -209,13 +209,108 @@ namespace ChambersTests.DataModel
             var ep = rampInPoint.ToExcursionPoint();
             await TestDbContext.ExcursionPoints.AddAsync(ep);
             await TestDbContext.SaveChangesAsync();
+
             var rampOutPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
                 tag, dt.AddDays(2), dt.AddDays(11), lt, ht, 120, 150)).FirstOrDefault();
             Assert.IsNotNull(rampOutPoint);
             Assert.AreEqual(3,rampOutPoint.HiPointsCt);
             Assert.AreEqual(excP3.Time,rampOutPoint.LastExcDate);
             Assert.AreEqual(rampOutP1.Time,rampOutPoint.RampOutDate);
+            Assert.AreEqual(3,rampOutPoint.HiPointsCt);
 
         }
+
+
+        [TestMethod]
+        public async Task LengthyHiExcursionTest2() {
+            //TestDbContext.IsPreservedForTest = true;
+            var tag = NewName();
+            var dt = new DateTime(2022, 01, 31);
+            var lt = 100; var ht = 200;
+            var rampInP1 = new CompressedPoint(tag, dt, ht - 60); TestDbContext.Add(rampInP1);
+            var excP1 = new CompressedPoint(tag, dt.AddDays(1), ht + 20); TestDbContext.Add(excP1);
+            var excP2 = new CompressedPoint(tag, dt.AddDays(5), ht + 30); TestDbContext.Add(excP2);
+            var excP3 = new CompressedPoint(tag, dt.AddDays(9), ht + 10); TestDbContext.Add(excP3);
+            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(10), ht - 60); TestDbContext.Add(rampOutP1);
+            await TestDbContext.SaveChangesAsync();
+
+            var rampInPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt, dt.AddDays(2), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(rampInPoint);
+            Assert.AreEqual(1, rampInPoint.TagExcNbr);
+            Assert.IsTrue(rampInPoint.TagName == tag);
+            Assert.IsTrue(rampInPoint.HiPointsCt == 1);
+            Assert.IsTrue(rampInPoint.RampInValue >= lt && rampInPoint.RampInValue < ht);
+            Assert.IsTrue(Equals(rampInPoint.FirstExcValue!, excP1.Value));
+            Assert.IsNull(rampInPoint.LastExcValue);
+            Assert.IsNull(rampInPoint.LastExcDate);
+
+            var savingdRampInPoint = rampInPoint.ToExcursionPoint();
+            await TestDbContext.ExcursionPoints.AddAsync(savingdRampInPoint);
+            await TestDbContext.SaveChangesAsync();
+
+            var middleExcPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(2), dt.AddDays(6), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(middleExcPoint);
+            Assert.AreEqual(2, middleExcPoint.HiPointsCt);
+            Assert.IsNull(middleExcPoint.LastExcDate);
+            Assert.IsNull(middleExcPoint.RampOutDate);
+
+            var savedRampInPoint = TestDbContext.ExcursionPoints.Single(ep => ep.CycleId == savingdRampInPoint.CycleId);
+            TestDbContext.Remove(savedRampInPoint);
+            await TestDbContext.SaveChangesAsync();
+            await TestDbContext.ExcursionPoints.AddAsync(middleExcPoint.ToExcursionPoint());
+            await TestDbContext.SaveChangesAsync();
+
+            var rampOutPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(6), dt.AddDays(11), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(rampOutPoint!.LastExcDate);
+            Assert.IsNotNull(rampOutPoint.RampOutDate);
+        }
+
+        [TestMethod]
+        public async Task LengthyHiExcursionWithNullThreshold() {
+            //TestDbContext.IsPreservedForTest = true;
+            var tag = NewName();
+            var dt = new DateTime(2022, 01, 31);
+            float? lt = null; var ht = 200;
+            var rampInP1 = new CompressedPoint(tag, dt, ht - 60); TestDbContext.Add(rampInP1);
+            var excP1 = new CompressedPoint(tag, dt.AddDays(1), ht + 20); TestDbContext.Add(excP1);
+            var excP2 = new CompressedPoint(tag, dt.AddDays(5), ht + 30); TestDbContext.Add(excP2);
+            var excP3 = new CompressedPoint(tag, dt.AddDays(9), ht + 10); TestDbContext.Add(excP3);
+            var rampOutP1 = new CompressedPoint(tag, dt.AddDays(10), ht - 60); TestDbContext.Add(rampOutP1);
+            await TestDbContext.SaveChangesAsync();
+
+            var rampInPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt, dt.AddDays(2), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(rampInPoint);
+            Assert.AreEqual(1, rampInPoint.TagExcNbr);
+            Assert.IsTrue(rampInPoint.TagName == tag);
+            Assert.IsTrue(rampInPoint.HiPointsCt == 1);
+            Assert.IsTrue(rampInPoint.RampInValue < ht);
+            Assert.IsTrue(Equals(rampInPoint.FirstExcValue!, excP1.Value));
+            Assert.IsNull(rampInPoint.LastExcValue);
+            Assert.IsNull(rampInPoint.LastExcDate);
+
+            await TestDbContext.ExcursionPoints.AddAsync(rampInPoint.ToExcursionPoint());
+            await TestDbContext.SaveChangesAsync();
+
+            var middleExcPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(2), dt.AddDays(6), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(middleExcPoint);
+            Assert.AreEqual(2, middleExcPoint.HiPointsCt);
+            Assert.IsNull(middleExcPoint.LastExcDate);
+            Assert.IsNull(middleExcPoint.RampOutDate);
+
+            await TestDbContext.ExcursionPoints.AddAsync(middleExcPoint.ToExcursionPoint());
+            await TestDbContext.SaveChangesAsync();
+
+            var rampOutPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync(
+                tag, dt.AddDays(6), dt.AddDays(11), lt, ht, 120, 150)).FirstOrDefault();
+            Assert.IsNotNull(rampOutPoint!.LastExcDate);
+            Assert.IsNotNull(rampOutPoint.RampOutDate);
+        }
+
+
     }
 }
