@@ -66,7 +66,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, PaceId int, StageDateId int, NextStepStartDate datetime, StepSizeDays int, NextStepEndDate datetime, ProcessedDate datetime NULL
 	  );
 
-	BEGIN TRAN;
 	--
 	INSERT INTO @PointsPacesTbl (PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate)
 	SELECT PaceId, StageDateId, NextStepStartDate, StepSizeDays, NextStepEndDate, ProcessedDate 
@@ -103,6 +102,9 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		WHERE RowID = @CurrPaceRow;
 		PRINT 'PROCESS Tag through the date date range'
 		WHILE @StepEndDate < @ToDate BEGIN
+
+			BEGIN TRAN;
+
 			PRINT Concat('@CurrStageDateId:', @CurrStageDateId, ' @StepStartDate:', @StepStartDate,' @StepEndDate:', @StepEndDate);
 
 			SELECT @stTagId = TagId, @stTagName = TagName, @stMinThreshold = MinThreshold, @stMaxThreshold = MaxThreshold
@@ -127,7 +129,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			)
 			EXECUTE [dbo].[spPivotExcursionPoints] @stTagName, @StepStartDate, @StepEndDate, @stMinThreshold, @stMaxThreshold
 				, @stThresholdDuration, @stSetPoint;
-
 			
 			DECLARE @CycleId int
 			, @LastExcDate datetime, @LastExcValue float,  @RampOutDate DateTime, @RampOutValue float
@@ -178,6 +179,8 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			SET @StepEndDate = DateAdd(day, @StepSizedays, @StepEndDate) ;
 			SET @PaceId = -1;
 
+			COMMIT TRAN;
+
 		END
 
 		-- Last PointsPace row of the date range
@@ -191,7 +194,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 	SELECT * FROM @ExcPointsOutput;
 
-	COMMIT TRAN;
 
 	--UNIT TESTS
 	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
