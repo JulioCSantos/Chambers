@@ -22,6 +22,7 @@ namespace ChambersDataModel.Entities
         public DateTime? StageDeprecatedDate { get; set; }
         public DateTime? StageDateDeprecatedDate { get; set; }
         public DateTime? ProductionDate { get; set; }
+        public DateTime? DeprecatedDate { get; set; }
         public bool? IsDeprecated { get; set; }
     }
 }

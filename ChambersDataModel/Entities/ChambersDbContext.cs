@@ -338,6 +338,8 @@ namespace ChambersDataModel.Entities
 
                 entity.ToView("StagesLimitsAndDatesCore");
 
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.ProductionDate).HasColumnType("datetime");
