@@ -1,1 +1,1 @@
-﻿exec spDriverExcursionsPointsForDate '2023-03-16', '2023-03-18'
+﻿exec spDriverExcursionsPointsForDate '2023-03-18', '2023-03-22', '15'

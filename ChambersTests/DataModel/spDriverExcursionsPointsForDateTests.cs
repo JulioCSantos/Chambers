@@ -5,6 +5,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChambersTests.DataModel
 {
@@ -69,7 +70,37 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task OneHighExcursionPointWithRampsTest() {
+        public async Task OneHighExcursionPointWithNoPointsPaceTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var tagName = NewName();
+            var baseDate = DateTime.Today;
+            var stageDate = new StagesDate(tagName, baseDate.AddHours(6));
+            var stage = stageDate.Stage;
+            stage.SetThresholds(100,300);
+            var tag = stage.Tag;
+            TestDbContext.StagesDates.Add(stageDate);
+            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            await TestDbContext.SaveChangesAsync();
+            var prevPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
+                .Where(pp => pp.StageDateId == stageDate.StageDateId).ToList();
+            Assert.AreEqual(0, prevPointsPaces.Count);
+            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate.AddDays(-1), baseDate.AddDays(3), stageDate.StageDateId.ToString());
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(result.First().RampInDate, rampInPoint.Time);
+            Assert.AreEqual(result.First().FirstExcDate, highExcursionPoint.Time);
+            Assert.AreEqual(result.First().LastExcDate, highExcursionPoint.Time);
+            Assert.AreEqual(result.First().RampOutDate, rampOutPoint.Time);
+            var currPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
+                .Where(pp => pp.StageDateId == stageDate.StageDateId).ToList();
+            Assert.AreEqual(4, currPointsPaces.Count);
+            Assert.AreEqual(1, currPointsPaces.Count(pp => pp.ProcessedDate == null));
+        }
+
+        [TestMethod]
+        public async Task OneHighExcursionPointWithInitialPointsPaceTest() {
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -79,13 +110,20 @@ namespace ChambersTests.DataModel
             var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
             var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
+            var prevPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
+                .Where(pp => pp.StageDateId == pointsPace.StageDateId).ToList();
+            Assert.AreEqual(1, prevPointsPaces.Count);
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
+                baseDate.AddDays(-1), baseDate.AddDays(3), pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(result.First().RampInDate, rampInPoint.Time);
             Assert.AreEqual(result.First().FirstExcDate, highExcursionPoint.Time);
             Assert.AreEqual(result.First().LastExcDate, highExcursionPoint.Time);
             Assert.AreEqual(result.First().RampOutDate, rampOutPoint.Time);
+            var currPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
+                .Where(pp => pp.StageDateId == pointsPace.StageDateId).ToList();
+            Assert.AreEqual(2, currPointsPaces.Count);
+            Assert.AreEqual(1, currPointsPaces.Count(pp => pp.ProcessedDate == null));
         }
 
         [TestMethod]
