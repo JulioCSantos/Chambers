@@ -14,12 +14,18 @@ BEGIN
 	SELECT 
 		@StartDate = 
 			CASE
+				WHEN @StartDate1 IS NULL AND @StartDate2 IS NULL THEN NULL
+				WHEN @StartDate1 IS NULL AND @StartDate2 IS NOT NULL THEN @StartDate2
+				WHEN @StartDate1 IS NOT NULL AND @StartDate2 IS NULL THEN @StartDate1
 				WHEN @StartDate1 > @EndDate2 THEN NULL
 				WHEN @StartDate1 < @StartDate2 THEN @StartDate2
 				ELSE @StartDate1
 			END,
 		@EndDate = 
 			CASE
+				WHEN @EndDate1 IS NULL AND @EndDate2 IS NULL THEN NULL
+				WHEN @EndDate1 IS NULL AND @EndDate2 IS NOT NULL THEN @EndDate2
+				WHEN @EndDate1 IS NOT NULL AND @EndDate2 IS NULL THEN @EndDate1
 				WHEN @EndDate1 < @StartDate2 THEN NULL
 				WHEN @EndDate1 > @EndDate2 THEN @EndDate2
 				ELSE @EndDate1

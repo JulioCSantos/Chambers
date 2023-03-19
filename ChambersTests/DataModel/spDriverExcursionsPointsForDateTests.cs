@@ -18,7 +18,9 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task EmptyResultsTest() {
+        public async Task EmptyResultsTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 new DateTime(2222, 1, 22), new DateTime(2222, 1, 23),"-1");
             Assert.AreEqual(0, result.Count);
