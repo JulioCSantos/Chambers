@@ -51,7 +51,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 	DECLARE @ExcPoints as TABLE ( CycleId int, TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
-	, StepLogId int NULL
+	, StepLogId int NULL, StageDateId int NULL
 	, RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
 	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
 	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
@@ -60,7 +60,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 	DECLARE @ExcPointsOutput as TABLE ( CycleId int, TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
-	, StepLogId int NULL
+	, StepLogId int NULL, StageDateId int NULL
 	, RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
 	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
 	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
@@ -122,6 +122,20 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, Convert(varchar(16), @ThresholdDuration), ', ', Convert(varchar(16), @SetPoint)
 				);
 
+			-- Update or insert PointsPaces row
+			DECLARE @currPaceId int = null;
+			IF (@PaceId <= 0) BEGIN
+				INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
+					 VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays , GetDate() ); 
+				SET @currPaceId = SCOPE_IDENTITY();
+			END
+			ELSE BEGIN
+				UPDATE [dbo].[PointsPaces] SET ProcessedDate = GetDate()
+				WHERE PaceId = @PaceId;
+				SET @currPaceId = @PaceId;
+
+			END
+
 			INSERT INTO @ExcPoints (
 				[CycleId], [TagName], [TagExcNbr]
 			  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
@@ -134,6 +148,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, @MinThreshold, @MaxThreshold, @ThresholdDuration, @SetPoint;
 
 			IF (EXISTS(SELECT * FROM @ExcPoints)) BEGIN
+				UPDATE @ExcPoints Set TagId = @TagId, StageDateId = @CurrStageDateId;
 				DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
 				, @HiPointsCt int, @LowPointsCt int
 				, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
@@ -144,14 +159,14 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				FROM @ExcPoints;
 				IF (@CycleId < 0) BEGIN
 				Insert into ExcursionPoints ( 
-					TagName, TagExcNbr
+					TagId, TagName, TagExcNbr, StageDateId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
 					, MinValue, MaxValue, AvergValue, StdDevValue
 					, ThresholdDuration, SetPoint
 					)
-					SELECT TagName, TagExcNbr
+					SELECT TagId, TagName, TagExcNbr, StageDateId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
@@ -172,15 +187,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				DELETE FROM @ExcPoints;
 			END
 
-			-- Update or insert PointsPaces row
-			IF (@PaceId <= 0) BEGIN
-				INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
-					 VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays , GetDate() ); 
-			END
-			ELSE BEGIN
-				UPDATE [dbo].[PointsPaces] SET ProcessedDate = GetDate()
-				WHERE PaceId = @PaceId;
-			END
 
 			-- prepare for next Point's step run
 			SET @ProcNextStepStartDate = @ProcNextStepEndDate; 
