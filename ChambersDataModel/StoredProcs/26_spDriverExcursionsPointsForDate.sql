@@ -152,7 +152,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				 		@CurrStageDateId, @StageId, @TagId, @TagName
 					   ,@StageStartDate, @StageEndDate, @DeprecatedDate
 					   ,@MinThreshold, @MaxThreshold
-					   ,@PaceId, @ProcNextStepStartDate
+					   ,@currPaceId, @ProcNextStepStartDate
 					   ,@ProcNextStepStartDate, @ProcNextStepEndDate
 					   ,@ThresholdDuration, @SetPoint
 					 )

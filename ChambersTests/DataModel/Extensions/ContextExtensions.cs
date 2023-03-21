@@ -17,6 +17,8 @@ namespace ChambersTests.DataModel.Extensions
             var stageDate = new StagesDate(stage);
             context.Tags.Add(tag);
             context.Stages.Add(stage);
+            stage.ThresholdDuration = 600;
+            stage.SetPoint = ((maxThreshold ?? 0) - (minThreshold ?? 0) / 2) + (minThreshold ?? 0);
             context.StagesDates.Add(stageDate);
             var pointsPace = new PointsPace() { StageDate = stageDate };
             if (nextStartDate != null) { pointsPace.NextStepStartDate = (DateTime)nextStartDate; }
