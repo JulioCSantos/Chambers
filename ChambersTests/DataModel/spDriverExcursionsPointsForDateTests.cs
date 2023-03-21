@@ -310,7 +310,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task HighExcursionNoPointsPaceTest() {
-            TestDbContext.IsPreservedForTest = true;
             var tagName = NewName();
             var baseDate = DateTime.Today;
             var stageDate = new StagesDate(tagName, baseDate);
@@ -362,7 +361,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionDeprecatedDateTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;

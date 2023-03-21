@@ -9,16 +9,16 @@ namespace ChambersDataModel.Entities
     {
         public int StepLogId { get; set; }
         public int StageDateId { get; set; }
-        public string StageName { get; set; }
+        public int StageId { get; set; }
         public int TagId { get; set; }
         public string TagName { get; set; }
         public DateTime StageStartDate { get; set; }
         public DateTime? StageEndDate { get; set; }
+        public DateTime? DeprecatedDate { get; set; }
         public double? MinThreshold { get; set; }
         public double? MaxThreshold { get; set; }
         public int PaceId { get; set; }
         public DateTime PaceStartDate { get; set; }
-        public DateTime PaceEndDate { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? ThresholdDuration { get; set; }

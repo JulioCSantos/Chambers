@@ -225,17 +225,13 @@ namespace ChambersDataModel.Entities
 
                 entity.ToTable("PointsStepsLog");
 
-                entity.Property(e => e.EndDate).HasColumnType("datetime");
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
-                entity.Property(e => e.PaceEndDate).HasColumnType("datetime");
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.PaceStartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageEndDate).HasColumnType("datetime");
-
-                entity.Property(e => e.StageName)
-                    .IsRequired()
-                    .HasMaxLength(255);
 
                 entity.Property(e => e.StageStartDate).HasColumnType("datetime");
 
