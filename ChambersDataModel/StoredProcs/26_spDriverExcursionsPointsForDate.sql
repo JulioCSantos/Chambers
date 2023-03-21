@@ -56,7 +56,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
 	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
 	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
-	, ThresholdDuration int, SetPoint float);
+	, DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
 
 	DECLARE @ExcPointsOutput as TABLE ( CycleId int, TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
@@ -65,7 +65,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
 	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
 	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
-	, ThresholdDuration int, SetPoint float);
+	, DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
 
 	-- If no Tag details found abort (details are not configured).
 	IF (NOT EXISTS(SELECT * FROM @StagesLimitsAndDatesCore)) BEGIN
@@ -157,6 +157,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
 				, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
 				FROM @ExcPoints;
+				UPDATE @ExcPoints SET DeprecatedDate = @DeprecatedDate;
 				IF (@CycleId < 0) BEGIN
 				UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint;
 				Insert into ExcursionPoints ( 
@@ -165,21 +166,21 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
 					, MinValue, MaxValue, AvergValue, StdDevValue
-					, ThresholdDuration, SetPoint
+					, DeprecatedDate, ThresholdDuration, SetPoint
 					)
 					SELECT TagId, TagName, TagExcNbr, StageDateId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
 					, MinValue, MaxValue, AvergValue, StdDevValue
-					, ThresholdDuration, SetPoint
+					, DeprecatedDate, ThresholdDuration, SetPoint
 					FROM @ExcPoints;
 					UPDATE @ExcPoints SET CycleId = SCOPE_IDENTITY();
 				END
 				ELSE BEGIN
 					UPDATE ExcursionPoints 
 					SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, @RampOutValue = RampOutValue
-					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt
+					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, DeprecatedDate = DeprecatedDate
 					, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
 					WHERE CycleId = @CycleId;
 				END

@@ -359,5 +359,30 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(excursion.ThresholdDuration, driverResult.First().ThresholdDuration);
             Assert.AreEqual(excursion.SetPoint, driverResult.First().SetPoint);
         }
+
+        [TestMethod]
+        public async Task OneHighExcursionDeprecatedDateTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today;
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            var stage = pointsPace.StageDate.Stage;
+            stage.DeprecatedDate = baseDate.AddDays(7); 
+            var tag = stage.Tag;
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            await TestDbContext.SaveChangesAsync();
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
+            Assert.AreEqual(1, driverResult.Count);
+            Assert.IsNotNull(driverResult.First().DeprecatedDate);
+            var excursion = (TestDbContext.ExcursionPoints
+                .Where(ex => ex.CycleId == driverResult.First().CycleId)).First();
+            Assert.IsNotNull(excursion.DeprecatedDate);
+            Assert.AreEqual(excursion.DeprecatedDate, stage.DeprecatedDate);
+        }
+
     }
 }
