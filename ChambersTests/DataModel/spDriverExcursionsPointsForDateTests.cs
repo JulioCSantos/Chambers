@@ -333,5 +333,31 @@ namespace ChambersTests.DataModel
             //Assert.AreEqual(stage.MaxThreshold, result.First().MaxThreshold);
             //Assert.AreEqual(stage.MinThreshold, result.First().MinThreshold);
         }
+
+        [TestMethod]
+        public async Task OneHighExcursionThresholdDurationSetPointTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today;
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            var stage = pointsPace.StageDate.Stage;
+            stage.ThresholdDuration = 6; //six seconds to be considered an excursion. SSRS only.
+            stage.SetPoint = 155; // fridge set point. SSRS only.
+            var tag = stage.Tag;
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            await TestDbContext.SaveChangesAsync();
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
+            var excursion = (TestDbContext.ExcursionPoints
+                .Where(ex => ex.CycleId == driverResult.First().CycleId)).First();
+            Assert.AreEqual(1, driverResult.Count);
+            Assert.AreEqual(excursion.FirstExcDate, hiExcPoint.Time);
+            Assert.AreEqual(excursion.LastExcDate, hiExcPoint.Time);
+            Assert.AreEqual(excursion.ThresholdDuration, driverResult.First().ThresholdDuration);
+            Assert.AreEqual(excursion.SetPoint, driverResult.First().SetPoint);
+        }
     }
 }

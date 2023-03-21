@@ -158,6 +158,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
 				FROM @ExcPoints;
 				IF (@CycleId < 0) BEGIN
+				UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint;
 				Insert into ExcursionPoints ( 
 					TagId, TagName, TagExcNbr, StageDateId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
