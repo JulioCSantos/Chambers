@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (       
          @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
-       , @LowThreashold float, @HiThreashold float, @TimeStep time(0) 
+       , @LowThreashold float, @HiThreashold float, @TimeStep time(0) NULL
 )
 AS
 BEGIN
 PRINT '>>> spPivotExcursionPoints begins'
+IF (@TimeStep IS NULL) SET @TimeStep = CAST('00:00:01' as time(0));
+
 PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate:', @EndDate
               , ' @TimeStep:', @TimeStep);
 
