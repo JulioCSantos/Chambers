@@ -59,7 +59,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                       SELECT TOP 1 3 as ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
                       , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
                       , NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
-                      , 120 as ThresholdDuration, 150 as SetPoint FROM [dbo].[ExcursionPoints] 
+                      , ThresholdDuration, SetPoint FROM [dbo].[ExcursionPoints] 
                       WHERE TagName = @TagName AND RampOutDate is NULL
                       ORDER BY TagName, TagExcNbr Desc
                       UNION ALL
@@ -67,7 +67,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                       SELECT TOP 1 2 as ExcPriority, CycleId, TagName, TagExcNbr, NULL as RampInDate, NULL as RampInValue, NULL as FirstExcDate, NULL as FirstExcValue
                       , 0 as HiPointsCt, 0 as LowPointsCt, 100 as MinThreshold, 200 as MaxThreshold
                       , NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
-                      , 120 as ThresholdDuration, 150 as SetPoint FROM [dbo].[ExcursionPoints] 
+                      , ThresholdDuration, SetPoint FROM [dbo].[ExcursionPoints] 
                       WHERE TagName = @TagName AND RampInDate is NOT NULL AND RampOutDate is NOT NULL
                       ORDER BY TagName, TagExcNbr Desc
                       UNION ALL
@@ -75,7 +75,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                       SELECT 1 as ExcPriority, -1 as  CycleId, @TagName as TagName, 1 as TagExcNbr, NULL, NULL, NULL, NULL
                       , 0, 0, 100, 200
                       , NULL, NULL, NULL, NULL
-                      , 120, 150
+                      , NULL, NULL
                       ) as allExc
               ORDER BY ExcPriority DESC;
 

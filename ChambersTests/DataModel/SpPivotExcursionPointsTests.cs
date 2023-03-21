@@ -51,8 +51,8 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(excPointNew.TagName == tag);
             Assert.IsTrue(excPointNew.HiPointsCt == 3);
             Assert.IsTrue(excPointNew.LowPointsCt == 0);
-            Assert.IsTrue(excPointNew.ThresholdDuration == 120);
-            Assert.IsTrue(excPointNew.SetPoint != null && Equals(excPointNew.SetPoint,150d));
+            Assert.IsNull(excPointNew.ThresholdDuration);
+            Assert.IsNull(excPointNew.SetPoint);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
@@ -164,8 +164,8 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
             Assert.IsTrue(excPointNew.LastExcValue >= ht);
-            Assert.IsTrue(excPointNew.ThresholdDuration == 120);
-            Assert.IsTrue(excPointNew.SetPoint == 150);
+            Assert.IsNull(excPointNew.ThresholdDuration);
+            Assert.IsNull(excPointNew.SetPoint);
             excPointNew = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (tag, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht,null)).Skip(1).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
