@@ -38,6 +38,7 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<spSeedForTestsResult>().HasNoKey().ToView(null);
         }
     }
 
@@ -249,7 +250,7 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, int? ThresholdDuration, double? SetPoint, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, TimeSpan? TimeStep, int? ThresholdDuration, double? SetPoint, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -293,6 +294,12 @@ namespace ChambersDataModel.Entities
                 },
                 new SqlParameter
                 {
+                    ParameterName = "TimeStep",
+                    Value = TimeStep ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Time,
+                },
+                new SqlParameter
+                {
                     ParameterName = "ThresholdDuration",
                     Value = ThresholdDuration ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.Int,
@@ -305,14 +312,14 @@ namespace ChambersDataModel.Entities
                 },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @ThresholdDuration, @SetPoint", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @TimeStep, @ThresholdDuration, @SetPoint", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 
             return _;
         }
 
-        public virtual async Task<int> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spSeedForTestsResult>> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -325,7 +332,7 @@ namespace ChambersDataModel.Entities
             {
                 parameterreturnValue,
             };
-            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [BB50PCSjsantos].[spSeedForTests]", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spSeedForTestsResult>("EXEC @returnValue = [BB50PCSjsantos].[spSeedForTests]", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

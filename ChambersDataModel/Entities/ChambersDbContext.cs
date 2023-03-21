@@ -184,7 +184,7 @@ namespace ChambersDataModel.Entities
                 entity.HasKey(e => new { e.Tag, e.Time })
                     .HasName("pkInterpolated");
 
-                entity.ToTable("Interpolated");
+                entity.ToTable("Interpolated", "BB50PCSjsantos");
 
                 entity.Property(e => e.Tag)
                     .HasMaxLength(255)

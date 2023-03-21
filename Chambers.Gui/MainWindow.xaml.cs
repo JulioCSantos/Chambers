@@ -31,8 +31,8 @@ namespace Chambers.Gui
             var fileInfo = new FileInfo(assmFile.Directory + @"\Chambers.sql");
 
 
-            StringBuilder sb = new StringBuilder();
-            Server myServer = new Server(@"ASUS-STRANGE");
+            StringBuilder sb = new ();
+            Server myServer = new (@"ASUS-STRANGE");
             //Using windows authentication
             myServer.ConnectionContext.LoginSecure = true;
             myServer.ConnectionContext.Connect();
@@ -65,7 +65,7 @@ namespace Chambers.Gui
             foreach (Table t in db.Tables) {
                 if (t.Schema == "dbo"/* && !t.IsSystemObject*/) {
                     StringCollection sc = t.Script(scriptOpt);
-                    foreach (string s in sc) {
+                    foreach (string? s in sc) {
                         sb.AppendLine(s);
                     }
                 }
@@ -76,7 +76,7 @@ namespace Chambers.Gui
             foreach (StoredProcedure sp in db.StoredProcedures) {
                 if (sp.Schema == "dbo"/* && !t.IsSystemObject*/) {
                     var sc = sp.Script(scriptOpt);
-                    foreach (string s in sc) {
+                    foreach (string? s in sc) {
                         sb.AppendLine(s);
                     }
                 }
@@ -87,7 +87,7 @@ namespace Chambers.Gui
             foreach (View v in db.Views) {
                 if (v.Schema == "dbo"/* && !t.IsSystemObject*/) {
                     StringCollection sc = v.Script(scriptOpt);
-                    foreach (string s in sc) {
+                    foreach (string? s in sc) {
                         sb.AppendLine(s);
                     }
                 }

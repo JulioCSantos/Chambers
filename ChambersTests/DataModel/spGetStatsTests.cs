@@ -28,9 +28,9 @@ namespace ChambersTests.DataModel
             var tag = "chamber_report_tag_1";
             var strDt = new DateTime(2022, 10, 31);
             var endDt = new DateTime(2022, 11, 30);
-            TestDbContext.CompressedPoints.Add(new CompressedPoint(tag, strDt.AddDays(1), 10));
-            TestDbContext.CompressedPoints.Add(new CompressedPoint(tag, strDt.AddDays(2), 20));
-            TestDbContext.CompressedPoints.Add(new CompressedPoint(tag, strDt.AddDays(3), 30));
+            TestDbContext.Add(new Interpolated(tag, strDt.AddDays(1), 10));
+            TestDbContext.Add(new Interpolated(tag, strDt.AddDays(2), 20));
+            TestDbContext.Add(new Interpolated(tag, strDt.AddDays(3), 30));
             await TestDbContext.SaveChangesAsync();
 
             var minValue = new OutputParameter<double?>();

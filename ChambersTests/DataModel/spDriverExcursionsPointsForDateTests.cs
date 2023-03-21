@@ -28,15 +28,17 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task OneHighExcursionPointTest() {
+        public async Task OneHighExcursionPointTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
-            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
@@ -54,9 +56,9 @@ namespace ChambersTests.DataModel
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
-            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
             await TestDbContext.SaveChangesAsync();
             Assert.AreEqual(1, TestDbContext.PointsPaces.Count(pp => pp.StageDateId == pointsPace.StageDateId));
             Assert.IsTrue(TestDbContext.PointsPaces.First().ProcessedDate == null);
@@ -79,9 +81,9 @@ namespace ChambersTests.DataModel
             stage.SetThresholds(100,300);
             var tag = stage.Tag;
             TestDbContext.StagesDates.Add(stageDate);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             var prevPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
                 .Where(pp => pp.StageDateId == stageDate.StageDateId).ToList();
@@ -108,9 +110,9 @@ namespace ChambersTests.DataModel
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             var prevPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
                 .Where(pp => pp.StageDateId == pointsPace.StageDateId).ToList();
@@ -136,10 +138,10 @@ namespace ChambersTests.DataModel
             TestDbContext.PointsPaces.Add(pointsPace);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MinThreshold! * 1.1));
-            var firstLowExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddMinutes(10), (float)(stage.MinThreshold! * 0.9));
-            var lastLowExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddMinutes(20), (float)(stage.MinThreshold! * 0.8));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MinThreshold! * 1.2));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-1), (float)(stage.MinThreshold! * 1.1));
+            var firstLowExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddMinutes(10), (float)(stage.MinThreshold! * 0.9));
+            var lastLowExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddMinutes(20), (float)(stage.MinThreshold! * 0.8));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(+1), (float)(stage.MinThreshold! * 1.2));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
@@ -161,7 +163,7 @@ namespace ChambersTests.DataModel
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var highExcursionPoint = TestDbContext.NewCompressedPoint(tag.TagName
+            var highExcursionPoint = TestDbContext.NewInterpolatedPoint(tag.TagName
                 , pointsPace.NextStepStartDate.AddDays(-1), (float)(stage.MaxThreshold! * 1.5));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
@@ -178,15 +180,15 @@ namespace ChambersTests.DataModel
             TestDbContext.PointsPaces.Add(pointsPace);
             // excursion 1
             var baseDate1 = baseDate;
-            var rampInPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             // excursion 2
             var baseDate2 = baseDate.AddDays(1);
-            var rampInPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
@@ -214,14 +216,14 @@ namespace ChambersTests.DataModel
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
             // excursion 1
-            var rampInPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint1 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate1.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate1.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             // excursion 2
-            var rampInPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
-            var highExcursionPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint2 = TestDbContext.NewCompressedPoint(tag.TagName, baseDate2.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
+            var rampInPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2.AddHours(-1), (float)(stage.MaxThreshold! * 0.9));
+            var highExcursionPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate2.AddHours(+1), (float)(stage.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             
             // Driver run for first day. One NOT Processed PaceStep
@@ -272,9 +274,9 @@ namespace ChambersTests.DataModel
             stage.MinThreshold = null;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
-            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
@@ -293,9 +295,9 @@ namespace ChambersTests.DataModel
             stage.MaxThreshold = null;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
-            var hiExcPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate, (float)(stage.MinThreshold! * 0.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MinThreshold! * 0.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
             await TestDbContext.SaveChangesAsync();
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
@@ -317,9 +319,9 @@ namespace ChambersTests.DataModel
             var pointsPaces = TestDbContext.PointsPaces.Where(pp => pp.StageDateId == stageDate.StageDateId).ToList();
             TestDbContext.PointsPaces.RemoveRange(pointsPaces);
             TestDbContext.StagesDates.Add(stageDate);
-            var rampInPoint = TestDbContext.NewCompressedPoint(tagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
-            var hiExcPoint = TestDbContext.NewCompressedPoint(tagName, baseDate, (float)(stage.MinThreshold! * 0.5));
-            var rampOutPoint = TestDbContext.NewCompressedPoint(tagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate, (float)(stage.MinThreshold! * 0.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
             await TestDbContext.SaveChangesAsync();
             
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(

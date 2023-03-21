@@ -11,12 +11,12 @@ BEGIN
 PRINT '>>> spGetStats begins'
 
 
-		SELECT @MinValue = Min(Value), @MaxValue = max(Value), @AvergValue = Avg(Value), @StdDevValue = STDEV(value)
-			FROM [dbo].fnGetInterp2(@TagName,@FirstExcDate,@LastExcDate,'00:10:00');
-
 		--SELECT @MinValue = Min(Value), @MaxValue = max(Value), @AvergValue = Avg(Value), @StdDevValue = STDEV(value)
-		--	FROM [dbo].Interpolated as Stat
-		--	WHERE Stat.tag = @TagName  and Stat.time >= @FirstExcDate And Stat.Time <= @LastExcDate;
+		--	FROM [dbo].fnGetInterp2(@TagName,@FirstExcDate,@LastExcDate,'00:00:01');
+
+		SELECT @MinValue = Min(Value), @MaxValue = max(Value), @AvergValue = Avg(Value), @StdDevValue = STDEV(value)
+			FROM [BB50PCSjsantos].Interpolated as Stat
+			WHERE Stat.tag = @TagName  and Stat.time >= @FirstExcDate And Stat.Time <= @LastExcDate;
 
 --PRINT 'spGetStats ends <<<'
 --DECLARE @OMinValue    float;

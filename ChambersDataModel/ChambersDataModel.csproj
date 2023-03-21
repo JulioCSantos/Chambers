@@ -62,7 +62,6 @@
     <EmbeddedResource Include="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
     <EmbeddedResource Include="StoredProcs\24_spGetInterop2.sql" />
-    <EmbeddedResource Include="StoredProcs\90_CreateSchemas.sql" />
     <EmbeddedResource Include="StoredProcs\92_spSeedForTests.sql" />
     <EmbeddedResource Include="StoredProcs\91_CreateCompressedPoint.sql" />
     <EmbeddedResource Include="Views\05_PointsStepsLogNextValues.sql" />

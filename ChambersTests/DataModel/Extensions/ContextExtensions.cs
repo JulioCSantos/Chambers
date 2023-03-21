@@ -33,6 +33,14 @@ namespace ChambersTests.DataModel.Extensions
             return highExcursionPoint;
         }
 
+        public static Interpolated NewInterpolatedPoint(this ChambersDbContext context
+            , string tagName, DateTime time, float value) {
+            var highExcursionPoint = new Interpolated(tagName, time, value);
+            context.Add(highExcursionPoint);
+
+            return highExcursionPoint;
+        }
+
         public static ExcursionPoint NewExcursionPoint(this ChambersDbContext context
             , string tagName, int tagExcNbr, int hiPointsCt, int lowPointsCt) {
             var excursionPoint = new ExcursionPoint() {
