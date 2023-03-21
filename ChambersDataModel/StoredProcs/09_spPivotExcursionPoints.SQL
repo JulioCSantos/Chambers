@@ -1,13 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (       
          @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
        , @LowThreashold float, @HiThreashold float, @TimeStep time(0) 
-       , @ThresholdDuration int = null, @SetPoint float = null
 )
 AS
 BEGIN
 PRINT '>>> spPivotExcursionPoints begins'
 PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate:', @EndDate
-              , ' @ThresholdDuration:', @ThresholdDuration, ' @SetPoint:', @SetPoint);
+              , ' @TimeStep:', @TimeStep);
 
        --Declare input cursor values
        DECLARE  @tag varchar(255), @time DateTime, @value float, @TagExcNbr int = 1; 
@@ -199,7 +198,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                              INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @TagName, @TagExcNbr
                                     , NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
                                     , @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
-                                    , NULL, NULL, @ThresholdDuration, @SetPoint);
+                                    , NULL, NULL, NULL, NULL);
                       END
               END
        END;
