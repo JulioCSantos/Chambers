@@ -135,7 +135,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				UPDATE [dbo].[PointsPaces] SET ProcessedDate = GetDate()
 				WHERE PaceId = @PaceId;
 				SET @currPaceId = @PaceId;
-
+				SET @PaceId = -1; --subsequent PointsPaces should be inserted after the first update
 			END
 			
 			-- Insert Log
