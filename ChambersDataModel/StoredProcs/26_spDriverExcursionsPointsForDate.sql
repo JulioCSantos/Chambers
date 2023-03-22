@@ -175,6 +175,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
 				, @HiPointsCt int, @LowPointsCt int
 				, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
+				-- Get latest result from spPivot into variables
 				SELECT TOP 1 @CycleId = CycleId
 				, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
 				, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
@@ -183,15 +184,16 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				UPDATE @ExcPoints SET DeprecatedDate = @DeprecatedDate;
 				IF (@CycleId < 0) BEGIN
 				UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint;
+				PRINT 'Insert Excursion Point';  
 				Insert into ExcursionPoints ( 
-					TagId, TagName, TagExcNbr, StageDateId
+					TagId, TagName, TagExcNbr, StageDateId, StepLogId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
 					, MinValue, MaxValue, AvergValue, StdDevValue
 					, DeprecatedDate, ThresholdDuration, SetPoint
 					)
-					SELECT TagId, TagName, TagExcNbr, StageDateId
+					SELECT TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
@@ -201,9 +203,10 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 					UPDATE @ExcPoints SET CycleId = SCOPE_IDENTITY();
 				END
 				ELSE BEGIN
-					UPDATE ExcursionPoints 
+				PRINT CONCAT('Excursion Point updated. CycleId:', @CycleId)
+				UPDATE ExcursionPoints 
 					SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, @RampOutValue = RampOutValue
-					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, DeprecatedDate = DeprecatedDate
+					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, DeprecatedDate = DeprecatedDate, StepLogId = @StepLogId
 					, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
 					WHERE CycleId = @CycleId;
 				END
