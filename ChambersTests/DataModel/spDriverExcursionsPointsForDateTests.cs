@@ -21,7 +21,6 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task EmptyResultsTest()
         {
-            TestDbContext.IsPreservedForTest = true;
            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 new DateTime(2222, 1, 22), new DateTime(2222, 1, 23),"-1");
             Assert.AreEqual(0, result.Count);
@@ -30,7 +29,6 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OneHighExcursionPointTest()
         {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -73,7 +71,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionPointWithNoPointsPaceTest() {
-            TestDbContext.IsPreservedForTest = true;
             var tagName = NewName();
             var baseDate = DateTime.Today;
             var stageDate = new StagesDate(tagName, baseDate.AddHours(6));
@@ -335,7 +332,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionThresholdDurationSetPointTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today;
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;

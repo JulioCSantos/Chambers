@@ -1,11 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (       
          @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
-       , @LowThreashold float, @HiThreashold float, @TimeStep time(0) NULL
+       , @LowThreashold float, @HiThreashold float, @TimeStep time(0) NULL,  @TimeOutDayFactor float NULL
 )
 AS
 BEGIN
 PRINT '>>> spPivotExcursionPoints begins'
 IF (@TimeStep IS NULL) SET @TimeStep = CAST('00:00:01' as time(0));
+IF (@TimeOutDayFactor IS NULL) SET @TimeOutDayFactor = 1.2; -- 1.2 seconds to process one day
+DECLARE @NbrOfdays int = DateDiff(day, @StartDate, @EndDate);
+DECLARE @TimeOutMilliSecs bigint = @NbrOfdays * @TimeOutDayFactor * 1000, @StartTimeOutTime datetime = GetUTCDate();
 
 PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate:', @EndDate
               , ' @TimeStep:', @TimeStep);
@@ -115,6 +118,16 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
        PRINT 'Loop through Excursion points in the time period if any'
        WHILE @@FETCH_STATUS = 0  BEGIN
                       
+            -- Check timeout
+            DECLARE @elapsedTimeMilliSeconds bigint, @returnValue int = 0;
+            SET @elapsedTimeMilliSeconds = DateDiff(ms,@StartTimeOutTime, GetUTCDate());
+            if (@TimeOutDayFactor > 0 AND @elapsedTimeMilliSeconds > @TimeOutMilliSecs) BEGIN
+                RAISERROR ('Timeout',1,1);
+                DELETE FROM @ExcPoints;
+				SET @returnValue = -1;
+				GOTO ReturnResult;
+            END;
+
               IF (@FirstExcDate IS NULL) BEGIN
                       PRINT 'Get First Excursion Point'
                       UPDATE @ExcPoint1 SET FirstExcDate = @time, FirstExcValue = @value;
@@ -220,21 +233,24 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
        PRINT 'Save LAST Excursion in date range (end of cursor)'
        INSERT INTO @ExcPoints Select * FROM @ExcPoint1;
 
+	ReturnResult:
        SELECT 
-              [CycleId], [TagName], [TagExcNbr]
+         [CycleId], [TagName], [TagExcNbr]
          , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
-      , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
+         , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
          , [HiPointsCt], [LowPointsCt], @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
          , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
          , [ThresholdDuration], [SetPoint]
        FROM @ExcPoints 
        WHERE (HiPointsCt > 0 OR LowPointsCt > 0) AND FirstExcDate IS NOT NULL;
 
+	   PRINT 'spPivotExcursionPoints ends <<<'
+	   RETURN @returnValue;
+
 -- UNIT TESTS
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-03'
 --, @LowThreashold = 100, @HiThreashold = 200;
 --EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
 --, @LowThreashold = 100, @HiThreashold = 200;
-PRINT 'spPivotExcursionPoints ends <<<'
 
 END

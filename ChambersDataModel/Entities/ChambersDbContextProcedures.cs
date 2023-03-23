@@ -249,7 +249,7 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, TimeSpan? TimeStep, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, TimeSpan? TimeStep, double? TimeOutDayFactor, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -297,9 +297,15 @@ namespace ChambersDataModel.Entities
                     Value = TimeStep ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.Time,
                 },
+                new SqlParameter
+                {
+                    ParameterName = "TimeOutDayFactor",
+                    Value = TimeOutDayFactor ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Float,
+                },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @TimeStep", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @TagName, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @TimeStep, @TimeOutDayFactor", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 
