@@ -18,5 +18,12 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(viewResults);
             Assert.AreEqual(0, viewResults.Count);
         }
+
+        [TestMethod]
+        public void SeriesManufacturingTest()
+        {
+            var seq = Enumerable.Range(1, 250);
+            var strSeq = string.Join(',', seq);
+        }
     }
 }

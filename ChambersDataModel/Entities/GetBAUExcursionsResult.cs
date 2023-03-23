@@ -24,8 +24,8 @@ namespace ChambersDataModel.Entities
         public double? LastExcValue { get; set; }
         public DateTime? RampOutDate { get; set; }
         public double? RampOutValue { get; set; }
-        public int HiPointsCt { get; set; }
-        public int LowPointsCt { get; set; }
+        public long? HiPointsCt { get; set; }
+        public long? LowPointsCt { get; set; }
         public double? MinThreshold { get; set; }
         public double? MaxThreshold { get; set; }
         public double? MinValue { get; set; }

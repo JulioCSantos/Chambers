@@ -169,7 +169,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			  , [ThresholdDuration], [SetPoint]
 			)
 			EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @TagName, @ProcNextStepStartDate
-				, @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01',2;
+				, @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01',0;
 
 			IF (@pivotReturnValue = 0 AND EXISTS(SELECT * FROM @ExcPoints)) BEGIN
 				UPDATE @ExcPoints Set TagId = @TagId, StageDateId = @CurrStageDateId;
