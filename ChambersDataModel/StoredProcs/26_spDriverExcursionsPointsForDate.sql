@@ -118,6 +118,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			BEGIN TRAN;
 
 			PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ''', @TagName, ''', '''
+				, ' StageDateId:', @CurrStageDateId 
 				, FORMAT(@ProcNextStepStartDate, 'yyyy-MM-dd'), ''', ''', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd'), ''', '
 				, CONVERT(varchar(255), @MinThreshold), ', ', CONVERT(varchar(255), @MaxThreshold), ', '
 				, Convert(varchar(16), @TagId), ', ' 
@@ -159,7 +160,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			SET @StepLogId = SCOPE_IDENTITY();
 
 			-- Find Excursions in date range
-			DECLARE @pivotReturnValue int;
+			DECLARE @pivotReturnValue int = 0;
 			INSERT INTO @ExcPoints (
 				[CycleId], [TagName], [TagExcNbr]
 			  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
@@ -217,7 +218,13 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			END
 
 			IF (@pivotReturnValue = 0) COMMIT TRAN;
-			ELSE ROLLBACK TRAN;
+			ELSE BEGIN 
+				ROLLBACK TRAN; 
+				PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ''', @TagName, ''', '''
+				, ' StageDateId:', @CurrStageDateId 
+				, FORMAT(@ProcNextStepStartDate, 'yyyy-MM-dd'), ''', ''', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd')
+				, 'ROLLED BACK')
+			END
 
 			-- prepare for next Point's step run
 			SET @ProcNextStepStartDate = @ProcNextStepEndDate; 
@@ -239,12 +246,13 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 	SELECT * FROM @ExcPointsOutput;
 
-	--UNIT TESTS
-	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
-	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '15,14'
-	--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '12341234'
-
-
 PRINT 'spDriverExcursionsPointsForDate ends <<<'
+
+RETURN @pivotReturnValue;
+
+--UNIT TESTS
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '15,14'
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '12341234'
 
 END;
