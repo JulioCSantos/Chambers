@@ -71,13 +71,13 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	IF (NOT EXISTS(SELECT * FROM @StagesLimitsAndDatesCore)) BEGIN
 		PRINT '<<< spDriverExcursionsPointsForDate aborted';
 		SELECT * FROM @ExcPoints;
-		RETURN;
+		RETURN -1;
 	END;
 
-	DECLARE @StgDtCount int, @CurrStgDt int = 1;
+	DECLARE @StgDtCount int, @CurrStgDtIx int = 1;
 	SELECT @StgDtCount = count(*) from @StagesLimitsAndDatesCore;
 	PRINT 'Process every StageDate'
-	WHILE @CurrStgDt <= @StgDtCount BEGIN
+	WHILE @CurrStgDtIx <= @StgDtCount BEGIN
 		DECLARE @CurrStageDateId int, @StageId int, @TagId int, @TagName varchar(255)
 		, @ProductionDate datetime, @DeprecatedDate datetime
 		, @StageStartDate datetime, @StageEndDate datetime
@@ -91,7 +91,11 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		, @MinThreshold = MinThreshold, @MaxThreshold = MaxThreshold
 		, @ThresholdDuration = ThresholdDuration, @SetPoint = SetPoint
 		, @PaceId = PaceId
-		FROM @StagesLimitsAndDatesCore WHERE RowID = @CurrStgDt;
+		FROM @StagesLimitsAndDatesCore WHERE RowID = @CurrStgDtIx;
+		if (@CurrStepStartDate < @ProductionDate) BEGIN
+			SET @CurrStepStartDate = @ProductionDate;
+			SET @CurrStepEndDate = DateAdd(day, @StepSizedays, @CurrStepStartDate);
+		END
 
 		PRINT CONCAT('Processing StageDateId:', @CurrStageDateId,' TagName:', @TagName, ' for ...');
 		--Get processing date region
@@ -102,7 +106,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			, Format(@ProcStartDate,'yyyy-MM-dd'),' and End date:', FORMAT(@ProcEndDate, 'yyyy-MM-dd'));
 		IF (@ProcStartDate is NULL) BEGIN 
 			PRINT CONCAT('valid processing dates not found for StageDateId', @CurrStageDateId);
-			SET @CurrStgDt=@CurrStgDt+1;
+			SET @CurrStgDtIx=@CurrStgDtIx+1;
 			CONTINUE; 
 		END;
 
@@ -129,7 +133,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			DECLARE @currPaceId int = null;
 			IF (@PaceId <= 0) BEGIN
 				INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
-					 VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays , GetDate() ); 
+						VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays , GetDate() ); 
 				SET @currPaceId = SCOPE_IDENTITY();
 			END
 			ELSE BEGIN
@@ -162,14 +166,14 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			-- Find Excursions in date range
 			DECLARE @pivotReturnValue int = 0;
 			INSERT INTO @ExcPoints (
-				[CycleId], [TagName], [TagExcNbr]
+				[CycleId], [StageDateId], [TagName], [TagExcNbr]
 			  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
 			  , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
 			  , [HiPointsCt], [LowPointsCt], [MinThreshold], [MaxThreshold]
 			  , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
 			  , [ThresholdDuration], [SetPoint]
 			)
-			EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @TagName, @ProcNextStepStartDate
+			EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @CurrStageDateId, @ProcNextStepStartDate
 				, @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01',0;
 
 			IF (@pivotReturnValue = 0 AND EXISTS(SELECT * FROM @ExcPoints)) BEGIN
@@ -240,7 +244,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
 			VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
 
-		SET @CurrStgDt=@CurrStgDt+1;
+		SET @CurrStgDtIx=@CurrStgDtIx+1;
 	END;
  
 

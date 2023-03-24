@@ -378,5 +378,48 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(excursion.DeprecatedDate, stage.DeprecatedDate);
         }
 
+        [TestMethod]
+        public async Task DeprecatedStageTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today.AddDays(-30);
+            var tagName = NewName();
+            var stageDate1 = new StagesDate(tagName, baseDate);
+            var stage1 = stageDate1.Stage; stage1.SetThresholds(100,200);
+            stage1.ProductionDate = baseDate;
+            stage1.DeprecatedDate = baseDate.AddDays(5);
+            TestDbContext.Add(stageDate1);
+            var stageDate2 = new StagesDate(tagName, baseDate.AddDays(5));
+            var stage2 = stageDate2.Stage; stage2.SetThresholds(130, 230);
+            stage2.ProductionDate = baseDate.AddDays(5);
+            TestDbContext.Add(stageDate2);
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate, (float)(stage1.MaxThreshold! * 0.8));
+            for (int ix = 1; ix < 10; ix++) {
+                TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(ix), (float)(stage1.MaxThreshold! * 1.5));
+            }
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(11), (float)(stage1.MaxThreshold! * 0.8));
+            await TestDbContext.SaveChangesAsync();
+            
+            var driverResult1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(10), stageDate1.StageDateId.ToString());
+            var numberOfSteps1 = ((DateTime)stage1.DeprecatedDate).Subtract((DateTime)stage1.ProductionDate).Days - 2; 
+            Assert.AreEqual(numberOfSteps1, driverResult1.Count);
+            var driverResul2 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(10), stageDate2.StageDateId.ToString());
+            var numberOfSteps2 = (rampOutPoint.Time).Subtract((DateTime)stage2.ProductionDate).Days - 2;
+            
+            Assert.AreEqual(numberOfSteps2, driverResul2.Count);
+            var excs = TestDbContext.ExcursionPoints
+                .Where(ex => ex.TagName == tagName);
+            Assert.AreEqual(2, excs.ToList().Count);
+            var exc1 = excs.FirstOrDefault(ex => ex.StageDateId == stageDate1.StageDateId);
+            var exc2 = excs.FirstOrDefault(ex => ex.StageDateId == stageDate2.StageDateId);
+            Assert.IsNotNull(exc1);
+            Assert.IsNotNull(exc2);
+            Assert.AreEqual(rampInPoint.Time, exc1.RampInDate);
+            Assert.AreEqual(stage1.DeprecatedDate, exc1.DeprecatedDate);
+            Assert.IsNull(exc1.RampOutDate);
+            Assert.IsNull(exc2.RampInDate);
+        }
+
     }
 }

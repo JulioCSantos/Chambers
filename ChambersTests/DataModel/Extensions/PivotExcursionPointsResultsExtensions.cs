@@ -11,6 +11,7 @@ namespace ChambersTests.DataModel.Extensions
         public static ExcursionPoint ToExcursionPoint(this spPivotExcursionPointsResult pepr)
         {
             var ep = new ExcursionPoint();
+            ep.StageDateId = pepr.StageDateId;
             ep.TagName = pepr.TagName;
             ep.TagExcNbr = pepr.TagExcNbr ?? -1;
             ep.RampInDate = pepr.RampInDate;

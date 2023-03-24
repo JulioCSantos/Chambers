@@ -1,10 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[spPivotExcursionPoints] (       
-         @TagName varchar(255), @StartDate DateTime, @EndDate DateTime
+         @StageDateId int, @StartDate DateTime, @EndDate DateTime
        , @LowThreashold float, @HiThreashold float, @TimeStep time(0) NULL,  @TimeOutDayFactor float NULL
 )
 AS
 BEGIN
 PRINT '>>> spPivotExcursionPoints begins'
+
+DECLARE  @TagName varchar(255), @returnValue int = 0;;
+SELECT TOP 1 @TagName = sldc.TagName
+FROM StagesLimitsAndDatesCore as sldc
+WHERE sldc.StageDateId = @StageDateId;
+IF (@TagName IS NULL) BEGIN
+	PRINT CONCAT('TagName not found for StageDateId:', @StageDateId);
+	RAISERROR ('TagName not found for StageDateId',1,1);
+	SET @returnValue = -1;
+	GOTO ReturnResult;
+END
+
+
 IF (@TimeStep IS NULL) SET @TimeStep = CAST('00:00:01' as time(0));
 IF (@TimeOutDayFactor IS NULL) SET @TimeOutDayFactor = 1.2; -- 1.2 seconds to process one day
 DECLARE @NbrOfdays int = DateDiff(day, @StartDate, @EndDate);
@@ -18,8 +31,8 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
        DECLARE @IsHiExc int = -1;
 
        -- Currently in-process Excursion in date range for Tag (TagName)
-       DECLARE @ExcPoint1 as TABLE ( ExcPriority int, CycleId int,
-                      TagName varchar(255), TagExcNbr int
+       DECLARE @ExcPoint1 as TABLE ( ExcPriority int, CycleId int, StageDateId int
+                      , TagName varchar(255), TagExcNbr int
                       , RampInDate DateTime, RampInValue float
                       , FirstExcDate DateTime, FirstExcValue float
                       , LastExcDate DateTime, LastExcValue float
@@ -30,8 +43,8 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                       , AvergValue float, StdDevValue float
                       , ThresholdDuration int, SetPoint float);
        -- Finished processed (saved) Excursions in date range
-       DECLARE @ExcPoints as TABLE ( ExcPriority int, CycleId int,
-                      TagName varchar(255), TagExcNbr int
+       DECLARE @ExcPoints as TABLE ( ExcPriority int, CycleId int, StageDateId int
+                      , TagName varchar(255), TagExcNbr int
                       , RampInDate DateTime, RampInValue float
                       , FirstExcDate DateTime, FirstExcValue float
                       , LastExcDate DateTime, LastExcValue float
@@ -49,33 +62,38 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
        DECLARE @HiPointsCt int = 0, @LowPointsCt int = 0; --Declare output counter values
 
        PRINT 'GET LAST Excursion or Empty (start up) Excursion row'
-       INSERT INTO @ExcPoint1 (ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+       INSERT INTO @ExcPoint1 (ExcPriority, CycleId, StageDateId, TagName, TagExcNbr
+              , RampInDate, RampInValue, FirstExcDate, FirstExcValue
               , HiPointsCt, LowPointsCt, LowThreashold, HiThreashold
               , MinValue, MaxValue, AvergValue, StdDevValue
               , ThresholdDuration, SetPoint)
-              SELECT TOP 1 ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+              SELECT TOP 1 ExcPriority, CycleId, StageDateId, TagName, TagExcNbr
+              , RampInDate, RampInValue, FirstExcDate, FirstExcValue
               , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
               , MinValue, MaxValue, AvergValue, StdDevValue
               , ThresholdDuration, SetPoint
               FROM (
                       -- get last incomplete Excursion (RampIn only) if one exists
-                      SELECT TOP 1 3 as ExcPriority, CycleId, TagName, TagExcNbr, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+                      SELECT TOP 1 3 as ExcPriority, CycleId, StageDateId, TagName, TagExcNbr
+					  , RampInDate, RampInValue, FirstExcDate, FirstExcValue
                       , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
                       , NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
                       , ThresholdDuration, SetPoint FROM [dbo].[ExcursionPoints] 
-                      WHERE TagName = @TagName AND RampOutDate is NULL
+                      WHERE StageDateId = @StageDateId AND RampOutDate is NULL
                       ORDER BY TagName, TagExcNbr Desc
                       UNION ALL
                       -- get completed Excursion (RampIn and RampOut populated) if one exists
-                      SELECT TOP 1 2 as ExcPriority, -1 as CycleId, TagName, TagExcNbr, NULL as RampInDate, NULL as RampInValue, NULL as FirstExcDate, NULL as FirstExcValue
+                      SELECT TOP 1 2 as ExcPriority, -1 as CycleId, StageDateId, TagName, TagExcNbr
+					  , NULL as RampInDate, NULL as RampInValue, NULL as FirstExcDate, NULL as FirstExcValue
                       , 0 as HiPointsCt, 0 as LowPointsCt, 100 as MinThreshold, 200 as MaxThreshold
                       , NULL as MinValue, NULL as MaxValue, NULL as AvergValue, NULL as StdDevValue
                       , ThresholdDuration, SetPoint FROM [dbo].[ExcursionPoints] 
-                      WHERE TagName = @TagName AND RampInDate is NOT NULL AND RampOutDate is NOT NULL
+                      WHERE StageDateId = @StageDateId AND RampInDate is NOT NULL AND RampOutDate is NOT NULL
                       ORDER BY TagName, TagExcNbr Desc
                       UNION ALL
                       -- Create a new Excursion 
-                      SELECT 1 as ExcPriority, -1 as  CycleId, @TagName as TagName, 1 as TagExcNbr, NULL, NULL, NULL, NULL
+                      SELECT 1 as ExcPriority, -1 as  CycleId, @StageDateId as StageDateId, @TagName as TagName, 1 as TagExcNbr
+					  , NULL, NULL, NULL, NULL
                       , 0, 0, 100, 200
                       , NULL, NULL, NULL, NULL
                       , NULL, NULL
@@ -120,7 +138,7 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
        WHILE @@FETCH_STATUS = 0  BEGIN
                       
             -- Check timeout
-            DECLARE @elapsedTimeMilliSeconds bigint, @returnValue int = 0;
+            DECLARE @elapsedTimeMilliSeconds bigint;
             SET @elapsedTimeMilliSeconds = DateDiff(ms,@StartTimeOutTime, GetUTCDate());
             if (@TimeOutDayFactor > 0 AND @elapsedTimeMilliSeconds > @TimeOutMilliSecs) BEGIN
                 RAISERROR ('Timeout',1,1);
@@ -214,8 +232,9 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
                              SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
                              SET @HiPointsCt = 0; SET @LowPointsCt = 0;
                              SET @RampInNotFound = 0; SET @RampOutNotFound = 0;
-                             INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @TagName, @TagExcNbr
-                                    , NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+                             INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @StageDateId, @TagName, @TagExcNbr
+                                    , NULL, NULL, NULL, NULL
+                                    , NULL, NULL, NULL, NULL
                                     , @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
                                     , NULL, NULL, NULL, NULL);
                       END
@@ -239,22 +258,17 @@ PRINT CONCAT('INPUT: @TagName:',@TagName, ' @StartDate:', @StartDate, ' @EndDate
 
 	ReturnResult:
        SELECT 
-         [CycleId], [TagName], [TagExcNbr]
+         [CycleId], [StageDateId], [TagName], [TagExcNbr]
          , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
          , [LastExcDate], [LastExcValue], [RampOutDate], [RampOutValue]
          , [HiPointsCt], [LowPointsCt], @LowThreashold as [MinThreshold], @HiThreashold as [MaxThreshold]
          , [MinValue], [MaxValue], [AvergValue], [StdDevValue]
          , [ThresholdDuration], [SetPoint]
        FROM @ExcPoints 
-       WHERE (HiPointsCt > 0 OR LowPointsCt > 0) AND FirstExcDate IS NOT NULL;
+       WHERE (HiPointsCt > 0 OR LowPointsCt > 0);
+       --WHERE (HiPointsCt > 0 OR LowPointsCt > 0) AND FirstExcDate IS NOT NULL;
 
 	   PRINT 'spPivotExcursionPoints ends <<<'
 	   RETURN @returnValue;
-
--- UNIT TESTS
---EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-03'
---, @LowThreashold = 100, @HiThreashold = 200;
---EXEC [dbo].[spPivotExcursionPoints] @TagName = 'chamber_report_tag_1', @StartDate = '2022-11-01', @EndDate = '2022-11-05'
---, @LowThreashold = 100, @HiThreashold = 200;
 
 END

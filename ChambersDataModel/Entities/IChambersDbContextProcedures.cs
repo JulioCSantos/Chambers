@@ -16,7 +16,7 @@ namespace ChambersDataModel.Entities
         Task<List<GetBAUExcursionsResult>> GetBAUExcursionsAsync(string TagsList, DateTime? AfterDate, DateTime? BeforeDate, int? DurationThreshold, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<spDriverExcursionsPointsForDateResult>> spDriverExcursionsPointsForDateAsync(DateTime? FromDate, DateTime? ToDate, string StageDateIds, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<int> spGetStatsAsync(string TagName, DateTime? FirstExcDate, DateTime? LastExcDate, OutputParameter<double?> MinValue, OutputParameter<double?> MaxValue, OutputParameter<double?> AvergValue, OutputParameter<double?> StdDevValue, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(string TagName, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, TimeSpan? TimeStep, double? TimeOutDayFactor, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<spSeedForTestsResult>> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<spPivotExcursionPointsResult>> spPivotExcursionPointsAsync(int? StageDateId, DateTime? StartDate, DateTime? EndDate, double? LowThreashold, double? HiThreashold, TimeSpan? TimeStep, double? TimeOutDayFactor, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<int> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
     }
 }
