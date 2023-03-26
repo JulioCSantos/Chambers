@@ -29,7 +29,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OneHighExcursionPointTest()
         {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
@@ -49,7 +49,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task PointsPacesUpdateWithOneHighExcursionPointTest()
         {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
@@ -72,7 +72,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OneHighExcursionPointWithNoPointsPaceTest() {
             var tagName = NewName();
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var stageDate = new StagesDate(tagName, baseDate.AddHours(6));
             var stage = stageDate.Stage;
             stage.SetThresholds(100,300);
@@ -102,7 +102,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionPointWithInitialPointsPaceTest() {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
@@ -130,7 +130,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task TwoLowExcursionPointsWithRampsTest()
         {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             TestDbContext.PointsPaces.Add(pointsPace);
             var stage = pointsPace.StageDate.Stage;
@@ -170,7 +170,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task TwoConsecutiveExcursionsTest() {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
@@ -203,7 +203,7 @@ namespace ChambersTests.DataModel
         //[TestMethod]
         public async Task TwoExcursionsOnTwoStepsTest()
         {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var stepDays = 2;
             var baseDate1 = baseDate;
             var baseDate2 = baseDate.AddDays(stepDays);
@@ -265,7 +265,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionPointWithNullLowExcursionTest() {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             stage.MinThreshold = null;
@@ -286,7 +286,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneLowExcursionPointWithNullHighExcursionTest() {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             stage.MaxThreshold = null;
@@ -332,7 +332,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionThresholdDurationSetPointTest() {
-            var baseDate = DateTime.Today;
+            var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             stage.ThresholdDuration = 6; //six seconds to be considered an excursion. SSRS only.
@@ -356,8 +356,10 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task OneHighExcursionDeprecatedDateTest() {
-            var baseDate = DateTime.Today;
+        public async Task OneHighExcursionDeprecatedDateTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today.AddDays(-10);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
             stage.DeprecatedDate = baseDate.AddDays(7); 

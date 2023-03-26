@@ -19,7 +19,6 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        //EXECUTE[dbo].[spPivotExcursionPoints] 'T1', '2022-01-01', '2022-03-31', 100, 200;
         public async Task HiExcursionWithPrevTagExcNbrTest()
         {
             string tag = NewName();
@@ -69,7 +68,8 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task LowExcursionTest() {
+        public async Task LowExcursionTest()
+        {
             var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             var lt = 100; var ht = 200;
@@ -211,18 +211,18 @@ namespace ChambersTests.DataModel
             var rampOutP1 = new Interpolated(tag, dt.AddDays(10), ht - 60); TestDbContext.Add(rampOutP1);
             await TestDbContext.SaveChangesAsync();
 
-            var rampInPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
+            var rampInExc = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt, dt.AddDays(2), lt, ht,null, null)).FirstOrDefault();
-            Assert.IsNotNull(rampInPoint);
-            Assert.AreEqual(1, rampInPoint.TagExcNbr);
-            Assert.IsTrue(rampInPoint.TagName == tag);
-            Assert.IsTrue(rampInPoint.HiPointsCt == 1);
-            Assert.IsTrue(rampInPoint.RampInValue >= lt && rampInPoint.RampInValue < ht);
-            Assert.IsTrue(Equals(rampInPoint.FirstExcValue!, excP1.Value));
-            Assert.IsNull(rampInPoint.LastExcValue);
-            Assert.IsNull(rampInPoint.LastExcDate);
+            Assert.IsNotNull(rampInExc);
+            Assert.AreEqual(1, rampInExc.TagExcNbr);
+            Assert.IsTrue(rampInExc.TagName == tag);
+            Assert.IsTrue(rampInExc.HiPointsCt == 1);
+            Assert.IsTrue(rampInExc.RampInValue >= lt && rampInExc.RampInValue < ht);
+            Assert.IsTrue(Equals(rampInExc.FirstExcValue!, excP1.Value));
+            Assert.IsNotNull(rampInExc.LastExcValue);
+            Assert.IsNotNull(rampInExc.LastExcDate);
 
-            var ep = rampInPoint.ToExcursionPoint();
+            var ep = rampInExc.ToExcursionPoint();
             await TestDbContext.ExcursionPoints.AddAsync(ep);
             await TestDbContext.SaveChangesAsync();
 
@@ -260,8 +260,8 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(rampInPoint.HiPointsCt == 1);
             Assert.IsTrue(rampInPoint.RampInValue >= lt && rampInPoint.RampInValue < ht);
             Assert.IsTrue(Equals(rampInPoint.FirstExcValue!, excP1.Value));
-            Assert.IsNull(rampInPoint.LastExcValue);
-            Assert.IsNull(rampInPoint.LastExcDate);
+            Assert.IsNotNull(rampInPoint.LastExcValue);
+            Assert.IsNotNull(rampInPoint.LastExcDate);
 
             var savingdRampInPoint = rampInPoint.ToExcursionPoint();
             await TestDbContext.ExcursionPoints.AddAsync(savingdRampInPoint);
@@ -271,7 +271,7 @@ namespace ChambersTests.DataModel
                 (stageDate.StageDateId, dt.AddDays(2), dt.AddDays(6), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(middleExcPoint);
             Assert.AreEqual(2, middleExcPoint.HiPointsCt);
-            Assert.IsNull(middleExcPoint.LastExcDate);
+            Assert.IsNotNull(middleExcPoint.LastExcDate);
             Assert.IsNull(middleExcPoint.RampOutDate);
 
             var savedRampInPoint = TestDbContext.ExcursionPoints.Single(ep => ep.CycleId == savingdRampInPoint.CycleId);
@@ -311,8 +311,8 @@ namespace ChambersTests.DataModel
             Assert.IsTrue(rampInResult.HiPointsCt == 1);
             Assert.IsTrue(rampInResult.RampInValue < ht);
             Assert.IsTrue(Equals(rampInResult.FirstExcValue!, excP1.Value));
-            Assert.IsNull(rampInResult.LastExcValue);
-            Assert.IsNull(rampInResult.LastExcDate);
+            Assert.IsNotNull(rampInResult.LastExcValue);
+            Assert.IsNotNull(rampInResult.LastExcDate);
 
             var rampInExc = rampInResult.ToExcursionPoint();
             await TestDbContext.ExcursionPoints.AddAsync(rampInExc);
@@ -322,7 +322,7 @@ namespace ChambersTests.DataModel
                 (stageDate.StageDateId, dt.AddDays(2), dt.AddDays(6), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(middleExcPoint);
             Assert.AreEqual(2, middleExcPoint.HiPointsCt);
-            Assert.IsNull(middleExcPoint.LastExcDate);
+            Assert.IsNotNull(middleExcPoint.LastExcDate);
             Assert.IsNull(middleExcPoint.RampOutDate);
 
             await TestDbContext.ExcursionPoints.AddAsync(middleExcPoint.ToExcursionPoint());
@@ -356,28 +356,6 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(excPnt.MinThreshold);
             Assert.AreEqual(excPnt.MinThreshold, lt);
             Assert.IsNull(excPnt.MaxThreshold);
-        }
-
-        [TestMethod]
-        // real time test. it needs to slow down to get the right result. like running in Debug mode or by itself.
-        public async Task TimeOutTest() {
-            var tag = NewName();
-            var dt = new DateTime(2023, 02, 01);
-            float lt = 100; float? ht = null;
-            var stageDate = new StagesDate(tag, dt);
-            stageDate.Stage.SetThresholds(lt, ht);
-            TestDbContext.Add(stageDate);
-            var rampInPl1 = new Interpolated(tag, dt.AddDays(1), lt + 60); TestDbContext.Add(rampInPl1);
-            Interpolated excPl;
-            excPl = new Interpolated(tag, dt.AddDays(3), lt - 50); TestDbContext.Add(excPl);
-            var rampOutPl1 = new Interpolated(tag, dt.AddDays(6), lt + 70); TestDbContext.Add(rampOutPl1);
-            await TestDbContext.SaveChangesAsync();
-            OutputParameter<int> retValue = new();
-            var excPnt = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
-                (stageDate.StageDateId, dt.AddDays(-30), dt.AddDays(+30), lt, ht, null, 0.00001, retValue)).FirstOrDefault();
-            Assert.AreEqual(-1, retValue.Value);
-            Assert.IsNull(excPnt);
-
         }
     }
 }

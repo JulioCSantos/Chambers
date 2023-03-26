@@ -12,12 +12,13 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task EmptyTest()
         {
+            var excPointsCount = new OutputParameter<int?>();
             var minValue = new OutputParameter<double?>();
             var maxValue = new OutputParameter<double?>();
             var avrgValue = new OutputParameter<double?>();
             var stdDevValue = new OutputParameter<double?>();
             var result = await TestDbContext.Procedures.spGetStatsAsync("", null, null
-                , minValue, maxValue, avrgValue, stdDevValue);
+                , excPointsCount, minValue, maxValue, avrgValue, stdDevValue);
             Assert.AreEqual(-1, result);
             Assert.IsNull(minValue.Value);
         }
@@ -33,12 +34,14 @@ namespace ChambersTests.DataModel
             TestDbContext.Add(new Interpolated(tag, strDt.AddDays(3), 30));
             await TestDbContext.SaveChangesAsync();
 
+            var excPointsCount = new OutputParameter<int?>();
             var minValue = new OutputParameter<double?>();
             var maxValue = new OutputParameter<double?>();
             var avrgValue = new OutputParameter<double?>();
             var stdDevValue = new OutputParameter<double?>();
             var result = await TestDbContext.Procedures.spGetStatsAsync(tag, strDt, endDt
-                , minValue, maxValue, avrgValue, stdDevValue);
+                , excPointsCount, minValue, maxValue, avrgValue, stdDevValue);
+            Assert.AreEqual(3, excPointsCount.Value);
             Assert.AreEqual(10,minValue.Value);
             Assert.AreEqual(30,maxValue.Value);
             Assert.AreEqual(20, avrgValue.Value);

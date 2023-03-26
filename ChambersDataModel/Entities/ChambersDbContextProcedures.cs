@@ -174,8 +174,15 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<int> spGetStatsAsync(string TagName, DateTime? FirstExcDate, DateTime? LastExcDate, OutputParameter<double?> MinValue, OutputParameter<double?> MaxValue, OutputParameter<double?> AvergValue, OutputParameter<double?> StdDevValue, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<int> spGetStatsAsync(string TagName, DateTime? FirstExcDate, DateTime? LastExcDate, OutputParameter<int?> ExcPointsCount, OutputParameter<double?> MinValue, OutputParameter<double?> MaxValue, OutputParameter<double?> AvergValue, OutputParameter<double?> StdDevValue, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
+            var parameterExcPointsCount = new SqlParameter
+            {
+                ParameterName = "ExcPointsCount",
+                Direction = System.Data.ParameterDirection.InputOutput,
+                Value = ExcPointsCount?._value ?? Convert.DBNull,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
             var parameterMinValue = new SqlParameter
             {
                 ParameterName = "MinValue",
@@ -232,14 +239,16 @@ namespace ChambersDataModel.Entities
                     Value = LastExcDate ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.DateTime,
                 },
+                parameterExcPointsCount,
                 parameterMinValue,
                 parameterMaxValue,
                 parameterAvergValue,
                 parameterStdDevValue,
                 parameterreturnValue,
             };
-            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[spGetStats] @TagName, @FirstExcDate, @LastExcDate, @MinValue OUTPUT, @MaxValue OUTPUT, @AvergValue OUTPUT, @StdDevValue OUTPUT", sqlParameters, cancellationToken);
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[spGetStats] @TagName, @FirstExcDate, @LastExcDate, @ExcPointsCount OUTPUT, @MinValue OUTPUT, @MaxValue OUTPUT, @AvergValue OUTPUT, @StdDevValue OUTPUT", sqlParameters, cancellationToken);
 
+            ExcPointsCount.SetValue(parameterExcPointsCount.Value);
             MinValue.SetValue(parameterMinValue.Value);
             MaxValue.SetValue(parameterMaxValue.Value);
             AvergValue.SetValue(parameterAvergValue.Value);
