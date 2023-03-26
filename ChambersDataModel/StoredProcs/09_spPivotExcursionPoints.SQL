@@ -189,19 +189,26 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
 		-- find last excursion point
 		IF (@FirstExcDate IS NOT NULL) BEGIN
             PRINT 'Find Last Excursion point'
-            --SELECT TOP 1 @LastExcDate = [time], @LastExcDate =  [value] FROM  PI.piarchive..piinterp
-            SELECT TOP 1 @LastExcDate = [time], @LastExcValue =  [value] FROM [BB50PCSjsantos].[Interpolated]
-            WHERE tag = @TagName 
-                AND time >= FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss') 
-                AND (
-                    (@RampOutDate IS NOT NULL AND time < FORMAT(@RampOutDate,'yyyy-MM-dd HH:mm:ss') )
-                    OR 
-                    (@RampOutDate IS NULL AND time < FORMAT(@EndDate,'yyyy-MM-dd HH:mm:ss') )
-                )
-				AND value is not null
-                AND ((@IsHiExc = 1 AND value >= @HiThreashold) OR (@IsHiExc = 0 AND value < @LowThreashold ))
-                --AND timestep = @TimeStep
-            ORDER BY time Desc;
+            IF (@RampOutDate IS NOT NULL) BEGIN
+                SELECT TOP 1 @LastExcDate = [time], @LastExcValue =  [value] FROM [BB50PCSjsantos].[Interpolated]
+                WHERE tag = @TagName 
+                    AND time >= FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss') 
+                    AND time < FORMAT(@RampOutDate,'yyyy-MM-dd HH:mm:ss')
+				    AND value is not null
+                    AND ((@IsHiExc = 1 AND value >= @HiThreashold) OR (@IsHiExc = 0 AND value < @LowThreashold ))
+                    --AND timestep = @TimeStep
+                ORDER BY time Desc;
+            END
+            ELSE BEGIN
+                SELECT TOP 1 @LastExcDate = [time], @LastExcValue =  [value] FROM [BB50PCSjsantos].[Interpolated]
+                WHERE tag = @TagName 
+                    AND time >= FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss') 
+                    AND time < FORMAT(@EndDate,'yyyy-MM-dd HH:mm:ss')
+				    AND value is not null
+                    AND ((@IsHiExc = 1 AND value >= @HiThreashold) OR (@IsHiExc = 0 AND value < @LowThreashold ))
+                    --AND timestep = @TimeStep
+                ORDER BY time Desc;
+            END
             UPDATE @ExcPoint1 SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue;
             PRINT Concat('Last Excursion point: @LastExcDate:', @LastExcDate,' RampOutValue:', @RampOutValue);
         END
@@ -213,7 +220,7 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
 			
         PRINT 'Update aggregated values (Min, Max, Averg, StdDev) if full Excursion found'
         IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
-            PRINT 'Update aggregated values'
+            PRINT CONCAT('Update aggregated values.',' @FirstExcDate:',@FirstExcDate,' @LastExcDate:',@LastExcDate)
             DECLARE @OExcPointsCount int, @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
             EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
                     , @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
@@ -222,22 +229,23 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
                             , AvergValue = @OAvergValue, StdDevValue = @OStdDevValue;
             IF (@IsHiExc = 1) Update @ExcPoint1 Set HiPointsCt = @OExcPointsCount
             ELSE Update @ExcPoint1 Set LowPointsCt = @OExcPointsCount
+            PRINT CONCAT('Count of Points found: ',@OExcPointsCount)
         END
 
-        IF (@CurrStartDate < @EndDate) BEGIN
-            PRINT 'Save Current Excursion and prepare for Next'
-            INSERT INTO @ExcPointsOutput Select * FROM @ExcPoint1;
-            DELETE FROM @ExcPoint1;
-            SET @TagExcNbr = @TagExcNbr + 1;
-            SET @RampInDate = NULL; SET @RampInValue = NULL; SET @FirstExcDate = NULL; SET @FirstExcValue = NULL;
-            SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
-            SET @HiPointsCt = 0; SET @LowPointsCt = 0;
-            INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @StageDateId, @TagName, @TagExcNbr
-                , NULL, NULL, NULL, NULL
-                , NULL, NULL, NULL, NULL
-                , @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
-                , NULL, NULL, NULL, NULL);
-        END
+        PRINT 'Save Current Excursion and prepare for Next'
+        INSERT INTO @ExcPointsOutput Select * FROM @ExcPoint1;
+        DELETE FROM @ExcPoint1;
+        DECLARE @ExcSavedCount int; Select @ExcSavedCount = count(*) from @ExcPointsOutput;
+        PRINT CONCAT('Number of Excursions saved: ',  @ExcSavedCount);
+        SET @TagExcNbr = @TagExcNbr + 1;
+        SET @RampInDate = NULL; SET @RampInValue = NULL; SET @FirstExcDate = NULL; SET @FirstExcValue = NULL;
+        SET @LastExcDate = NULL; SET @LastExcValue = NULL; SET @RampOutDate = NULL; SET @RampOutValue = NULL;
+        SET @HiPointsCt = 0; SET @LowPointsCt = 0;
+        INSERT INTO @ExcPoint1 VALUES (0, @CycleId, @StageDateId, @TagName, @TagExcNbr
+            , NULL, NULL, NULL, NULL
+            , NULL, NULL, NULL, NULL
+            , @HiPointsCt, @LowPointsCt, @LowThreashold, @HiThreashold, NULL, NULL
+            , NULL, NULL, NULL, NULL);
     END;
 
 ReturnResult:
