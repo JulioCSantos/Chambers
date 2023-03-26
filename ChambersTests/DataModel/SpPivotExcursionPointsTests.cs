@@ -288,7 +288,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task LengthyHiExcursionWithNullThreshold() {
-            TestDbContext.IsPreservedForTest = true;
             var tag = NewName();
             var dt = new DateTime(2022, 01, 31);
             float? lt = null; var ht = 200;
