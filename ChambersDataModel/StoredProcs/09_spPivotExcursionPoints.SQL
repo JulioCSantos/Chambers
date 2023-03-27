@@ -188,7 +188,7 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
                 SELECT TOP 1 @RampOutDate = [time], @RampOutValue =  [value] FROM [BB50PCSjsantos].[Interpolated]
                 WHERE tag = @TagName 
                         AND time > FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss') 
-                        AND time <= FORMAT(@EndDate,'yyyy-MM-dd HH:mm:ss') -- cant go beyond invoked date range or future ExPs will be compromised
+                        AND time <= FORMAT(@EndDate,'yyyy-MM-dd HH:mm:ss') -- cant go beyond invoked date range or future ExPs will be compromised 
                         AND value is not null
                         AND (
                         (@LowThreashold IS NULL OR value >= @LowThreashold)  

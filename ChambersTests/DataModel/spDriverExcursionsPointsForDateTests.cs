@@ -21,7 +21,6 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task EmptyResultsTest()
         {
-            TestDbContext.IsPreservedForTest = true;
            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 new DateTime(2222, 1, 22), new DateTime(2222, 1, 23),"-1");
             Assert.AreEqual(0, result.Count);
@@ -362,6 +361,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OneHighExcursionDeprecatedDateTest()
         {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-10);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -378,17 +378,21 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(1, driverResult.Count);
             Assert.IsNotNull(driverResult.First().DeprecatedDate);
             var excursion = (TestDbContext.ExcursionPoints
-                .Where(ex => ex.CycleId == driverResult.First().CycleId)).First();
+                .Where(ex => ex.StageDateId == driverResult.First().StageDateId)).FirstOrDefault();
+            Assert.IsNotNull(excursion);
             Assert.IsNotNull(excursion.DeprecatedDate);
             Assert.AreEqual(excursion.DeprecatedDate, stage.DeprecatedDate);
         }
 
         [TestMethod]
-        public async Task DeprecatedStageTest() {
+        public async Task DeprecatedStageTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var tagName = NewName();
             var stageDate1 = new StagesDate(tagName, baseDate);
             var stage1 = stageDate1.Stage; stage1.SetThresholds(100,200);
+            stage1.SetPoint = 150; stage1.ThresholdDuration = 60;
             stage1.ProductionDate = baseDate;
             stage1.DeprecatedDate = baseDate.AddDays(5);
             TestDbContext.Add(stageDate1);
@@ -397,21 +401,19 @@ namespace ChambersTests.DataModel
             stage2.ProductionDate = baseDate.AddDays(5);
             TestDbContext.Add(stageDate2);
             var rampInPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate, (float)(stage1.MaxThreshold! * 0.8));
-            for (int ix = 1; ix < 10; ix++) {
-                TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(ix), (float)(stage1.MaxThreshold! * 1.5));
+            for (int ix = 0; ix < 10; ix++) {
+                TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(ix).AddHours(1), (float)(stage1.MaxThreshold! * 1.5));
             }
-            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(11), (float)(stage1.MaxThreshold! * 0.8));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddDays(9).AddHours(2), (float)(stage1.MaxThreshold! * 0.8));
             await TestDbContext.SaveChangesAsync();
             
             var driverResult1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(10), stageDate1.StageDateId.ToString());
-            var numberOfSteps1 = ((DateTime)stage1.DeprecatedDate).Subtract((DateTime)stage1.ProductionDate).Days - 2; 
-            Assert.AreEqual(numberOfSteps1, driverResult1.Count);
+            Assert.AreEqual(1, driverResult1.Count);
             var driverResul2 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                baseDate, baseDate.AddDays(10), stageDate2.StageDateId.ToString());
-            var numberOfSteps2 = (rampOutPoint.Time).Subtract((DateTime)stage2.ProductionDate).Days - 2;
+                baseDate.AddDays(9), baseDate.AddDays(20), stageDate2.StageDateId.ToString());
             
-            Assert.AreEqual(numberOfSteps2, driverResul2.Count);
+            Assert.AreEqual(1, driverResul2.Count);
             var excs = TestDbContext.ExcursionPoints
                 .Where(ex => ex.TagName == tagName);
             Assert.AreEqual(2, excs.ToList().Count);
@@ -446,17 +448,19 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task SubsequentExcursionPointTest() {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var e1Dt = baseDate.AddDays(1);
             var e2Dt = baseDate.AddDays(2);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), e1Dt, 1);
             TestDbContext.PointsPaces.Add(pointsPace);
+            await TestDbContext.SaveChangesAsync();
             var stageDate = pointsPace.StageDate;
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             var prevExc = new ExcursionPoint() {
                 TagId = tag.TagId, TagName = tag.TagName, StageDateId = stageDate.StageDateId , TagExcNbr = 1
-                , RampInDate = e1Dt.AddDays(1), RampInValue = 150, FirstExcDate = e1Dt.AddHours(2), FirstExcValue = 210
+                , RampInDate = e1Dt.AddHours(1), RampInValue = 150, FirstExcDate = e1Dt.AddHours(2), FirstExcValue = 210
                 , LastExcDate = e1Dt.AddHours(3), LastExcValue = 230, RampOutDate = e1Dt.AddHours(4), RampOutValue = 180
                 , HiPointsCt = 10
             };
