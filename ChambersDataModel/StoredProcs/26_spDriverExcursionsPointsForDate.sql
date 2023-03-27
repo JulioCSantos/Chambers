@@ -59,6 +59,16 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
 	, DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
 
+	DECLARE @ExcPointsWIP as TABLE ( RowID int NULL
+	, CycleId int, TagId int NULL
+	, TagName varchar(255), TagExcNbr int NULL
+	, StepLogId int NULL, StageDateId int NULL
+	, RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
+	, LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
+	, HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
+	, MinValue float, MaxValue float, AvergValue float, StdDevValue float
+	, DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
+
 	DECLARE @ExcPointsOutput as TABLE ( RowID int NULL
 	, CycleId int, TagId int NULL
 	, TagName varchar(255), TagExcNbr int NULL
@@ -169,11 +179,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			SET @StepLogId = SCOPE_IDENTITY();
 
 			-- Find Excursions in date range
-			IF (@CurrStageDateId IS  NULL) RETURN 1;
-			IF (@ProcNextStepStartDate IS  NULL) RETURN 2;
-			IF (@ProcNextStepEndDate IS  NULL) RETURN 3;
-			IF (@MinThreshold IS  NULL) RETURN 4;
-			IF (@MaxThreshold IS  NULL) RETURN 5;
 			DECLARE @pivotReturnValue int = 0;
 			--INSERT INTO @ExcPoints (
 			INSERT INTO @ExcPoints (
@@ -187,9 +192,153 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @CurrStageDateId, @ProcNextStepStartDate
 				, @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01';
 
+			DECLARE @ExcsFound int;
+			SELECT @ExcsFound = count(*) from @ExcPoints;
+
+			SET @ProcNextStepStartDate = @ProcNextStepEndDate; 
+			SET @ProcNextStepEndDate = DateAdd(day, @StepSizedays, @ProcNextStepStartDate);
+			PRINT 'processing next Step using...'; 
+			PRINT CONCAT(' @ProcNextStepStartDate:', FORMAT(@ProcNextStepStartDate,'yyyy-MM-dd')
+				,' @ProcNextStepEndDate:', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd'));
+
+		END -- Next day in date Range
+
 				
-				Insert into @ExcPointsOutput
-				SELECT * FROM @ExcPoints;
+		DECLARE @wCycleId int, @wLastExcDate datetime, @wLastExcValue float, @wRampOutDate datetime, @wRampOutValue float
+		, @wHiPointsCt int, @wLowPointsCt int
+		, @wMinValue float, @wMaxValue float, @wAvergValue float, @wStdDevValue float;		
+
+		DELETE FROM @ExcPointsOutput;
+		DELETE FROM @ExcPointsWIP;
+		DECLARE @pvtExcCount int, @pvtExcIx int = 1;
+		SELECT @pvtExcCount = count(*) from @ExcPoints;
+		PRINT 'Process every spPivot excursion result'
+		WHILE @pvtExcIx <= @pvtExcCount BEGIN
+
+			if (NOT EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
+				PRINT 'INSERT'
+				Insert into @ExcPointsWIP 
+				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
+
+				SELECT @wCycleId = CycleId
+				, @wLastExcDate = LastExcDate, @wLastExcValue = LastExcValue, @wRampOutDate = RampOutDate, @wRampOutValue = RampOutValue
+				, @wHiPointsCt = HiPointsCt, @wLowPointsCt = LowPointsCt
+				, @wMinValue = MinValue, @wMaxValue = MaxValue, @wAvergValue = AvergValue, @wStdDevValue = StdDevValue
+				FROM @ExcPointsWIP
+
+				SET @pvtExcIx=@pvtExcIx+1;
+				CONTINUE; --skip to next excursion (if any)
+			END
+
+			PRINT 'Get current Excursion'
+			DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
+			, @HiPointsCt int, @LowPointsCt int
+			, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
+			SELECT @CycleId = CycleId
+			, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+			, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
+			, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
+			FROM @ExcPoints
+			WHERE RowId = @pvtExcIx;
+
+			IF (@wRampOutDate IS NULL) BEGIN
+				PRINT 'MERGE' -- Must use Minimum and Maximum calculations for stats
+				UPDATE @ExcPointsWIP SET HiPointsCt = HiPointsCt + @HiPointsCt
+				, LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
+				, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
+			END
+			ELSE BEGIN
+				PRINT 'RELEASE TO OUTPUT and Insert the focused ExcPoints row'
+				INSERT INTO @ExcPointsOutput
+				SELECT * FROM @ExcPointsWIP;
+				
+				DELETE FROM @ExcPointsWIP;
+				
+				Insert into @ExcPointsWIP 
+				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
+			END
+
+			SET @pvtExcIx=@pvtExcIx+1;
+
+		END -- Next spPivot excursion row
+		
+		DELETE FROM @ExcPoints;
+
+		-- handle the last Excursion
+		INSERT INTO @ExcPointsOutput
+		SELECT * FROM @ExcPointsWIP;
+		DELETE FROM @ExcPointsWIP;
+
+		Insert into ExcursionPoints ( 
+			TagId, TagName, TagExcNbr, StageDateId, StepLogId
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, DeprecatedDate, ThresholdDuration, SetPoint
+			)
+		SELECT 
+			TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, DeprecatedDate, ThresholdDuration, SetPoint
+			FROM @ExcPointsOutput;
+
+		-- Insert PointsPaces' next process row
+		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
+			VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
+
+		--IF (@pivotReturnValue = 0) COMMIT TRAN;
+		--ELSE BEGIN 
+		--	ROLLBACK TRAN; 
+		--	PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ''', @TagName, ''', '''
+		--	, ' StageDateId:', @CurrStageDateId 
+		--	, FORMAT(@ProcNextStepStartDate, 'yyyy-MM-dd'), ''', ''', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd')
+		--	, 'ROLLED BACK')
+		--	SET @pivotReturnValue = -1;
+		--	GOTO spDriverExit;
+		--END
+
+
+		SET @CurrStgDtIx=@CurrStgDtIx+1;
+	END; -- Next stageDate
+ 
+
+spDriverExit:
+			
+SELECT * FROM @ExcPointsOutput;
+--SELECT * FROM @ExcPoints;
+
+PRINT 'spDriverExcursionsPointsForDate ends <<<'
+
+RETURN @pivotReturnValue;
+--RETURN 0;;
+
+--UNIT TESTS
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '15,14'
+--EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '12341234'
+
+
+				--Insert into @ExcPointsWIP ( 
+				--	RowId, TagId, TagName, TagExcNbr, StageDateId, StepLogId
+				--	, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+				--	, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+				--	, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+				--	, MinValue, MaxValue, AvergValue, StdDevValue
+				--	, DeprecatedDate, ThresholdDuration, SetPoint
+				--	)
+				--SELECT 
+				--	RowId, TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
+				--	, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+				--	, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+				--	, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+				--	, MinValue, MaxValue, AvergValue, StdDevValue
+				--	, DeprecatedDate, ThresholdDuration, SetPoint
+				--	FROM @ExcPoints
+				--	WHERE RowId = @pvtExcIx;
 
 			--IF (@pivotReturnValue = 0 AND EXISTS(SELECT * FROM @ExcPoints)) BEGIN
 			--	UPDATE @ExcPoints Set TagId = @TagId, StageDateId = @CurrStageDateId;
@@ -247,113 +396,5 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 			-- prepare for next Point's step run
 			
-			SET @ProcNextStepStartDate = @ProcNextStepEndDate; 
-			SET @ProcNextStepEndDate = DateAdd(day, @StepSizedays, @ProcNextStepStartDate);
-			PRINT 'processing next Step using...'; 
-			PRINT CONCAT(' @ProcNextStepStartDate:', FORMAT(@ProcNextStepStartDate,'yyyy-MM-dd')
-				,' @ProcNextStepEndDate:', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd'));
-
-		END -- Next day in date Range
-		
-		DELETE FROM @ExcPointsOutput;
-		DECLARE @pvtExcCount int, @pvtExcIx int = 1;
-		SELECT @pvtExcCount = count(*) from @ExcPoints;
-		PRINT 'Process every spPivot excursion result'
-		WHILE @pvtExcIx <= @pvtExcCount BEGIN
-			PRINT ''
-
-			if (EXISTS(SELECT * FROM @ExcPointsOutput)) BEGIN
-				PRINT 'UPDATE'
-				DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
-				, @HiPointsCt int, @LowPointsCt int
-				, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
-				SELECT @CycleId = CycleId
-				, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
-				, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
-				, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-				FROM @ExcPoints
-				WHERE RowId = @pvtExcIx;
-				UPDATE @ExcPointsOutput SET TagExcNbr = TagExcNbr + 1, HiPointsCt = HiPointsCt + @HiPointsCt
-					, LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
-					, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
-			END ELSE BEGIN
-				PRINT 'INSERT'
-				Insert into @ExcPointsOutput ( 
-					RowId, TagId, TagName, TagExcNbr, StageDateId, StepLogId
-					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-					, MinValue, MaxValue, AvergValue, StdDevValue
-					, DeprecatedDate, ThresholdDuration, SetPoint
-					)
-				SELECT 
-					RowId, TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
-					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-					, MinValue, MaxValue, AvergValue, StdDevValue
-					, DeprecatedDate, ThresholdDuration, SetPoint
-					FROM @ExcPoints
-					WHERE RowId = @pvtExcIx;
-			END
-
-
-			SET @pvtExcIx=@pvtExcIx+1;
-
-		END -- Next spPivot excursion row
-		
-		DELETE FROM @ExcPoints;
-
-		Insert into ExcursionPoints ( 
-			TagId, TagName, TagExcNbr, StageDateId, StepLogId
-			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-			, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-			, MinValue, MaxValue, AvergValue, StdDevValue
-			, DeprecatedDate, ThresholdDuration, SetPoint
-			)
-		SELECT 
-			TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
-			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-			, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-			, MinValue, MaxValue, AvergValue, StdDevValue
-			, DeprecatedDate, ThresholdDuration, SetPoint
-			FROM @ExcPointsOutput;
-
-		-- Insert PointsPaces' next process row
-		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
-			VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
-
-		--IF (@pivotReturnValue = 0) COMMIT TRAN;
-		--ELSE BEGIN 
-		--	ROLLBACK TRAN; 
-		--	PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ''', @TagName, ''', '''
-		--	, ' StageDateId:', @CurrStageDateId 
-		--	, FORMAT(@ProcNextStepStartDate, 'yyyy-MM-dd'), ''', ''', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd')
-		--	, 'ROLLED BACK')
-		--	SET @pivotReturnValue = -1;
-		--	GOTO spDriverExit;
-		--END
-
-
-		SET @CurrStgDtIx=@CurrStgDtIx+1;
-	END; -- Next stageDate
- 
-
-spDriverExit:
-			
-SELECT * FROM @ExcPointsOutput;
---SELECT * FROM @ExcPoints;
-
-PRINT 'spDriverExcursionsPointsForDate ends <<<'
-
-RETURN @pivotReturnValue;
---RETURN 0;;
-
---UNIT TESTS
---EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', NULL
---EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '15,14'
---EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '12341234'
 
 END;
