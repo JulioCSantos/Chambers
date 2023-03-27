@@ -9,6 +9,7 @@ namespace ChambersDataModel.Entities
     {
         public int? CycleId { get; set; }
         public int? StageDateId { get; set; }
+        public int? TagId { get; set; }
         public string TagName { get; set; }
         public int? TagExcNbr { get; set; }
         public DateTime? RampInDate { get; set; }

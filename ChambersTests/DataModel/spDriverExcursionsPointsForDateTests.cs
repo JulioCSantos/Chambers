@@ -21,6 +21,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task EmptyResultsTest()
         {
+            TestDbContext.IsPreservedForTest = true;
            var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 new DateTime(2222, 1, 22), new DateTime(2222, 1, 23),"-1");
             Assert.AreEqual(0, result.Count);
@@ -306,7 +307,8 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public async Task HighExcursionNoPointsPaceTest() {
+        public async Task HighExcursionNoPointsPaceTest()
+        {
             var tagName = NewName();
             var baseDate = DateTime.Today.AddDays(-30);
             var stageDate = new StagesDate(tagName, baseDate);
@@ -316,7 +318,8 @@ namespace ChambersTests.DataModel
             TestDbContext.PointsPaces.RemoveRange(pointsPaces);
             TestDbContext.StagesDates.Add(stageDate);
             var rampInPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddHours(-5), (float)(stage.MinThreshold! * 1.5));
-            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate, (float)(stage.MinThreshold! * 0.5));
+            var hiExcPoint1 = TestDbContext.NewInterpolatedPoint(tagName, baseDate, (float)(stage.MinThreshold! * 0.5));
+            var hiExcPoint2 = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddHours(1), (float)(stage.MinThreshold! * 0.5));
             var rampOutPoint = TestDbContext.NewInterpolatedPoint(tagName, baseDate.AddHours(5), (float)(stage.MinThreshold! * 1.5));
             await TestDbContext.SaveChangesAsync();
             
@@ -324,8 +327,9 @@ namespace ChambersTests.DataModel
                 baseDate.AddDays(-1), baseDate.AddDays(2), stageDate.StageDateId.ToString());
             var excPoint = TestDbContext.ExcursionPoints;
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(result.First().FirstExcDate, hiExcPoint.Time);
-            Assert.AreEqual(result.First().LastExcDate, hiExcPoint.Time);
+            Assert.AreEqual(2, result.First().LowPointsCt);
+            Assert.AreEqual(result.First().FirstExcDate, hiExcPoint1.Time);
+            Assert.AreEqual(result.First().LastExcDate, hiExcPoint2.Time);
             Assert.AreEqual(stage.MaxThreshold, result.First().MaxThreshold);
             Assert.AreEqual(stage.MinThreshold, result.First().MinThreshold);
         }
@@ -421,7 +425,9 @@ namespace ChambersTests.DataModel
             Assert.IsNull(exc2.RampInDate);
         }
         [TestMethod]
-        public async Task OneLengthyExcursionWithoutRampsTest() {
+        public async Task OneLengthyExcursionWithoutRampsTest()
+        {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-200);
             var stageDate = new StagesDate(NewName(), baseDate.AddDays(-1));
             var stage = stageDate.Stage;
@@ -436,8 +442,8 @@ namespace ChambersTests.DataModel
             var result = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate.AddDays(-1), baseDate.AddDays(6), stageDate.StageDateId.ToString());
             var excursions = TestDbContext.ExcursionPoints.Where(x => x.StageDateId == stageDate.StageDateId).ToList();
-            Assert.AreEqual(1, excursions.Count);
-            Assert.AreEqual(99, excursions.First().HiPointsCt);
+            Assert.AreEqual(5, excursions.Count);
+            Assert.AreEqual(99, excursions.Sum(e => e.HiPointsCt));
         }
     }
 }
