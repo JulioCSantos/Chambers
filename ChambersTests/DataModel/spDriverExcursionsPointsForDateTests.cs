@@ -5,6 +5,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChambersTests.DataModel
@@ -29,6 +30,7 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task OneHighExcursionPointTest()
         {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -170,6 +172,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task TwoConsecutiveExcursionsTest() {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 1);
             var stage = pointsPace.StageDate.Stage;
@@ -480,6 +483,31 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(prevExc.TagExcNbr + 1, exc.TagExcNbr);
             Assert.AreEqual(exc.FirstExcDate, hiExcPoint.Time);
             Assert.AreEqual(exc.LastExcDate, hiExcPoint.Time);
+        }
+        [TestMethod]
+        public async Task LengthyExcursionNoRampsTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = new DateTime(2023, 01, 01);
+            var stageDate = new StagesDate(NewName(), baseDate);
+            var stage = stageDate.Stage; stage.SetThresholds(100,200);
+            var tag = stage.Tag;
+            TestDbContext.Add(stageDate);
+            await TestDbContext.SaveChangesAsync();
+            var stageDateId = stageDate.StageDateId;
+
+            for (int ix = 0; ix < 10; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(ix), (float)(stage.MaxThreshold! * 1.30d));
+            }
+            await TestDbContext.SaveChangesAsync();
+
+            var driverResult1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(5), stageDateId.ToString());
+            var driverResult2 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate.AddDays(4), baseDate.AddDays(11), stageDateId.ToString());
+            var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDateId);
+
+            Assert.IsNotNull(excs);
+            Assert.AreEqual(1,excs.Count());
         }
     }
 }
