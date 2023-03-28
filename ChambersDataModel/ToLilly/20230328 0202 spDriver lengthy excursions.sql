@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[spDriverExcursionsPointsForDate] 
+ALTER PROCEDURE [dbo].[spDriverExcursionsPointsForDate] 
 	@FromDate datetime, -- Processing Start date
 	@ToDate datetime, -- Processing ENd date
 	@StageDateIds nvarchar(max) = null
@@ -196,9 +196,8 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @CurrStageDateId, @ProcNextStepStartDate
 				, @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01';
 
-			DECLARE @dbgExcsFound int, @dbgRampInDate datetime;
-			SELECT @dbgExcsFound = count(*) from @ExcPoints;
-			SELECT top 1 @dbgRampInDate = RampInDate from @ExcPoints;
+			DECLARE @ExcsFound int;
+			SELECT @ExcsFound = count(*) from @ExcPoints;
 
 			SET @ProcNextStepStartDate = @ProcNextStepEndDate; 
 			SET @ProcNextStepEndDate = DateAdd(day, @StepSizedays, @ProcNextStepStartDate);
@@ -258,7 +257,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 
 		DELETE FROM @ExcPointsOutput;
 		--DELETE FROM @ExcPointsWIP;
-		DECLARE @pvtExcCount int, @pvtExcIx int = 1, @HighestTagExcNbr int;
+		DECLARE @pvtExcCount int, @pvtExcIx int = 1;
 		SELECT @pvtExcCount = count(*) from @ExcPoints;
 		PRINT 'Process every spPivot excursion result'
 		WHILE @pvtExcIx <= @pvtExcCount BEGIN
@@ -304,7 +303,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				SELECT * FROM @ExcPointsWIP;
 
 				IF (@wCycleId > 0) BEGIN
-					PRINT 'Update ExcursionPoint'
+					PRINT 'Update ExcursionPoints'
 					SELECT @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
 						, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
 						, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
@@ -316,8 +315,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 					WHERE CycleId = @CycleId;
 				END
 				ELSE BEGIN
-					PRINT 'Insert Excursion'
-					SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
 					Insert into ExcursionPoints ( 
 					TagId, TagName, TagExcNbr, StageDateId, StepLogId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
@@ -327,7 +324,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 					, DeprecatedDate, ThresholdDuration, SetPoint
 					)
 				SELECT 
-					TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
+					TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
 					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
@@ -370,7 +367,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			END
 			ELSE BEGIN
 				PRINT 'Insert Excursion'
-				SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
 				Insert into ExcursionPoints ( 
 				TagId, TagName, TagExcNbr, StageDateId, StepLogId
 				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
@@ -380,7 +376,7 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				, DeprecatedDate, ThresholdDuration, SetPoint
 				)
 			SELECT 
-				TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
+				TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
 				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
 				, LastExcDate, LastExcValue, RampOutDate, RampOutValue
 				, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold

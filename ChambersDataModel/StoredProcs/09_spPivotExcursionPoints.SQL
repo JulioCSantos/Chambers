@@ -124,7 +124,7 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
                 SELECT TOP 1 @RampInDate = [time], @RampInValue =  [value] FROM [BB50PCSjsantos].[Interpolated]
                 WHERE tag = @TagName
                         AND time < FORMAT(@FirstExcDate,'yyyy-MM-dd HH:mm:ss')
-                        AND time >= FORMAT(DateAdd(day,-1,@FirstExcDate),'yyyy-MM-dd HH:mm:ss')
+                        AND time >= FORMAT(@StartDate,'yyyy-MM-dd HH:mm:ss')
                         AND value is not null
                         AND (
                         (@IsHiExc = 1 AND @HiThreashold IS NOT NULL AND value < @HiThreashold) 
