@@ -86,6 +86,8 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		RETURN -1;
 	END;
 --*****************************************************************************************
+	PRINT ' >>> GET new excursions in date range'
+
 	DECLARE @StgDtCount int, @CurrStgDtIx int = 1;
 	SELECT @StgDtCount = count(*) from @StagesLimitsAndDatesCore;
 	PRINT 'Process every StageDate'
@@ -182,9 +184,8 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 					 )
 			SET @StepLogId = SCOPE_IDENTITY();
 
-			-- Find Excursions in date range
+			PRINT 'Find Excursions in date range'
 			DECLARE @pivotReturnValue int = 0;
-			--INSERT INTO @ExcPoints (
 			INSERT INTO @ExcPoints (
 				[CycleId], [StageDateId], [TagId], [TagName], [TagExcNbr]
 			  , [RampInDate], [RampInValue], [FirstExcDate], [FirstExcValue]
@@ -207,10 +208,75 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 				,' @ProcNextStepEndDate:', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd'));
 
 		END -- Next day in date Range
+		PRINT ' <<< GET new excursions in date range'
 --*****************************************************************************************
+		PRINT ' >>> Compress lengthy excursions'
+		DECLARE @dbgUpdateCnt int, @dbgInsertCnt int;
+		SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
+		SELECT @dbgInsertCnt = count(*) from @ExcPoints WHERE CycleId < 0;
+		
+		PRINT 'UPDATE ThresholdDuration, SetPoint... in the new excursions found through spPivot'
+		UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate;
 
-       PRINT 'GET Latest Excursion row from [ExcursionPoints] table'
-       INSERT INTO @ExcPointsWIP (CycleId, StageDateId, TagName, TagExcNbr
+		DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
+		, @HiPointsCt int, @LowPointsCt int
+		, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
+
+		DECLARE @pvtExcCount int, @pvtExcIx int, @prevPvtExcId int;
+		SELECT @pvtExcIx = count(*) from @ExcPoints;
+		WHILE @pvtExcIx > 1 BEGIN
+			PRINT CONCAT('check if pointed excursion #',@pvtExcIx,' can be compressed')
+			DECLARE @pointedRampInDate datetime;
+			SELECT @pointedRampInDate = RampInDate FROM @ExcPoints WHERE RowId = @pvtExcIx;
+			IF (@pointedRampInDate IS NOT NULL) BEGIN 
+				PRINT CONCAT('pointed excursion #',@pvtExcIx,' can NOT be compressed. Move forward')
+				GOTO SetNextExcursion;
+			END
+
+			PRINT CONCAT('check if previous excursion #',@pvtExcIx - 1,' can accept compression')
+			SET @prevPvtExcId = @pvtExcIx - 1;
+			DECLARE @previousRampOutDate datetime;
+			SELECT @previousRampOutDate = RampOutDate FROM @ExcPoints WHERE RowId = @prevPvtExcId;
+			IF (@previousRampOutDate IS NOT NULL) BEGIN 
+				PRINT CONCAT('previous excursion #',@prevPvtExcId,' DOESNT accept compression. Move forward')
+				GOTO SetNextExcursion;
+			END
+
+			PRINT CONCAT('	compress pointed excursion #',@pvtExcIx);
+			PRINT '		prepare to update previous excursion'
+				SELECT @CycleId = CycleId
+				, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+				, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
+				, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
+				FROM @ExcPoints where RowId = @pvtExcIx;
+			PRINT '		update previous excursion with pointed excursion'
+				UPDATE @ExcPoints
+				SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
+					 , HiPointsCt = HiPointsCt + @HiPointsCt, LowPointsCt = LowPointsCt + @LowPointsCt
+					 , StepLogId = @StepLogId
+					 , MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
+				WHERE  RowId = @prevPvtExcId;
+			PRINT '	   delete pointed excursion'
+				DELETE FROM @ExcPoints where RowId = @pvtExcIx;
+			PRINT CONCAT('	  excursion #',@pvtExcIx,' compressed')
+
+SetNextExcursion:
+			SET @pvtExcIx = @pvtExcIx - 1;
+			PRINT CONCAT('previous excursion #',@pvtExcIx,' is now the POINTED excursion and is ready to be processed');
+		END
+		PRINT ' <<< Compress lengthy excursions ENDED'
+--*****************************************************************************************
+		PRINT ' >>> Merge with ExcursionPoints table'
+		SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
+		SELECT @dbgInsertCnt = count(*) from @ExcPoints WHERE CycleId < 0;
+
+		PRINT 'Determine if first Excursion from spPivot proc can be merged with ExcursionPoints table''s last excursion'
+		DECLARE @fstExcRampInDate datetime;
+		SELECT @fstExcRampInDate = RampInDate FROM @ExcPoints WHERE RowId = 1;
+		IF (@fstExcRampInDate IS NULL) BEGIN
+		    PRINT ' GET Latest Excursion row from [ExcursionPoints] table and save it in @ExcPointsWIP '
+			DELETE FROM @ExcPointsWIP;
+			INSERT INTO @ExcPointsWIP (CycleId, StageDateId, TagName, TagExcNbr
             , RampInDate, RampInValue, FirstExcDate, FirstExcValue
             , LastExcDate, LastExcValue, RampOutDate, RampOutValue
             , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
@@ -225,172 +291,77 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 			FROM [dbo].[ExcursionPoints] 
                 WHERE StageDateId = @CurrStageDateId 
                 ORDER BY TagExcNbr Desc
-
-
-		DECLARE @wCycleId int, @wLastExcDate datetime, @wLastExcValue float, @wRampOutDate datetime, @wRampOutValue float
-		, @wHiPointsCt int, @wLowPointsCt int, @wTagExcNbr int, @wRampInDate int, @prevRampOutDate datetime, @currRampInDate datetime
-		, @wMinValue float, @wMaxValue float, @wAvergValue float, @wStdDevValue float;
-		DECLARE @currTagExcNbr int;
-
-		IF (EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
-			SELECT TOP 1 @wCycleId = CycleId
-			, @wLastExcDate = LastExcDate, @wLastExcValue = LastExcValue, @wRampOutDate = RampOutDate, @wRampOutValue = RampOutValue
-			, @wHiPointsCt = HiPointsCt, @wLowPointsCt = LowPointsCt, @wTagExcNbr = TagExcNbr, @prevRampOutDate = RampOutDate
-			, @wMinValue = MinValue, @wMaxValue = MaxValue, @wAvergValue = AvergValue, @wStdDevValue = StdDevValue
-			FROM @ExcPointsWIP;
-			IF (@wRampOutDate IS NOT NULL) BEGIN -- Only TagExcNbr is needed from a completed Excursion 
-				SET @currTagExcNbr = @wTagExcNbr + 1;
-				IF (@wRampOutValue > @ProcNextStepStartDate) SET @ProcNextStepStartDate = @wRampOutValue;
-				DELETE FROM @ExcPointsWIP
-			END
-		END
-		ELSE SET @currTagExcNbr = 1; -- initialize TagExcNbr for Tag's (StageDateId) first Excursion
-
-		IF (@wTagExcNbr IS NULL) SET @currTagExcNbr = 1
-		ELSE BEGIN
-			IF (@wRampOutDate IS NOT NULL) BEGIN
-				SET @currTagExcNbr = @wTagExcNbr + 1;
-				DELETE FROM @ExcPointsWIP
-			END
-			ELSE SET @currTagExcNbr = @wTagExcNbr;
-		END
-		
-
-		DELETE FROM @ExcPointsOutput;
-		--DELETE FROM @ExcPointsWIP;
-		DECLARE @pvtExcCount int, @pvtExcIx int = 1, @HighestTagExcNbr int;
-		SELECT @pvtExcCount = count(*) from @ExcPoints;
-		PRINT 'Process every spPivot excursion result'
-		WHILE @pvtExcIx <= @pvtExcCount BEGIN
-
-			if (NOT EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
-				PRINT 'INSERT'
-				Insert into @ExcPointsWIP 
-				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
-
-				SELECT @wCycleId = CycleId
-				, @wLastExcDate = LastExcDate, @wLastExcValue = LastExcValue, @wRampOutDate = RampOutDate, @wRampOutValue = RampOutValue
-				, @wHiPointsCt = HiPointsCt, @wLowPointsCt = LowPointsCt, @wTagExcNbr = TagExcNbr, @prevRampOutDate = RampOutDate
-				, @wMinValue = MinValue, @wMaxValue = MaxValue, @wAvergValue = AvergValue, @wStdDevValue = StdDevValue
-				FROM @ExcPointsWIP
-				UPDATE @ExcPointsWIP SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate;
-
-				IF (@currTagExcNbr IS NOT NULL) UPDATE @ExcPointsWIP SET TagExcNbr = @currTagExcNbr;
-
-				SET @pvtExcIx=@pvtExcIx+1;
-				CONTINUE; --skip to next excursion (if any)
-			END
-
-			PRINT 'prepare current Excursion for use'
-			DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
-			, @HiPointsCt int, @LowPointsCt int
-			, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
-			SELECT @CycleId = CycleId
-			, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
-			, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt, @currRampInDate = RampInDate
-			, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-			FROM @ExcPoints
-			WHERE RowId = @pvtExcIx;
-
-			IF (@prevRampOutDate IS NULL AND @currRampInDate IS NULL) BEGIN
-				PRINT 'MERGE' -- Must use Minimum and Maximum calculations for stats
-				UPDATE @ExcPointsWIP SET HiPointsCt = HiPointsCt + @HiPointsCt
-				, LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
-				, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
-			END
-			ELSE BEGIN
-				PRINT 'Copy TO OUTPUT (@ExcPointsOutput) and persist the current Excursion in @ExcPointsWIP'
-				INSERT INTO @ExcPointsOutput
-				SELECT * FROM @ExcPointsWIP;
-
-				IF (@wCycleId > 0) BEGIN
-					PRINT 'Update ExcursionPoint'
-					SELECT @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
-						, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
-						, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-					FROM @ExcPointsWIP
-					UPDATE ExcursionPoints
-					SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
-						, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, StepLogId = @StepLogId
-						, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
-					WHERE CycleId = @CycleId;
-				END
-				ELSE BEGIN
-					PRINT 'Insert Excursion'
-					SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
-					Insert into ExcursionPoints ( 
-					TagId, TagName, TagExcNbr, StageDateId, StepLogId
-					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-					, MinValue, MaxValue, AvergValue, StdDevValue
-					, DeprecatedDate, ThresholdDuration, SetPoint
-					)
-				SELECT 
-					TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
-					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-					, MinValue, MaxValue, AvergValue, StdDevValue
-					, DeprecatedDate, ThresholdDuration, SetPoint
-					FROM @ExcPointsWIP
-				END
-				
-				DELETE FROM @ExcPointsWIP;
-				
-				Insert into @ExcPointsWIP 
-				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
-				SET @currTagExcNbr = @currTagExcNbr + 1;
-			END
-
-			SET @pvtExcIx=@pvtExcIx+1;
-
-		END -- Next spPivot excursion row
---*****************************************************************************************
-		
-		DELETE FROM @ExcPoints;
-
-		-- handle the last Excursion
-		IF (EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
-			PRINT 'Copy TO OUTPUT (@ExcPointsOutput) and persist this last Excursion'
-			INSERT INTO @ExcPointsOutput
-			SELECT * FROM @ExcPointsWIP;
-
-			IF (@wCycleId > 0) BEGIN
-				PRINT 'Update ExcursionPoints'
-				SELECT @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+			PRINT '  IF ExcursionPoints table last entry is open for a merge ...  '
+			IF (EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN 
+				DECLARE @tblRampOutDate datetime;
+				SELECT TOP 1 @tblRampOutDate = RampOutDate from @ExcPointsWIP;
+				IF (@tblRampOutDate IS NULL) BEGIN
+					PRINT ' ...Update excursion in @ExcPoints using the entry from ExcursionsTable ';
+					SELECT @CycleId = CycleId
+					, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
 					, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
 					, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-				FROM @ExcPointsWIP
-				UPDATE ExcursionPoints
-				SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
-					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, StepLogId = @StepLogId
-					, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
-				WHERE CycleId = @wCycleId;
+					FROM @ExcPointsWIP;
+					-- Must use Minimum and Maximum calculations for stats. to be implemented...
+					UPDATE @ExcPoints SET CycleId = @CycleId,  HiPointsCt = HiPointsCt + @HiPointsCt
+					, LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
+					, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
+					 where RowId = 1;
+				END
 			END
-			ELSE BEGIN
-				PRINT 'Insert Excursion'
-				SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
-				Insert into ExcursionPoints ( 
-				TagId, TagName, TagExcNbr, StageDateId, StepLogId
-				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-				, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-				, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-				, MinValue, MaxValue, AvergValue, StdDevValue
-				, DeprecatedDate, ThresholdDuration, SetPoint
-				)
-			SELECT 
-				TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
-				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-				, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-				, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-				, MinValue, MaxValue, AvergValue, StdDevValue
-				, DeprecatedDate, ThresholdDuration, SetPoint
-				FROM @ExcPointsWIP
-			END
-			DELETE FROM @ExcPointsWIP;
 		END
 
+		PRINT ' <<< Merge with ExcursionPoints table ENDED'
+--*****************************************************************************************
+		PRINT ' >>> Persist excursions to table'
+
+		SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
+		SELECT @dbgInsertCnt = count(*) from @ExcPoints WHERE CycleId < 0;
+
+		INSERT INTO @ExcPointsOutput
+		SELECT * FROM @ExcPoints;
+
+
+		UPDATE ExcursionPoints 
+		SET HiPointsCt = ep.HiPointsCt, LowPointsCt = ep.LowPointsCt, LastExcDate = ep.LastExcDate, LastExcValue = ep.LastExcValue
+		, RampOutDate = ep.RampOutDate, RampOutValue = ep.RampOutValue
+		FROM @ExcPoints as ep
+		WHERE ep.CycleId > 0 AND ExcursionPoints.CycleId = ep.CycleId
+
+		DELETE FROM @ExcPoints WHERE CycleId > 0;
+
+		DECLARE @HighestTagExcNbr int;
+		SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc;
+		if (@HighestTagExcNbr IS NULL) SET @HighestTagExcNbr = 0;
+
+		PRINT 'Update TagExcNbr of every spPivot excursion result'
+		SELECT @pvtExcCount = count(*) from @ExcPoints;
+		SET @pvtExcIx = 1;
+		WHILE @pvtExcIx <= @pvtExcCount BEGIN
+			UPDATE  @ExcPoints SET TagExcNbr = @HighestTagExcNbr + @pvtExcIx WHERE RowId = @pvtExcIx;
+			SET @pvtExcIx = @pvtExcIx + 1;
+		END
+
+		PRINT 'Insert new Excursions to ExcursionPoints Table'
+		Insert into ExcursionPoints ( 
+			TagId, TagName, TagExcNbr, StageDateId, StepLogId
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, DeprecatedDate, ThresholdDuration, SetPoint
+			)
+		SELECT 
+			TagId, TagName, IsNull(TagExcNbr,0), StageDateId, @StepLogId as StepLogId
+			, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+			, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+			, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+			, MinValue, MaxValue, AvergValue, StdDevValue
+			, DeprecatedDate, ThresholdDuration, SetPoint
+			FROM @ExcPoints
+
+		PRINT ' <<< Persist excursions to table'
+--*****************************************************************************************
 		-- Insert PointsPaces' next process row if Tag was not deprecated in the next PointsPace time interval
 		if (@DeprecatedDate IS NULL OR @DeprecatedDate > DateAdd(day,1,@ProcNextStepStartDate))
 		INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
@@ -406,7 +377,6 @@ PRINT '>>> spDriverExcursionsPointsForDate begins'
 		--	SET @pivotReturnValue = -1;
 		--	GOTO spDriverExit;
 		--END
-
 
 		SET @CurrStgDtIx=@CurrStgDtIx+1;
 	END; -- Next stageDate
@@ -427,79 +397,182 @@ RETURN 0;;
 --EXEC [dbo].[spDriverExcursionsPointsForDate] '2023-03-01', '2023-03-31', '12341234'
 
 
-				--Insert into @ExcPointsWIP ( 
-				--	RowId, TagId, TagName, TagExcNbr, StageDateId, StepLogId
-				--	, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-				--	, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-				--	, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-				--	, MinValue, MaxValue, AvergValue, StdDevValue
-				--	, DeprecatedDate, ThresholdDuration, SetPoint
-				--	)
-				--SELECT 
-				--	RowId, TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
-				--	, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-				--	, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-				--	, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-				--	, MinValue, MaxValue, AvergValue, StdDevValue
-				--	, DeprecatedDate, ThresholdDuration, SetPoint
-				--	FROM @ExcPoints
-				--	WHERE RowId = @pvtExcIx;
+--		 PRINT 'GET Latest Excursion row from [ExcursionPoints] table'
+--       INSERT INTO @ExcPointsWIP (CycleId, StageDateId, TagName, TagExcNbr
+--            , RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--            , LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--            , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+--            , MinValue, MaxValue, AvergValue, StdDevValue
+--            , ThresholdDuration, SetPoint)
+--            SELECT TOP 1 CycleId, StageDateId, TagName, TagExcNbr
+--            , RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--            , LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--            , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+--            , MinValue, MaxValue, AvergValue, StdDevValue
+--            , ThresholdDuration, SetPoint
+--			FROM [dbo].[ExcursionPoints] 
+--                WHERE StageDateId = @CurrStageDateId 
+--                ORDER BY TagExcNbr Desc
 
-			--IF (@pivotReturnValue = 0 AND EXISTS(SELECT * FROM @ExcPoints)) BEGIN
-			--	UPDATE @ExcPoints Set TagId = @TagId, StageDateId = @CurrStageDateId;
-			--	DECLARE @CycleId int, @LastExcDate datetime, @LastExcValue float, @RampOutDate datetime, @RampOutValue float
-			--	, @HiPointsCt int, @LowPointsCt int
-			--	, @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
-			--	-- Get latest result from spPivot into variables
-			--	SELECT TOP 1 @CycleId = CycleId
-			--	, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
-			--	, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
-			--	, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-			--	FROM @ExcPoints;
-			--	UPDATE @ExcPoints SET DeprecatedDate = @DeprecatedDate;
-			--	IF (@CycleId < 0) BEGIN
-			--	UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint;
-			--	PRINT 'Insert Excursion Point';  
-			--	Insert into ExcursionPoints ( 
-			--		TagId, TagName, TagExcNbr, StageDateId, StepLogId
-			--		, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-			--		, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-			--		, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
-			--		, MinValue, MaxValue, AvergValue, StdDevValue
-			--		, DeprecatedDate, ThresholdDuration, SetPoint
-			--		)
-			--		SELECT TagId, TagName, TagExcNbr, StageDateId, @StepLogId as StepLogId
-			--		, RampInDate, RampInValue, FirstExcDate, FirstExcValue
-			--		, LastExcDate, LastExcValue, RampOutDate, RampOutValue
-			--		, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-			--		, MinValue, MaxValue, AvergValue, StdDevValue
-			--		, DeprecatedDate, ThresholdDuration, SetPoint
-			--		FROM @ExcPoints;
-			--		UPDATE @ExcPoints SET CycleId = SCOPE_IDENTITY();
-			--	END
-			--	ELSE BEGIN
-			--	PRINT CONCAT('Excursion Point updated. CycleId:', @CycleId)
-			--	UPDATE ExcursionPoints 
-			--		SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, @RampOutValue = RampOutValue
-			--		, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, DeprecatedDate = DeprecatedDate, StepLogId = @StepLogId
-			--		, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
-			--		WHERE CycleId = @CycleId;
-			--	END
-			--	Insert into @ExcPointsOutput
-			--	SELECT * FROM @ExcPoints;
-			--	DELETE FROM @ExcPoints;
-			--END
 
-			--IF (@pivotReturnValue = 0) COMMIT TRAN;
-			--ELSE BEGIN 
-			--	ROLLBACK TRAN; 
-			--	PRINT CONCAT('EXECUTE [dbo].[spPivotExcursionPoints] ''', @TagName, ''', '''
-			--	, ' StageDateId:', @CurrStageDateId 
-			--	, FORMAT(@ProcNextStepStartDate, 'yyyy-MM-dd'), ''', ''', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd')
-			--	, 'ROLLED BACK')
-			--END
+--		DECLARE @wCycleId int, @wLastExcDate datetime, @wLastExcValue float, @wRampOutDate datetime, @wRampOutValue float
+--		, @wHiPointsCt int, @wLowPointsCt int, @wTagExcNbr int, @wRampInDate int, @prevRampOutDate datetime, @currRampInDate datetime
+--		, @wMinValue float, @wMaxValue float, @wAvergValue float, @wStdDevValue float;
+--		DECLARE @currTagExcNbr int;
 
-			-- prepare for next Point's step run
-			
+--		IF (EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
+--			SELECT TOP 1 @wCycleId = CycleId
+--			, @wLastExcDate = LastExcDate, @wLastExcValue = LastExcValue, @wRampOutDate = RampOutDate, @wRampOutValue = RampOutValue
+--			, @wHiPointsCt = HiPointsCt, @wLowPointsCt = LowPointsCt, @wTagExcNbr = TagExcNbr, @prevRampOutDate = RampOutDate
+--			, @wMinValue = MinValue, @wMaxValue = MaxValue, @wAvergValue = AvergValue, @wStdDevValue = StdDevValue
+--			FROM @ExcPointsWIP;
+--			IF (@wRampOutDate IS NOT NULL) BEGIN -- Only TagExcNbr is needed from a completed Excursion 
+--				SET @currTagExcNbr = @wTagExcNbr + 1;
+--				IF (@wRampOutValue > @ProcNextStepStartDate) SET @ProcNextStepStartDate = @wRampOutValue;
+--				DELETE FROM @ExcPointsWIP
+--			END
+--		END
+--		ELSE SET @currTagExcNbr = 1; -- initialize TagExcNbr for Tag's (StageDateId) first Excursion
+
+--		IF (@wTagExcNbr IS NULL) SET @currTagExcNbr = 1
+--		ELSE BEGIN
+--			IF (@wRampOutDate IS NOT NULL) BEGIN
+--				SET @currTagExcNbr = @wTagExcNbr + 1;
+--				DELETE FROM @ExcPointsWIP
+--			END
+--			ELSE SET @currTagExcNbr = @wTagExcNbr;
+--		END
+		
+
+--		DELETE FROM @ExcPointsOutput;
+--		--DELETE FROM @ExcPointsWIP;
+--		SELECT @pvtExcCount = count(*) from @ExcPoints;
+--		PRINT 'Process every spPivot excursion result'
+--		WHILE @pvtExcIx <= @pvtExcCount BEGIN
+
+--			if (NOT EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
+--				PRINT 'INSERT'
+--				Insert into @ExcPointsWIP 
+--				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
+
+--				SELECT @wCycleId = CycleId
+--				, @wLastExcDate = LastExcDate, @wLastExcValue = LastExcValue, @wRampOutDate = RampOutDate, @wRampOutValue = RampOutValue
+--				, @wHiPointsCt = HiPointsCt, @wLowPointsCt = LowPointsCt, @wTagExcNbr = TagExcNbr, @prevRampOutDate = RampOutDate
+--				, @wMinValue = MinValue, @wMaxValue = MaxValue, @wAvergValue = AvergValue, @wStdDevValue = StdDevValue
+--				FROM @ExcPointsWIP
+--				UPDATE @ExcPointsWIP SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate;
+
+--				IF (@currTagExcNbr IS NOT NULL) UPDATE @ExcPointsWIP SET TagExcNbr = @currTagExcNbr;
+
+--				SET @pvtExcIx=@pvtExcIx+1;
+--				CONTINUE; --skip to next excursion (if any)
+--			END
+
+--			PRINT 'prepare current Excursion for use'
+--			SELECT @CycleId = CycleId
+--			, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+--			, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt, @currRampInDate = RampInDate
+--			, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
+--			FROM @ExcPoints
+--			WHERE RowId = @pvtExcIx;
+
+--			IF (@prevRampOutDate IS NULL AND @currRampInDate IS NULL) BEGIN
+--				PRINT 'MERGE' -- Must use Minimum and Maximum calculations for stats
+--				UPDATE @ExcPointsWIP SET HiPointsCt = HiPointsCt + @HiPointsCt
+--				, LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
+--				, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue;
+--			END
+--			ELSE BEGIN
+--				PRINT 'Copy TO OUTPUT (@ExcPointsOutput) and persist the current Excursion in @ExcPointsWIP'
+--				INSERT INTO @ExcPointsOutput
+--				SELECT * FROM @ExcPointsWIP;
+
+--				IF (@wCycleId > 0) BEGIN
+--					PRINT 'Update ExcursionPoint'
+--					SELECT @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+--						, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
+--						, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
+--					FROM @ExcPointsWIP
+--					UPDATE ExcursionPoints
+--					SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
+--						, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, StepLogId = @StepLogId
+--						, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
+--					WHERE CycleId = @CycleId;
+--				END
+--				ELSE BEGIN
+--					PRINT 'Insert Excursion'
+--					SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
+--					Insert into ExcursionPoints ( 
+--					TagId, TagName, TagExcNbr, StageDateId, StepLogId
+--					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--					, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+--					, MinValue, MaxValue, AvergValue, StdDevValue
+--					, DeprecatedDate, ThresholdDuration, SetPoint
+--					)
+--				SELECT 
+--					TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
+--					, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--					, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--					, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+--					, MinValue, MaxValue, AvergValue, StdDevValue
+--					, DeprecatedDate, ThresholdDuration, SetPoint
+--					FROM @ExcPointsWIP
+--				END
+				
+--				DELETE FROM @ExcPointsWIP;
+				
+--				Insert into @ExcPointsWIP 
+--				SELECT * FROM @ExcPoints WHERE RowId = @pvtExcIx;
+--				SET @currTagExcNbr = @currTagExcNbr + 1;
+--			END
+
+--			SET @pvtExcIx=@pvtExcIx+1;
+
+--		END -- Next spPivot excursion row
+----*****************************************************************************************
+		
+--		DELETE FROM @ExcPoints;
+
+--		-- handle the last Excursion
+--		IF (EXISTS(SELECT * FROM @ExcPointsWIP)) BEGIN
+--			PRINT 'Copy TO OUTPUT (@ExcPointsOutput) and persist this last Excursion'
+--			INSERT INTO @ExcPointsOutput
+--			SELECT * FROM @ExcPointsWIP;
+
+--			IF (@wCycleId > 0) BEGIN
+--				PRINT 'Update ExcursionPoints'
+--				SELECT @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+--					, @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
+--					, @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
+--				FROM @ExcPointsWIP
+--				UPDATE ExcursionPoints
+--				SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
+--					, HiPointsCt = @HiPointsCt, LowPointsCt = @LowPointsCt, StepLogId = @StepLogId
+--					, MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
+--				WHERE CycleId = @wCycleId;
+--			END
+--			ELSE BEGIN
+--				PRINT 'Insert Excursion'
+--				SELECT TOP 1 @HighestTagExcNbr = TagExcNbr from [dbo].[ExcursionPoints] WHERE StageDateId = @CurrStageDateId ORDER BY TagExcNbr Desc 
+--				Insert into ExcursionPoints ( 
+--				TagId, TagName, TagExcNbr, StageDateId, StepLogId
+--				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--				, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--				, HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
+--				, MinValue, MaxValue, AvergValue, StdDevValue
+--				, DeprecatedDate, ThresholdDuration, SetPoint
+--				)
+--			SELECT 
+--				TagId, TagName, (IsNull(@HighestTagExcNbr,0) + 1) as TagExcNbr, StageDateId, @StepLogId as StepLogId
+--				, RampInDate, RampInValue, FirstExcDate, FirstExcValue
+--				, LastExcDate, LastExcValue, RampOutDate, RampOutValue
+--				, HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+--				, MinValue, MaxValue, AvergValue, StdDevValue
+--				, DeprecatedDate, ThresholdDuration, SetPoint
+--				FROM @ExcPointsWIP
+--			END
+--			DELETE FROM @ExcPointsWIP;
+--		E
 
 END;

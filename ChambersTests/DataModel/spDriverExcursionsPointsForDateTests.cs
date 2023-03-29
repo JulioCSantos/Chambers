@@ -480,7 +480,9 @@ namespace ChambersTests.DataModel
                 e2Dt, e2Dt.AddDays(2), pointsPace.StageDateId.ToString());
             
             Assert.AreEqual(1, driverResult.Count);
-            var exc = driverResult.First();
+            var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDate.StageDateId);
+            Assert.AreEqual(2, excs.Count());
+            var exc = excs.OrderByDescending(e => e.CycleId).First();
             Assert.AreEqual(prevExc.TagExcNbr + 1, exc.TagExcNbr);
             Assert.AreEqual(exc.FirstExcDate, hiExcPoint.Time);
             Assert.AreEqual(exc.LastExcDate, hiExcPoint.Time);
@@ -528,10 +530,56 @@ namespace ChambersTests.DataModel
 
             var driverResult1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
                 baseDate, baseDate.AddDays(4), stageDate.StageDateId.ToString());
-            var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDate.StageDateId);
+            //var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDate.StageDateId);
+            var excs = TestDbContext.ExcursionPoints.Where(e => e.StageDateId == stageDate.StageDateId);
 
             Assert.IsNotNull(excs);
             Assert.AreEqual(1, excs.Count());
+        }
+
+
+        [TestMethod]
+        public async Task MergeTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = new DateTime(2023, 01, 01, 23, 59, 57);
+            var stageDate = new StagesDate(NewName(), baseDate);
+            var stage = stageDate.Stage; stage.SetThresholds(100, 200);
+            var tag = stage.Tag;
+            TestDbContext.Add(stageDate);
+            await TestDbContext.SaveChangesAsync();
+
+
+            TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddSeconds(-1), (float)(stage.MaxThreshold! * 0.8d));
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddSeconds(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+            TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddSeconds(7), (float)(stage.MaxThreshold! * 0.7d));
+
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(1).AddSeconds(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(2).AddSeconds(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+            await TestDbContext.SaveChangesAsync();
+
+            var driverResult1 = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(6), stageDate.StageDateId.ToString());
+            var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDate.StageDateId);
+
+            Assert.IsNotNull(excs);
+            Assert.AreEqual(2, excs.Count());
+            var earliestTime = TestDbContext.Interpolateds
+                .Where(i => i.Tag == tag.TagName && i.Value >= stage.MaxThreshold!).Min(ex => ex.Time);
+            var latestTime = TestDbContext.Interpolateds
+                .Where(i => i.Tag == tag.TagName && i.Value >= stage.MaxThreshold!).Max(ex => ex.Time);
+            Assert.AreEqual(earliestTime,excs.First().FirstExcDate);
+            Assert.AreEqual(latestTime, excs.Skip(1).First().LastExcDate);
+            Assert.IsNull(excs.First().RampInDate);
+            Assert.IsNotNull(excs.First().RampOutDate);
+            Assert.IsNull(excs.Skip(1).First().RampInDate);
+            Assert.IsNull(excs.Skip(1).First().RampOutDate);
         }
     }
 }
