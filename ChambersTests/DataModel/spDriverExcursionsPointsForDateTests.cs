@@ -103,7 +103,7 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(result.First().RampOutDate, rampOutPoint.Time);
             var currPointsPaces = TestDbContext.PointsPaces.AsNoTracking()
                 .Where(pp => pp.StageDateId == stageDate.StageDateId).ToList();
-            Assert.AreEqual(4, currPointsPaces.Count);
+            Assert.AreEqual(5, currPointsPaces.Count);
             Assert.AreEqual(1, currPointsPaces.Count(pp => pp.ProcessedDate == null));
             Assert.IsNotNull(result.First().StageDateId);
             Assert.IsNotNull(result.First().TagId);
