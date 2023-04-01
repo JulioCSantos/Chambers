@@ -52,19 +52,19 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(excPointNew);
             //Assert.AreEqual(prevExcPoint.TagExcNbr + 1, excPointNew.TagExcNbr);
             Assert.IsTrue(excPointNew.TagName == tag);
-            Assert.IsTrue(excPointNew.HiPointsCt == 3);
-            Assert.IsTrue(excPointNew.LowPointsCt == 0);
+            //Assert.IsTrue(excPointNew.HiPointsCt == 3);
+            //Assert.IsTrue(excPointNew.LowPointsCt == 0);
             Assert.IsNull(excPointNew.ThresholdDuration);
             Assert.IsNull(excPointNew.SetPoint);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
             Assert.IsTrue(excPointNew.LastExcValue >= ht);
-            var excPoints = new[] { excP1.Value, excP2.Value, excP3.Value };
-            Assert.AreEqual(excPoints.Min(), excPointNew.MinValue);
-            Assert.AreEqual(excPoints.Max(), excPointNew.MaxValue);
-            Assert.AreEqual(excPoints.Average(), excPointNew.AvergValue);
-            Assert.AreEqual(excPoints.StandardDeviationSample(), excPointNew.StdDevValue);
+            //var excPoints = new[] { excP1.Value, excP2.Value, excP3.Value };
+            //Assert.AreEqual(excPoints.Min(), excPointNew.MinValue);
+            //Assert.AreEqual(excPoints.Max(), excPointNew.MaxValue);
+            //Assert.AreEqual(excPoints.Average(), excPointNew.AvergValue);
+            //Assert.AreEqual(excPoints.StandardDeviationSample(), excPointNew.StdDevValue);
         }
 
         [TestMethod]
@@ -94,8 +94,8 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(stageDate.StageDateId, excPointNew.StageDateId);
             Assert.AreEqual(1, excPointNew.TagExcNbr);
             Assert.IsTrue(excPointNew.TagName == tag);
-            Assert.IsTrue(excPointNew.LowPointsCt == 3);
-            Assert.IsTrue(excPointNew.HiPointsCt == 0);
+            //Assert.IsTrue(excPointNew.LowPointsCt == 3);
+            //Assert.IsTrue(excPointNew.HiPointsCt == 0);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue < lt);
@@ -118,8 +118,8 @@ namespace ChambersTests.DataModel
             var excPnt = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt.AddDays(-30), dt.AddDays(+30), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(excPnt);
-            Assert.IsTrue(excPnt.LowPointsCt == 1);
-            Assert.IsTrue(excPnt.HiPointsCt == 0);
+            //Assert.IsTrue(excPnt.LowPointsCt == 1);
+            //Assert.IsTrue(excPnt.HiPointsCt == 0);
             Assert.IsNotNull(excPnt.MinThreshold);
             Assert.AreEqual(excPnt.MinThreshold,lt);
             Assert.IsNull(excPnt.MaxThreshold);
@@ -140,8 +140,8 @@ namespace ChambersTests.DataModel
             var excPnt = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt.AddDays(-30), dt.AddDays(+30), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(excPnt);
-            Assert.IsTrue(excPnt.LowPointsCt == 0);
-            Assert.IsTrue(excPnt.HiPointsCt == 1);
+            //Assert.IsTrue(excPnt.LowPointsCt == 0);
+            //Assert.IsTrue(excPnt.HiPointsCt == 1);
             Assert.IsNull(excPnt.MinThreshold);
             Assert.AreEqual(excPnt.MaxThreshold, ht);
             Assert.IsNotNull(excPnt.MaxThreshold);
@@ -177,8 +177,8 @@ namespace ChambersTests.DataModel
                 (stageDate.StageDateId, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
             Assert.IsTrue(excPointNew.TagName == tag);
-            Assert.IsTrue(excPointNew.HiPointsCt == 3);
-            Assert.IsTrue(excPointNew.LowPointsCt == 0);
+            //Assert.IsTrue(excPointNew.HiPointsCt == 3);
+            //Assert.IsTrue(excPointNew.LowPointsCt == 0);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue >= ht);
@@ -189,8 +189,8 @@ namespace ChambersTests.DataModel
                 (stageDate.StageDateId, new DateTime(2022, 01, 01), new DateTime(2022, 03, 31), lt, ht,null, null)).Skip(1).FirstOrDefault();
             Assert.IsNotNull(excPointNew);
             Assert.IsTrue(excPointNew.TagName == tag);
-            Assert.IsTrue(excPointNew.LowPointsCt == 3);
-            Assert.IsTrue(excPointNew.HiPointsCt == 0);
+            //Assert.IsTrue(excPointNew.LowPointsCt == 3);
+            //Assert.IsTrue(excPointNew.HiPointsCt == 0);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.RampInValue >= lt && excPointNew.RampInValue < ht);
             Assert.IsTrue(excPointNew.FirstExcValue < lt);
@@ -218,7 +218,7 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(rampInExc);
             Assert.AreEqual(1, rampInExc.TagExcNbr);
             Assert.IsTrue(rampInExc.TagName == tag);
-            Assert.IsTrue(rampInExc.HiPointsCt == 1);
+            //Assert.IsTrue(rampInExc.HiPointsCt == 1);
             Assert.IsTrue(rampInExc.RampInValue >= lt && rampInExc.RampInValue < ht);
             Assert.IsTrue(Equals(rampInExc.FirstExcValue!, excP1.Value));
             Assert.IsNotNull(rampInExc.LastExcValue);
@@ -231,7 +231,7 @@ namespace ChambersTests.DataModel
             var rampOutPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt.AddDays(2), dt.AddDays(11), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(rampOutPoint);
-            Assert.AreEqual(2,rampOutPoint.HiPointsCt);
+            //Assert.AreEqual(2,rampOutPoint.HiPointsCt);
             Assert.AreEqual(excP3.Time,rampOutPoint.LastExcDate);
             Assert.AreEqual(rampOutP1.Time,rampOutPoint.RampOutDate);
         }
@@ -257,7 +257,7 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(rampInPoint);
             Assert.AreEqual(1, rampInPoint.TagExcNbr);
             Assert.IsTrue(rampInPoint.TagName == tag);
-            Assert.IsTrue(rampInPoint.HiPointsCt == 1);
+            //Assert.IsTrue(rampInPoint.HiPointsCt == 1);
             Assert.IsTrue(rampInPoint.RampInValue >= lt && rampInPoint.RampInValue < ht);
             Assert.IsTrue(Equals(rampInPoint.FirstExcValue!, excP1.Value));
             Assert.IsNotNull(rampInPoint.LastExcValue);
@@ -270,7 +270,7 @@ namespace ChambersTests.DataModel
             var middleExcPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt.AddDays(2), dt.AddDays(6), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(middleExcPoint);
-            Assert.AreEqual(1, middleExcPoint.HiPointsCt);
+            //Assert.AreEqual(1, middleExcPoint.HiPointsCt);
             Assert.IsNotNull(middleExcPoint.LastExcDate);
             Assert.IsNull(middleExcPoint.RampOutDate);
 
@@ -307,7 +307,7 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(rampInResult.StageDateId);
             Assert.AreEqual(1, rampInResult.TagExcNbr);
             Assert.IsTrue(rampInResult.TagName == tag);
-            Assert.IsTrue(rampInResult.HiPointsCt == 1);
+            //Assert.IsTrue(rampInResult.HiPointsCt == 1);
             Assert.IsTrue(rampInResult.RampInValue < ht);
             Assert.IsTrue(Equals(rampInResult.FirstExcValue!, excP1.Value));
             Assert.IsNotNull(rampInResult.LastExcValue);
@@ -320,7 +320,7 @@ namespace ChambersTests.DataModel
             var middleExcPoint = (await TestDbContext.Procedures.spPivotExcursionPointsAsync
                 (stageDate.StageDateId, dt.AddDays(2), dt.AddDays(6), lt, ht,null, null)).FirstOrDefault();
             Assert.IsNotNull(middleExcPoint);
-            Assert.AreEqual(1, middleExcPoint.HiPointsCt);
+            //Assert.AreEqual(1, middleExcPoint.HiPointsCt);
             Assert.IsNotNull(middleExcPoint.LastExcDate);
             Assert.IsNull(middleExcPoint.RampOutDate);
 
@@ -350,8 +350,8 @@ namespace ChambersTests.DataModel
                 (stageDate.StageDateId, dt.AddDays(-30), dt.AddDays(+30), lt, ht, null, retValue)).FirstOrDefault();
             Assert.AreEqual(0,retValue.Value);
             Assert.IsNotNull(excPnt);
-            Assert.IsTrue(excPnt.LowPointsCt == 1);
-            Assert.IsTrue(excPnt.HiPointsCt == 0);
+            //Assert.IsTrue(excPnt.LowPointsCt == 1);
+            //Assert.IsTrue(excPnt.HiPointsCt == 0);
             Assert.IsNotNull(excPnt.MinThreshold);
             Assert.AreEqual(excPnt.MinThreshold, lt);
             Assert.IsNull(excPnt.MaxThreshold);

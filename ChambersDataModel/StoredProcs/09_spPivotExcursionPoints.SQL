@@ -197,18 +197,18 @@ PRINT CONCAT('INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, ' 
         ELSE SET @CurrStartDate = @EndDate; --finalize while loop
         PRINT CONCAT('@CurrStartDate:',@CurrStartDate);
                       
-        IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
-            PRINT 'Update aggregated values (count, Min, Max, Averg, StdDev) if full Excursion found'
-            DECLARE @OExcPointsCount int, @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
-            EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
-                    , @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
-                    , @AvergValue = @OAvergValue OUTPUT, @StdDevValue = @OStdDevValue OUTPUT;
-            UPDATE @ExcPoint1 SET MinValue = @OMinValue, MaxValue = @OMaxValue
-                            , AvergValue = @OAvergValue, StdDevValue = @OStdDevValue;
-            IF (@IsHiExc = 1) Update @ExcPoint1 Set HiPointsCt = @OExcPointsCount
-            ELSE Update @ExcPoint1 Set LowPointsCt = @OExcPointsCount
-            PRINT 'aggregated values updated'
-        END
+        --IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
+        --    PRINT 'Update aggregated values (count, Min, Max, Averg, StdDev) if full Excursion found'
+        --    DECLARE @OExcPointsCount int, @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
+        --    EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
+        --            , @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
+        --            , @AvergValue = @OAvergValue OUTPUT, @StdDevValue = @OStdDevValue OUTPUT;
+        --    UPDATE @ExcPoint1 SET MinValue = @OMinValue, MaxValue = @OMaxValue
+        --                    , AvergValue = @OAvergValue, StdDevValue = @OStdDevValue;
+        --    IF (@IsHiExc = 1) Update @ExcPoint1 Set HiPointsCt = @OExcPointsCount
+        --    ELSE Update @ExcPoint1 Set LowPointsCt = @OExcPointsCount
+        --    PRINT 'aggregated values updated'
+        --END
 
         PRINT 'Save Current Excursion and prepare for Next'
         INSERT INTO @ExcPointsOutput Select * FROM @ExcPoint1;
