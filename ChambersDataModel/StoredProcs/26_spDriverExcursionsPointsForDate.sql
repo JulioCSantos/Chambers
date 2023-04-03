@@ -48,7 +48,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
               WHERE (@StageDateIds IS NULL OR sldc.StageDateId in (SELECT StageDateId From @StageDateIdsTable));
 
 
-       DECLARE @ExcPoints as TABLE ( RowID int not null primary key identity(1,1)
+       DECLARE @ExcPoints as TABLE ( RowID int not null primary key identity(1,1), NewRowId int
        , CycleId int, TagId int NULL
        , TagName varchar(255), TagExcNbr int NULL
        , StepLogId int NULL, StageDateId int NULL
@@ -68,7 +68,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        , MinValue float, MaxValue float, AvergValue float, StdDevValue float
        , DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
 
-       DECLARE @ExcPointsOutput as TABLE ( RowID int NULL
+       DECLARE @ExcPointsOutput as TABLE ( RowID int NULL, NewRowId int
        , CycleId int, TagId int NULL
        , TagName varchar(255), TagExcNbr int NULL
        , StepLogId int NULL, StageDateId int NULL
@@ -190,6 +190,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                 )
                 EXECUTE @pivotReturnValue = [dbo].[spPivotExcursionPoints] @CurrStageDateId, @ProcNextStepStartDate
                         , @ProcNextStepEndDate, @MinThreshold, @MaxThreshold, '00:00:01';
+				UPDATE @ExcPoints SET StepLogId = @StepLogId WHERE StepLogId IS NULL;
 
                 DECLARE @dbgExcsFound int, @dbgFirstExcDate datetime;
                 SELECT @dbgExcsFound = count(*) from @ExcPoints;
@@ -210,24 +211,27 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
               PRINT ' <<< GET new excursions in date range ENDED'
 --*****************************************************************************************
               PRINT ' >>> Compress lengthy excursions'
-
-              --DECLARE @dbgUpdateCnt int, @dbgInsertCnt int;
-              --SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
-              --SELECT @dbgInsertCnt = count(*) from @ExcPoints WHERE CycleId < 0;
               
               --PRINT 'UPDATE ThresholdDuration, SetPoint... in the new excursions found through spPivot'
-              UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration, SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate;
+              UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration
+			  , SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate, NewRowId = RowId;
+
+     --         DECLARE @dbgUpdateCnt int, @dbgInsertCnt int;
+     --         SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
+     --         SELECT @dbgInsertCnt = count(*) from @ExcPoints WHERE CycleId < 0;
+			  --PRINT CONCAT('Compress :excursions: @dbgUpdateCnt:', @dbgUpdateCnt,' @dbgInsertCnt:', @dbgInsertCnt);
+
 
               DECLARE @CycleId int,@FirstExcDate datetime, @FirstExcValue float, @LastExcDate datetime, @LastExcValue float
 			  , @RampOutDate datetime, @RampOutValue float, @HiPointsCt int, @LowPointsCt int
               , @MinValue float, @MaxValue float, @AvergValue float, @StdDevValue float;
 
-              DECLARE @pvtExcCount int, @pvtExcIx int, @prevPvtExcId int;
+              DECLARE @pvtExcCount int, @pvtExcIx int, @prevPvtExcId int, @adjPvtExcId int;
               SELECT @pvtExcIx = count(*) from @ExcPoints;
               WHILE @pvtExcIx > 1 BEGIN
                       --PRINT CONCAT('check if pointed excursion #',@pvtExcIx,' can be compressed')
                       DECLARE @pointedRampInDate datetime;
-                      SELECT @pointedRampInDate = RampInDate FROM @ExcPoints WHERE RowId = @pvtExcIx;
+                      SELECT @pointedRampInDate = RampInDate FROM @ExcPoints WHERE NewRowId = @pvtExcIx;
                       IF (@pointedRampInDate IS NOT NULL) BEGIN 
                              --PRINT CONCAT('pointed excursion #',@pvtExcIx,' can NOT be compressed. Move forward')
                              GOTO SetNextExcursion;
@@ -236,7 +240,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                       --PRINT CONCAT('check if previous excursion #',@pvtExcIx - 1,' can accept compression')
                       SET @prevPvtExcId = @pvtExcIx - 1;
                       DECLARE @previousRampOutDate datetime;
-                      SELECT @previousRampOutDate = RampOutDate FROM @ExcPoints WHERE RowId = @prevPvtExcId;
+                      SELECT @previousRampOutDate = RampOutDate FROM @ExcPoints WHERE NewRowId = @prevPvtExcId;
                       IF (@previousRampOutDate IS NOT NULL) BEGIN 
                              --PRINT CONCAT('previous excursion #',@prevPvtExcId,' DOESNT accept compression. Move forward')
                              GOTO SetNextExcursion;
@@ -247,30 +251,37 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                              , @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
                              , @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
                              , @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
-                             FROM @ExcPoints where RowId = @pvtExcIx;
+                             FROM @ExcPoints where NewRowId = @pvtExcIx;
                       --PRINT '              update previous excursion with pointed excursion'
                              UPDATE @ExcPoints
                              SET LastExcDate = @LastExcDate, LastExcValue = @LastExcValue, RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
                                     , HiPointsCt = HiPointsCt + @HiPointsCt, LowPointsCt = LowPointsCt + @LowPointsCt
                                     , StepLogId = @StepLogId
                                     , MinValue = @MinValue, MaxValue = @MaxValue, AvergValue = @AvergValue, StdDevValue = @StdDevValue
-                             WHERE  RowId = @prevPvtExcId;
+                             WHERE  NewRowId = @prevPvtExcId;
                       --PRINT '          delete pointed excursion'
-                             DELETE FROM @ExcPoints where RowId = @pvtExcIx;
+                             DELETE FROM @ExcPoints where NewRowId = @pvtExcIx;
                       --PRINT CONCAT('         excursion #',@pvtExcIx,' compressed')
+							-- Adjust subsequent rows NewRowId
+							UPDATE @ExcPoints SET NewRowId = NewRowId - 1 WHERE NewRowId > @pvtExcIx;
 
 SetNextExcursion:
                       SET @pvtExcIx = @pvtExcIx - 1;
                       --PRINT CONCAT('previous excursion #',@pvtExcIx,' is now the POINTED excursion and is ready to be processed');
               END
               
-              --SELECT @dbgExcsFound = count(*) from @ExcPoints;
-              --SELECT top 1 @dbgFirstExcDate = FirstExcDate from @ExcPoints;
-              --PRINT CONCAT(' <<< Compress lengthy excursions: @dbgExcsFound:',@dbgExcsFound,'  @dbgFirstExcDate:',@dbgFirstExcDate);
+              SELECT @dbgExcsFound = count(*) from @ExcPoints;
+              SELECT top 1 @dbgFirstExcDate = FirstExcDate from @ExcPoints ORDER BY NewRowId Desc;
+              --PRINT CONCAT(' <<< Compress lengthy excursions: @dbgExcsFound:',@dbgExcsFound,'  @dbgFirstExcDate: ',@dbgFirstExcDate);
 
               PRINT ' <<< Compress lengthy excursions ENDED'
 --*****************************************************************************************
             PRINT ' >>> Compute statistics '
+			DECLARE @FirstExcDate1 datetime, @FirstExcDate2 datetime, @FirstExcDate3 datetime;
+			SELECT @FirstExcDate1 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 1;
+			SELECT @FirstExcDate2 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 2;
+			SELECT @FirstExcDate3 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 3;
+
 
             SELECT @pvtExcCount = count(*) from @ExcPoints;
 		    SET @pvtExcIx = 1
@@ -279,18 +290,18 @@ SetNextExcursion:
 			    SELECT @FirstExcDate = FirstExcDate, @FirstExcValue = FirstExcValue, @LastExcDate = LastExcDate
                     , @LowPointsCt = LowPointsCt, @HiPointsCt = HiPointsCt 
 				    , @MinThreshold = MinThreshold, @MaxThreshold = MaxThreshold
-			    FROM @ExcPoints WHERE RowId = @pvtExcIx
+			    FROM @ExcPoints WHERE NewRowId = @pvtExcIx
 		        IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
-                    --PRINT 'Update aggregated values (count, Min, Max, Averg, StdDev) if full Excursion found'
-                    DECLARE @OExcPointsCount int, @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
+                    PRINT CONCAT(' STATS: @TagName:',@TagName,' @FirstExcDate:', FORMAT(@FirstExcDate,'yyyy-MM-dd'),' @LastExcDate:', FORMAT(@LastExcDate,'yyyy-MM-dd'));
+					DECLARE @OExcPointsCount int, @OMinValue float, @OMaxValue float, @OAvergValue float, @OStdDevValue float;
                     EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
                             , @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
                             , @AvergValue = @OAvergValue OUTPUT, @StdDevValue = @OStdDevValue OUTPUT;
                     UPDATE @ExcPoints SET MinValue = @OMinValue, MaxValue = @OMaxValue
                                     , AvergValue = @OAvergValue, StdDevValue = @OStdDevValue
-				    WHERE RowId = @pvtExcIx;
-                    IF (@FirstExcValue >= @MaxThreshold) Update @ExcPoints Set HiPointsCt = @OExcPointsCount WHERE RowId = @pvtExcIx;
-                    ELSE Update @ExcPoints Set LowPointsCt = @OExcPointsCount WHERE RowId = @pvtExcIx;
+				    WHERE NewRowId = @pvtExcIx;
+                    IF (@FirstExcValue >= @MaxThreshold) Update @ExcPoints Set HiPointsCt = @OExcPointsCount WHERE NewRowId = @pvtExcIx;
+                    ELSE Update @ExcPoints Set LowPointsCt = @OExcPointsCount WHERE NewRowId = @pvtExcIx;
                     --PRINT 'aggregated values updated'
                 END
 
@@ -305,7 +316,7 @@ SetNextExcursion:
 
               --PRINT 'Determine if first Excursion from spPivot proc can be merged with ExcursionPoints table''s last excursion'
               DECLARE @fstExcRampInDate datetime;
-              SELECT @fstExcRampInDate = RampInDate FROM @ExcPoints WHERE RowId = 1;
+              SELECT @fstExcRampInDate = RampInDate FROM @ExcPoints WHERE NewRowId = 1;
               IF (@fstExcRampInDate IS NULL) BEGIN
                   --PRINT ' GET Latest Excursion row from [ExcursionPoints] table and save it in @ExcPointsWIP '
                       DELETE FROM @ExcPointsWIP;
@@ -335,11 +346,22 @@ SetNextExcursion:
                                     , @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
                                     , @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
                                     FROM @ExcPointsWIP;
-                                    -- Must use Minimum and Maximum calculations for stats. to be implemented...
                                     UPDATE @ExcPoints SET CycleId = @CycleId,  HiPointsCt = HiPointsCt + @HiPointsCt
                                     , LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
                                     , RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
-                                    where RowId = 1;
+                                    where NewRowId = 1;
+									--IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
+									--	PRINT CONCAT(' STATS: @TagName:',@TagName,' @FirstExcDate:', FORMAT(@FirstExcDate,'yyyy-MM-dd'),' @LastExcDate:', FORMAT(@LastExcDate,'yyyy-MM-dd'));
+									--	EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
+									--			, @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
+									--			, @AvergValue = @OAvergValue OUTPUT, @StdDevValue = @OStdDevValue OUTPUT;
+									--	UPDATE @ExcPoints SET MinValue = @OMinValue, MaxValue = @OMaxValue
+									--					, AvergValue = @OAvergValue, StdDevValue = @OStdDevValue
+									--	WHERE RowId = @pvtExcIx;
+									--	IF (@FirstExcValue >= @MaxThreshold) Update @ExcPoints Set HiPointsCt = @OExcPointsCount WHERE RowId = @pvtExcIx;
+									--	ELSE Update @ExcPoints Set LowPointsCt = @OExcPointsCount WHERE RowId = @pvtExcIx;
+									--	--PRINT 'aggregated values updated'
+									--END
                              END
                       END
 				END
@@ -394,7 +416,8 @@ SetNextExcursion:
                       , DeprecatedDate, ThresholdDuration, SetPoint
                       )
               SELECT 
-                      TagId, TagName, IsNull(TagExcNbr,0), StageDateId, @StepLogId as StepLogId
+                      --TagId, TagName, IsNull(TagExcNbr,0), StageDateId, @StepLogId as StepLogId
+                      TagId, TagName, IsNull(TagExcNbr,0), StageDateId, StepLogId
                       , RampInDate, RampInValue, FirstExcDate, FirstExcValue
                       , LastExcDate, LastExcValue, RampOutDate, RampOutValue
                       , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold

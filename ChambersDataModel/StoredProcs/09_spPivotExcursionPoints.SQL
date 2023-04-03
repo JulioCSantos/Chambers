@@ -5,7 +5,7 @@
 AS
 BEGIN
 PRINT '		>>> spPivotExcursionPoints'
-DECLARE @MaximumDate datetime = DateAdd(day,-1,GetDate()) ;
+DECLARE @MaximumDate datetime = CAST(GETDATE() AS DATE) ; --zero hour of today's date
 IF (@EndDate > @MaximumDate) SET @EndDate = @MaximumDate;
 
 DECLARE @TagId int, @TagName varchar(255), @returnValue int = 0, @ThresholdDuration int, @SetPoint float;
@@ -195,7 +195,7 @@ PRINT CONCAT('		INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, 
         ELSE IF (@LastExcDate is not null and @LastExcDate < @EndDate) SET @CurrStartDate = DateAdd(SECOND,3,@LastExcDate)
         ELSE SET @CurrStartDate = @EndDate; --finalize while loop
         --PRINT CONCAT('@CurrStartDate:',@CurrStartDate);
-                      
+
         --PRINT 'Save Current Excursion and prepare for Next'
         INSERT INTO @ExcPointsOutput Select * FROM @ExcPoint1;
         DELETE FROM @ExcPoint1;
