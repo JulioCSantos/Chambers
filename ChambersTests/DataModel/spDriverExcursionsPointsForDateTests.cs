@@ -188,7 +188,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task TwoConsecutiveExcursionsTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 1);
             var stage = pointsPace.StageDate.Stage;
@@ -379,7 +378,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionDeprecatedDateTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-10);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -405,7 +403,6 @@ namespace ChambersTests.DataModel
         [TestMethod]
         public async Task DeprecatedStageTest()
         {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var tagName = NewName();
             var stageDate1 = new StagesDate(tagName, baseDate);
@@ -446,7 +443,6 @@ namespace ChambersTests.DataModel
         }
         [TestMethod]
         public async Task OneLengthyExcursionWithoutRampsTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-200);
             var stageDate = new StagesDate(NewName(), baseDate.AddDays(-1));
             var stage = stageDate.Stage;
@@ -467,7 +463,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task SubsequentExcursionPointTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var e1Dt = baseDate.AddDays(1);
             var e2Dt = baseDate.AddDays(2);
@@ -504,7 +499,6 @@ namespace ChambersTests.DataModel
         }
         [TestMethod]
         public async Task LengthyExcursionNoRampsTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = new DateTime(2023, 01, 01);
             var stageDate = new StagesDate(NewName(), baseDate);
             var stage = stageDate.Stage; stage.SetThresholds(100,200);
@@ -530,7 +524,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task MidnightExcursionTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = new DateTime(2023, 01, 01,23,59,30);
             var stageDate = new StagesDate(NewName(), baseDate);
             var stage = stageDate.Stage; stage.SetThresholds(100, 200);
@@ -555,7 +548,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task MergeTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = new DateTime(2023, 01, 01, 23, 59, 57);
             var stageDate = new StagesDate(NewName(), baseDate);
             var stage = stageDate.Stage; stage.SetThresholds(100, 200);
@@ -590,6 +582,52 @@ namespace ChambersTests.DataModel
             var latestTime = TestDbContext.Interpolateds
                 .Where(i => i.Tag == tag.TagName && i.Value >= stage.MaxThreshold!).Max(ex => ex.Time);
             Assert.AreEqual(earliestTime,excs.First().FirstExcDate);
+            Assert.AreEqual(latestTime, excs.Skip(1).First().LastExcDate);
+            Assert.IsNull(excs.First().RampInDate);
+            Assert.IsNotNull(excs.First().RampOutDate);
+            Assert.IsNull(excs.Skip(1).First().RampInDate);
+            Assert.IsNull(excs.Skip(1).First().RampOutDate);
+        }
+        [TestMethod]
+        public async Task MergeDaysAPartTest() {
+            var baseDate = new DateTime(2023, 01, 01, 22, 00, 00);
+            var stageDate = new StagesDate(NewName(), baseDate);
+            var stage = stageDate.Stage; stage.SetThresholds(100, 200);
+            var tag = stage.Tag;
+            TestDbContext.Add(stageDate);
+            await TestDbContext.SaveChangesAsync();
+
+
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(1).AddHours(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+
+            for (float ix = 0; ix < 5; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(2).AddHours(ix), (float)(stage.MaxThreshold! * 0.5) + ix / 10);
+            }
+
+            for (float ix = -1; ix < 4; ix++) {
+                TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddDays(3).AddHours(ix), (float)(stage.MaxThreshold! * 1.30d) + ix / 10);
+            }
+            await TestDbContext.SaveChangesAsync();
+
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                baseDate, baseDate.AddDays(5), stageDate.StageDateId.ToString());
+            Assert.IsNotNull(driverResult);
+            Assert.AreEqual(2,driverResult.Count);
+            var excs = TestDbContext.ExcursionPoints.Where(ep => ep.StageDateId == stageDate.StageDateId);
+
+            Assert.IsNotNull(excs);
+            Assert.AreEqual(2, excs.Count());
+            var earliestTime = TestDbContext.Interpolateds
+                .Where(i => i.Tag == tag.TagName && i.Value >= stage.MaxThreshold!).Min(ex => ex.Time);
+            var latestTime = TestDbContext.Interpolateds
+                .Where(i => i.Tag == tag.TagName && i.Value >= stage.MaxThreshold!).Max(ex => ex.Time);
+            Assert.AreEqual(earliestTime, excs.First().FirstExcDate);
             Assert.AreEqual(latestTime, excs.Skip(1).First().LastExcDate);
             Assert.IsNull(excs.First().RampInDate);
             Assert.IsNotNull(excs.First().RampOutDate);

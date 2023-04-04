@@ -39,6 +39,7 @@
     <None Remove="StoredProcs\15_spGetStats.sql" />
     <None Remove="StoredProcs\24_spGetInterop2.sql" />
     <None Remove="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
+    <None Remove="StoredProcs\27_spOverDriver.sql" />
     <None Remove="StoredProcs\90_CreateSchemas.sql" />
     <None Remove="StoredProcs\91_CreateCompressedPoint.sql" />
     <None Remove="StoredProcs\92_spSeedForTests.sql" />
@@ -62,6 +63,7 @@
     <EmbeddedResource Include="StoredProcs\26_spDriverExcursionsPointsForDate.sql" />
     <EmbeddedResource Include="StoredProcs\15_spGetStats.sql" />
     <EmbeddedResource Include="StoredProcs\24_spGetInterop2.sql" />
+    <EmbeddedResource Include="StoredProcs\27_spOverDriver.sql" />
     <EmbeddedResource Include="StoredProcs\92_spSeedForTests.sql" />
     <EmbeddedResource Include="StoredProcs\91_CreateCompressedPoint.sql" />
     <EmbeddedResource Include="Views\05_PointsStepsLogNextValues.sql" />

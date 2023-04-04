@@ -105,6 +105,8 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
               , @ThresholdDuration = ThresholdDuration, @SetPoint = SetPoint
               , @PaceId = PaceId
               FROM @StagesLimitsAndDatesCore WHERE RowID = @CurrStgDtIx;
+              --PRINT CONCAT('@StagesLimitsAndDatesCore @ProductionDate:', Format(@ProductionDate,'yyyy-MM-dd'),' @DeprecatedDate:', FORMAT(@DeprecatedDate, 'yyyy-MM-dd'));
+
 
               if (@CurrStepStartDate < @ProductionDate) BEGIN
                       SET @CurrStepStartDate = @ProductionDate;
@@ -277,11 +279,6 @@ SetNextExcursion:
               PRINT ' <<< Compress lengthy excursions ENDED'
 --*****************************************************************************************
             PRINT ' >>> Compute statistics '
-			DECLARE @FirstExcDate1 datetime, @FirstExcDate2 datetime, @FirstExcDate3 datetime;
-			SELECT @FirstExcDate1 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 1;
-			SELECT @FirstExcDate2 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 2;
-			SELECT @FirstExcDate3 = FirstExcDate FROM @ExcPoints WHERE NewRowId = 3;
-
 
             SELECT @pvtExcCount = count(*) from @ExcPoints;
 		    SET @pvtExcIx = 1
@@ -342,15 +339,16 @@ SetNextExcursion:
                              IF (@tblRampOutDate IS NULL) BEGIN
                                     --PRINT ' ...Update excursion in @ExcPoints using the entry from ExcursionsTable ';
                                     SELECT @CycleId = CycleId
-                                    , @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
+                                    --, @LastExcDate = LastExcDate, @LastExcValue = LastExcValue, @RampOutDate = RampOutDate, @RampOutValue = RampOutValue
                                     , @HiPointsCt = HiPointsCt, @LowPointsCt = LowPointsCt
                                     , @MinValue = MinValue, @MaxValue = MaxValue, @AvergValue = AvergValue, @StdDevValue = StdDevValue
                                     FROM @ExcPointsWIP;
                                     UPDATE @ExcPoints SET CycleId = @CycleId,  HiPointsCt = HiPointsCt + @HiPointsCt
-                                    , LowPointsCt = LowPointsCt + @LowPointsCt, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
-                                    , RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
+                                    , LowPointsCt = LowPointsCt + @LowPointsCt
+									--, LastExcDate = @LastExcDate, LastExcValue = @LastExcValue
+         --                           , RampOutDate = @RampOutDate, RampOutValue = @RampOutValue
                                     where NewRowId = 1;
-									--IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
+                                    									--IF (@FirstExcDate IS NOT NULL AND @LastExcDate IS NOT NULL) BEGIN
 									--	PRINT CONCAT(' STATS: @TagName:',@TagName,' @FirstExcDate:', FORMAT(@FirstExcDate,'yyyy-MM-dd'),' @LastExcDate:', FORMAT(@LastExcDate,'yyyy-MM-dd'));
 									--	EXECUTE dbo.spGetStats @TagName, @FirstExcDate, @LastExcDate
 									--			, @ExcPointsCount = @OExcPointsCount OUTPUT, @MinValue = @OMinValue OUTPUT, @MaxValue = @OMaxValue OUTPUT
