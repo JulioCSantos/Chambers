@@ -107,16 +107,18 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
               FROM @StagesLimitsAndDatesCore WHERE RowID = @CurrStgDtIx;
               --PRINT CONCAT('@StagesLimitsAndDatesCore @ProductionDate:', Format(@ProductionDate,'yyyy-MM-dd'),' @DeprecatedDate:', FORMAT(@DeprecatedDate, 'yyyy-MM-dd'));
 
-                        IF (@IsDeprecated = 1) BEGIN 
-                                    PRINT CONCAT('Stage ', @CurrStageDateId, ' deprecated as of ',@DeprecatedDate);
-                                    GOTO NextStageDate;
-                        END
 
               if (@CurrStepStartDate < @ProductionDate) BEGIN
                       SET @CurrStepStartDate = @ProductionDate;
               END
               SET @CurrStepEndDate = DateAdd(day, @StepSizedays, @CurrStepStartDate);
 
+			  IF (@DeprecatedDate IS NOT NULL) BEGIN 
+				IF (@DeprecatedDate >= @CurrStepStartDate AND @DeprecatedDate <= @CurrStepEndDate) BEGIN
+                        PRINT CONCAT('Stage ', @CurrStageDateId, ' deprecated as of ',@DeprecatedDate);
+                        GOTO NextStageDate;
+				END
+              End
                         
               PRINT CONCAT('Processing StageDateId:', @CurrStageDateId,' TagName:', @TagName, ' for ...');
               --Get processing date region
@@ -168,23 +170,23 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                       
                 -- Insert Log
                 DECLARE @StepLogId int;
-                INSERT INTO [dbo].[PointsStepsLog] (
-                                    [StageDateId], [StageId], [TagId], [TagName]
-                                ,[StageStartDate], [StageEndDate], [DeprecatedDate]
-                                ,[MinThreshold], [MaxThreshold]
-                                ,[PaceId], [PaceStartDate]
-                                ,[StartDate], [EndDate]
-                                ,[ThresholdDuration], [SetPoint]
-                            )
-                        VALUES (
-                                    @CurrStageDateId, @StageId, @TagId, @TagName
-                                ,@StageStartDate, @StageEndDate, @DeprecatedDate
-                                ,@MinThreshold, @MaxThreshold
-                                ,@currPaceId, @ProcNextStepStartDate
-                                ,@ProcNextStepStartDate, @ProcNextStepEndDate
-                                ,@ThresholdDuration, @SetPoint
-                            )
-                SET @StepLogId = SCOPE_IDENTITY();
+				INSERT INTO [dbo].[PointsStepsLog] (
+									[StageDateId], [StageId], [TagId], [TagName]
+								,[StageStartDate], [StageEndDate], [DeprecatedDate]
+								,[MinThreshold], [MaxThreshold]
+								,[PaceId], [PaceStartDate]
+								,[StartDate], [EndDate]
+								,[ThresholdDuration], [SetPoint]
+							)
+						VALUES (
+									@CurrStageDateId, @StageId, @TagId, @TagName
+								,@StageStartDate, @StageEndDate, @DeprecatedDate
+								,@MinThreshold, @MaxThreshold
+								,@currPaceId, @ProcNextStepStartDate
+								,@ProcNextStepStartDate, @ProcNextStepEndDate
+								,@ThresholdDuration, @SetPoint
+							)
+				SET @StepLogId = SCOPE_IDENTITY();
 
                 --PRINT 'Find Excursions in date range'
                 DECLARE @pivotReturnValue int = 0;
@@ -424,7 +426,7 @@ SetNextExcursion:
               PRINT ' <<< Persist excursions to table ENDED'
 --*****************************************************************************************
               -- Insert PointsPaces' next process row if Tag was not deprecated in the next PointsPace time interval
-              if (@DeprecatedDate IS NULL OR @DeprecatedDate > DateAdd(day,1,@ProcNextStepStartDate))
+              if (@DeprecatedDate IS NULL OR @DeprecatedDate > DateAdd(day,@StepSizeDays,@ProcNextStepStartDate))
               INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
                       VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
 

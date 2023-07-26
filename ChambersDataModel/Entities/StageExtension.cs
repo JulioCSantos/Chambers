@@ -13,6 +13,9 @@ namespace ChambersDataModel.Entities
             StageName = tag.TagName;
             SetThresholds(minThreshold, maxThreshold);
         }
+        public Stage(Tag tag, DateTime productionDate, double? minThreshold = null, double? maxThreshold = null) : this(tag, minThreshold, maxThreshold) {
+            ProductionDate = productionDate;
+        }
 
         public Stage(string stageName, double? minThreshold = null, double? maxThreshold = null) : this() {
             StageName = stageName;

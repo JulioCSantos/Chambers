@@ -13,7 +13,7 @@ namespace ChambersTests.DataModel.Extensions
         public static PointsPace NewPointsPace(this ChambersDbContext context, string stageName, DateTime? nextStartDate = null
             , int? stepSizeDays = null, int? minThreshold = 100, int? maxThreshold = 200) {
             var tag = new Tag(IntExtensions.NextId(), tagName: stageName);
-            var stage = new Stage(tag, minThreshold, maxThreshold);
+            var stage = new Stage(tag, nextStartDate!.Value.AddDays(-1), minThreshold, maxThreshold);
             var stageDate = new StagesDate(stage);
             if (stage.ProductionDate == null) { stage.ProductionDate = stageDate.StartDate; }
             context.Tags.Add(tag);

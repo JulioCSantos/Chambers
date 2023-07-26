@@ -15,7 +15,15 @@ namespace ChambersDataModel.Entities
 
         public StagesDate(Stage stage, DateTime? startDate = null, DateTime? endDate = null) : this() {
             Stage = stage;
-            SetDates(startDate, endDate);
+            if (startDate != null) { StartDate = startDate!.Value; }
+            else {
+                if (stage.ProductionDate == null) { SetDates(startDate, endDate); }
+                else { StartDate = stage.ProductionDate!.Value; }
+            }
+            if (endDate != null) { EndDate = endDate!.Value; }
+            else { EndDate = DateTime.MaxValue; }
+
+
         }
 
         public void SetDates(DateTime? startDate, DateTime? endDate) {

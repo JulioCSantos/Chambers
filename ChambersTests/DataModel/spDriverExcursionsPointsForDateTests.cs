@@ -30,11 +30,13 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionPointTest() {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
-            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate, 3);
             var stage = pointsPace.StageDate.Stage;
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
+            baseDate = baseDate.AddDays(1);
             var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
             var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate, (float)(stage.MaxThreshold! * 1.5));
             var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
@@ -379,7 +381,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionDeprecatedDateTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-10);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
