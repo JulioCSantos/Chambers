@@ -30,7 +30,6 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionPointTest() {
-            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-30);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate, 3);
             var stage = pointsPace.StageDate.Stage;
@@ -634,7 +633,7 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(latestTime, excs.Skip(1).First().LastExcDate);
             Assert.IsNull(excs.First().RampInDate);
             Assert.IsNotNull(excs.First().RampOutDate);
-            Assert.IsNull(excs.Skip(1).First().RampInDate);
+            Assert.IsNotNull(excs.Skip(1).First().RampInDate);
             Assert.IsNull(excs.Skip(1).First().RampOutDate);
         }
     }
