@@ -15,6 +15,7 @@ namespace ChambersTests.DataModel.Extensions
             var tag = new Tag(IntExtensions.NextId(), tagName: stageName);
             var stage = new Stage(tag, minThreshold, maxThreshold);
             var stageDate = new StagesDate(stage);
+            if (stage.ProductionDate == null) { stage.ProductionDate = stageDate.StartDate; }
             context.Tags.Add(tag);
             context.Stages.Add(stage);
             stage.ThresholdDuration = 600;

@@ -8,6 +8,7 @@ namespace ChambersDataModel.Entities
     public partial class spDriverExcursionsPointsForDateResult
     {
         public int RowID { get; set; }
+        public int? NewRowId { get; set; }
         public int? CycleId { get; set; }
         public int? TagId { get; set; }
         public string TagName { get; set; }

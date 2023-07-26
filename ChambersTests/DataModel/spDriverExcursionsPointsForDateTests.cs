@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.XPath;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ChambersTests.DataModel
 {
@@ -378,6 +379,7 @@ namespace ChambersTests.DataModel
 
         [TestMethod]
         public async Task OneHighExcursionDeprecatedDateTest() {
+            TestDbContext.IsPreservedForTest = true;
             var baseDate = DateTime.Today.AddDays(-10);
             var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(-1), 3);
             var stage = pointsPace.StageDate.Stage;
@@ -390,7 +392,7 @@ namespace ChambersTests.DataModel
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
-                baseDate, baseDate.AddDays(3), pointsPace.StageDateId.ToString());
+                pointsPace.NextStepStartDate, stage.DeprecatedDate.Value.AddDays(1), pointsPace.StageDateId.ToString());
             Assert.AreEqual(1, driverResult.Count);
             Assert.IsNotNull(driverResult.First().DeprecatedDate);
             var excursion = (TestDbContext.ExcursionPoints
