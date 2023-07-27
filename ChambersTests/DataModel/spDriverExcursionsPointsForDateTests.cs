@@ -678,8 +678,10 @@ namespace ChambersTests.DataModel
             var tag = stage.Tag;
             TestDbContext.PointsPaces.Add(pointsPace);
             var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.8));
-            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(10), (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(15), (float)(stage.MaxThreshold! * 0.5));
+            var hiExcPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(10), (float)(stage.MaxThreshold! * 1.5));
+            var hiExcPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(11), (float)(stage.MaxThreshold! * 1.6));
+            var hiExcPoint3 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(16), (float)(stage.MaxThreshold! * 1.6));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(20), (float)(stage.MaxThreshold! * 0.5));
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var startDate = pointsPace.NextStepStartDate;
@@ -694,7 +696,11 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(excursion.DeprecatedDate);
             Assert.AreEqual(excursion.DeprecatedDate, stage.DeprecatedDate);
             Assert.AreEqual(excursion.RampInDate, rampInPoint.Time);
-            Assert.AreEqual(excursion.FirstExcDate, hiExcPoint.Time);
+            Assert.AreEqual(excursion.FirstExcDate, hiExcPoint1.Time);
+            Assert.AreEqual(excursion.FirstExcValue, hiExcPoint1.Value);
+            Assert.AreEqual(excursion.LastExcDate, hiExcPoint2.Time);
+            Assert.AreEqual(excursion.LastExcValue, hiExcPoint2.Value);
+
             Assert.IsNull(excursion.RampOutDate);
         }
     }
