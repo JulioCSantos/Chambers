@@ -15,6 +15,7 @@ namespace ChambersDataModel.Entities
         public DateTime StageStartDate { get; set; }
         public DateTime? StageEndDate { get; set; }
         public DateTime? DeprecatedDate { get; set; }
+        public DateTime? DecommissionedDate { get; set; }
         public double? MinThreshold { get; set; }
         public double? MaxThreshold { get; set; }
         public int PaceId { get; set; }

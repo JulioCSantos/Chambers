@@ -15,6 +15,7 @@ namespace ChambersDataModel.Entities
         public int TagId { get; set; }
         public string TagName { get; set; }
         public byte[] Picture { get; set; }
+        public DateTime? DecommissionedDate { get; set; }
 
         public virtual ICollection<Stage> Stages { get; set; }
     }

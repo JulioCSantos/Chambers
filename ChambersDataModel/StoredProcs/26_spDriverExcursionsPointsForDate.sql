@@ -20,7 +20,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        -- Processing Tag details
        DECLARE @StagesLimitsAndDatesCore TABLE (
               RowID int not null primary key identity(1,1)
-              , TagId int, TagName nvarchar(255), StageDateId int, StageName nvarchar(255) NULL
+              , TagId int, TagName nvarchar(255), DecommissionedDate datetime, StageDateId int, StageName nvarchar(255) NULL
               , MinThreshold float, MaxThreshold float, StartDate datetime, EndDate datetime
               , TimeStep float null, StageId int, ThresholdDuration int NULL, SetPoint float NULL
               , StageDeprecatedDate datetime NULL, StageDateDeprecatedDate datetime NULL
@@ -32,7 +32,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        --PRINT 'Get PointPaces for all StagesDatesId. If PointsPaces doesnt exist for a StageDate manufacture one.'
        --PRINT 'If StagesDatesId list not informed use all StagesDates configured'
        INSERT INTO @StagesLimitsAndDatesCore
-       SELECT TagId, TagName, sldc.StageDateId, StageName 
+       SELECT TagId, TagName, DecommissionedDate, sldc.StageDateId, StageName 
               , MinThreshold, MaxThreshold, StartDate, EndDate
               , TimeStep, StageId, ThresholdDuration, SetPoint 
               , StageDeprecatedDate, StageDateDeprecatedDate 
@@ -56,7 +56,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        , LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
        , HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
        , MinValue float, MaxValue float, AvergValue float, StdDevValue float
-       , DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
+       , DeprecatedDate datetime, DecommissionedDate datetime, ThresholdDuration int, SetPoint float);
 
        DECLARE @ExcPointsWIP as TABLE ( RowID int NULL
        , CycleId int, TagId int NULL
@@ -66,7 +66,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        , LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
        , HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
        , MinValue float, MaxValue float, AvergValue float, StdDevValue float
-       , DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
+       , DeprecatedDate datetime, DecommissionedDate datetime, ThresholdDuration int, SetPoint float);
 
        DECLARE @ExcPointsOutput as TABLE ( RowID int NULL, NewRowId int
        , CycleId int, TagId int NULL
@@ -76,7 +76,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        , LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
        , HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
        , MinValue float, MaxValue float, AvergValue float, StdDevValue float
-       , DeprecatedDate datetime, ThresholdDuration int, SetPoint float);
+       , DeprecatedDate datetime, DecommissionedDate datetime, ThresholdDuration int, SetPoint float);
 
        -- If no Tag details found abort (details are not configured).
        IF (NOT EXISTS(SELECT * FROM @StagesLimitsAndDatesCore)) BEGIN
@@ -92,13 +92,13 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        --PRINT 'Process every StageDate'
        WHILE @CurrStgDtIx <= @StgDtCount BEGIN
               DECLARE @CurrStageDateId int, @StageId int, @TagId int, @TagName varchar(255)
-              , @ProductionDate datetime, @DeprecatedDate datetime
+              , @ProductionDate datetime, @DeprecatedDate datetime, @DecommissionedDate datetime
               , @StageStartDate datetime, @StageEndDate datetime
               , @CurrStepStartDate datetime, @CurrStepEndDate datetime, @StepSizedays int
               , @MinThreshold float, @MaxThreshold float, @ThresholdDuration float, @SetPoint float
               , @PaceId int, @IsDeprecated bit;
               SELECT @CurrStageDateId = StageDateId, @StageId = StageId, @TagId = TagId, @TagName = TagName
-              , @ProductionDate = ProductionDate, @DeprecatedDate = DeprecatedDate
+              , @ProductionDate = ProductionDate, @DeprecatedDate = DeprecatedDate, @DecommissionedDate = DecommissionedDate
               , @StageStartDate = StartDate, @StageEndDate = EndDate
               , @CurrStepStartDate = NextStepStartDate, @CurrStepEndDate = NextStepEndDate, @StepSizedays = StepSizedays
               , @MinThreshold = MinThreshold, @MaxThreshold = MaxThreshold
@@ -172,7 +172,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                 DECLARE @StepLogId int;
 				INSERT INTO [dbo].[PointsStepsLog] (
 									[StageDateId], [StageId], [TagId], [TagName]
-								,[StageStartDate], [StageEndDate], [DeprecatedDate]
+								,[StageStartDate], [StageEndDate], [DeprecatedDate], [DecommissionedDate]
 								,[MinThreshold], [MaxThreshold]
 								,[PaceId], [PaceStartDate]
 								,[StartDate], [EndDate]
@@ -180,7 +180,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
 							)
 						VALUES (
 									@CurrStageDateId, @StageId, @TagId, @TagName
-								,@StageStartDate, @StageEndDate, @DeprecatedDate
+								,@StageStartDate, @StageEndDate, @DeprecatedDate, @DecommissionedDate
 								,@MinThreshold, @MaxThreshold
 								,@currPaceId, @ProcNextStepStartDate
 								,@ProcNextStepStartDate, @ProcNextStepEndDate
@@ -224,7 +224,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
              
               --PRINT 'UPDATE ThresholdDuration, SetPoint... in the new excursions found through spPivot'
               UPDATE @ExcPoints SET ThresholdDuration = @ThresholdDuration
-                        , SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate, NewRowId = RowId;
+                        , SetPoint = @SetPoint, DeprecatedDate = @DeprecatedDate, DecommissionedDate = @DecommissionedDate, NewRowId = RowId;
 
      --         DECLARE @dbgUpdateCnt int, @dbgInsertCnt int;
      --         SELECT @dbgUpdateCnt = count(*) from @ExcPoints WHERE CycleId > 0;
@@ -324,19 +324,19 @@ SetNextExcursion:
               SELECT @fstExcRampInDate = RampInDate FROM @ExcPoints WHERE NewRowId = 1;
               IF (@fstExcRampInDate IS NULL) BEGIN
                   --PRINT ' GET Latest Excursion row from [ExcursionPoints] table and save it in @ExcPointsWIP '
-                      DELETE FROM @ExcPointsWIP;
-                      INSERT INTO @ExcPointsWIP (CycleId, StageDateId, TagName, TagExcNbr
-            , RampInDate, RampInValue, FirstExcDate, FirstExcValue
-            , LastExcDate, LastExcValue, RampOutDate, RampOutValue
-            , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-            , MinValue, MaxValue, AvergValue, StdDevValue
-            , ThresholdDuration, SetPoint)
-            SELECT TOP 1 CycleId, StageDateId, TagName, TagExcNbr
-            , RampInDate, RampInValue, FirstExcDate, FirstExcValue
-            , LastExcDate, LastExcValue, RampOutDate, RampOutValue
-            , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
-            , MinValue, MaxValue, AvergValue, StdDevValue
-            , ThresholdDuration, SetPoint
+                DELETE FROM @ExcPointsWIP;
+                INSERT INTO @ExcPointsWIP (CycleId, StageDateId, TagName, TagExcNbr
+                    , RampInDate, RampInValue, FirstExcDate, FirstExcValue
+                    , LastExcDate, LastExcValue, RampOutDate, RampOutValue
+                    , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+                    , MinValue, MaxValue, AvergValue, StdDevValue
+                    , ThresholdDuration, SetPoint)
+                    SELECT TOP 1 CycleId, StageDateId, TagName, TagExcNbr
+                    , RampInDate, RampInValue, FirstExcDate, FirstExcValue
+                    , LastExcDate, LastExcValue, RampOutDate, RampOutValue
+                    , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
+                    , MinValue, MaxValue, AvergValue, StdDevValue
+                    , ThresholdDuration, SetPoint
                       FROM [dbo].[ExcursionPoints] 
                 WHERE StageDateId = @CurrStageDateId 
                 ORDER BY TagExcNbr Desc
@@ -407,7 +407,7 @@ SetNextExcursion:
                       , LastExcDate, LastExcValue, RampOutDate, RampOutValue
                       , HiPointsCt, LowPointsCt, MinThreshold,MaxThreshold
                       , MinValue, MaxValue, AvergValue, StdDevValue
-                      , DeprecatedDate, ThresholdDuration, SetPoint
+                      , DeprecatedDate, DecommissionedDate, ThresholdDuration, SetPoint
                       )
               SELECT 
                       --TagId, TagName, IsNull(TagExcNbr,0), StageDateId, @StepLogId as StepLogId
@@ -416,7 +416,7 @@ SetNextExcursion:
                       , LastExcDate, LastExcValue, RampOutDate, RampOutValue
                       , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
                       , MinValue, MaxValue, AvergValue, StdDevValue
-                      , DeprecatedDate, ThresholdDuration, SetPoint
+                      , DeprecatedDate, DecommissionedDate, ThresholdDuration, SetPoint
                       FROM @ExcPoints
 
               --SELECT @dbgExcsFound = count(*) from @ExcPoints;

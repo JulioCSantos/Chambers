@@ -33,6 +33,7 @@ namespace ChambersDataModel.Entities
         public int? ThresholdDuration { get; set; }
         public double? SetPoint { get; set; }
         public DateTime? DeprecatedDate { get; set; }
+        public DateTime? DecommissionedDate { get; set; }
         public bool? IsDeprecated { get; set; }
     }
 }

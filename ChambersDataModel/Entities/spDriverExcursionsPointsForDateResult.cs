@@ -32,6 +32,7 @@ namespace ChambersDataModel.Entities
         public double? AvergValue { get; set; }
         public double? StdDevValue { get; set; }
         public DateTime? DeprecatedDate { get; set; }
+        public DateTime? DecommissionedDate { get; set; }
         public int? ThresholdDuration { get; set; }
         public double? SetPoint { get; set; }
     }

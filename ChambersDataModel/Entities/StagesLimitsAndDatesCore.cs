@@ -9,6 +9,7 @@ namespace ChambersDataModel.Entities
     {
         public int TagId { get; set; }
         public string TagName { get; set; }
+        public DateTime? DecommissionedDate { get; set; }
         public int StageDateId { get; set; }
         public string StageName { get; set; }
         public double? MinThreshold { get; set; }

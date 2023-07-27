@@ -38,7 +38,6 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
-            modelBuilder.Entity<spSeedForTestsResult>().HasNoKey().ToView(null);
         }
     }
 
@@ -315,7 +314,7 @@ namespace ChambersDataModel.Entities
             return _;
         }
 
-        public virtual async Task<List<spSeedForTestsResult>> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<int> spSeedForTestsAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -328,7 +327,7 @@ namespace ChambersDataModel.Entities
             {
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<spSeedForTestsResult>("EXEC @returnValue = [BB50PCSjsantos].[spSeedForTests]", sqlParameters, cancellationToken);
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [BB50PCSjsantos].[spSeedForTests]", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

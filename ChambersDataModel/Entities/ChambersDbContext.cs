@@ -152,6 +152,8 @@ namespace ChambersDataModel.Entities
 
                 entity.HasIndex(e => e.StageDateId, "ixExcursionPointsStageDateId");
 
+                entity.Property(e => e.DecommissionedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Duration).HasComputedColumnSql("(datediff(second,[FirstExcDate],[LastExcDate]))", true);
@@ -226,6 +228,8 @@ namespace ChambersDataModel.Entities
                     .HasName("pkPointsStepsLogPaceLogId");
 
                 entity.ToTable("PointsStepsLog");
+
+                entity.Property(e => e.DecommissionedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
@@ -336,6 +340,8 @@ namespace ChambersDataModel.Entities
 
                 entity.ToView("StagesLimitsAndDatesCore");
 
+                entity.Property(e => e.DecommissionedDate).HasColumnType("datetime");
+
                 entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
@@ -360,6 +366,8 @@ namespace ChambersDataModel.Entities
                 entity.HasIndex(e => e.TagName, "ixTagsTagName");
 
                 entity.Property(e => e.TagId).ValueGeneratedNever();
+
+                entity.Property(e => e.DecommissionedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.TagName)
                     .IsRequired()

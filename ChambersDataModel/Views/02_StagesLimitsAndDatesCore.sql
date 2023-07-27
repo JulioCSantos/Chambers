@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[StagesLimitsAndDatesCore]
 AS
-SELECT t .TagId, t .TagName, std.StageDateId, st.StageName, st.MinThreshold, st.MaxThreshold, std.StartDate, std.EndDate, st.TimeStep, st.StageId
+SELECT t .TagId, t .TagName, t.DecommissionedDate, std.StageDateId, st.StageName, st.MinThreshold, st.MaxThreshold, std.StartDate, std.EndDate, st.TimeStep, st.StageId
 , st.ThresholdDuration, st.SetPoint, st.DeprecatedDate AS StageDeprecatedDate, std.DeprecatedDate AS StageDateDeprecatedDate, st.ProductionDate
 , COALESCE(st.DeprecatedDate, std.DeprecatedDate) as DeprecatedDate
 , IIF((st.DeprecatedDate IS NULL AND std.DeprecatedDate IS NULL), Cast(0 as bit), Cast(1 as bit)) AS IsDeprecated

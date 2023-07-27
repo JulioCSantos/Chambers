@@ -636,5 +636,35 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(excs.Skip(1).First().RampInDate);
             Assert.IsNull(excs.Skip(1).First().RampOutDate);
         }
+
+        [TestMethod]
+        public async Task OneHighExcursionDecommissionTest() {
+            var baseDate = DateTime.Today.AddDays(-5);
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate.AddDays(1), 3);
+            var stage = pointsPace.StageDate.Stage;
+            var tag = stage.Tag;
+            tag.DecommissionedDate = baseDate.AddDays(2);
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var excDate = tag.DecommissionedDate.Value;
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate, (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            await TestDbContext.SaveChangesAsync();
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                pointsPace.NextStepStartDate, tag.DecommissionedDate.Value.AddDays(3), pointsPace.StageDateId.ToString());
+            Assert.AreEqual(1, driverResult.Count);
+            Assert.IsNotNull(driverResult.First().DecommissionedDate);
+            var excursion = (TestDbContext.ExcursionPoints
+                .Where(ex => ex.StageDateId == driverResult.First().StageDateId)).FirstOrDefault();
+            Assert.IsNotNull(excursion);
+            Assert.IsNotNull(excursion.DecommissionedDate);
+            Assert.AreEqual(excursion.DecommissionedDate, tag.DecommissionedDate);
+            var pointsStepsLog = (TestDbContext.PointsStepsLogs
+                .Where(ex => ex.StageDateId == driverResult.First().StageDateId)).FirstOrDefault();
+            Assert.IsNotNull(pointsStepsLog);
+            Assert.IsNotNull(pointsStepsLog.DecommissionedDate);
+            Assert.AreEqual(pointsStepsLog.DecommissionedDate, tag.DecommissionedDate);
+        }
     }
 }
