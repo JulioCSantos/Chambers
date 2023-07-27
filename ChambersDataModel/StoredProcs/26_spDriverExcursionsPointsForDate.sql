@@ -64,7 +64,7 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
        , StepLogId int NULL, StageDateId int NULL
        , RampInDate DateTime NULL, RampInValue float NULL, FirstExcDate DateTime NULL, FirstExcValue float NULL
        , LastExcDate DateTime NULL, LastExcValue float NULL, RampOutDate DateTime NULL, RampOutValue float NULL
-       , HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
+ , HiPointsCt int NULL, LowPointsCt int NULL, MinThreshold float NULL, MaxThreshold float NULL
        , MinValue float, MaxValue float, AvergValue float, StdDevValue float
        , DeprecatedDate datetime, DecommissionedDate datetime, ThresholdDuration int, SetPoint float);
 
@@ -113,21 +113,35 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
               END
               SET @CurrStepEndDate = DateAdd(day, @StepSizedays, @CurrStepStartDate);
 
-			  IF (@DeprecatedDate IS NOT NULL) BEGIN 
-				IF (@DeprecatedDate >= @CurrStepStartDate AND @DeprecatedDate <= @CurrStepEndDate) BEGIN
+			  IF (@DeprecatedDate IS NOT NULL OR @DecommissionedDate is NOT NULL) BEGIN 
+                IF (ISNULL(@DeprecatedDate,'9999-01-01') < ISNULL(@DecommissionedDate,'9999-01-01')) BEGIN
+				    IF (@DeprecatedDate >= @CurrStepStartDate AND @DeprecatedDate <= @CurrStepEndDate) BEGIN
                         PRINT CONCAT('Stage ', @CurrStageDateId, ' deprecated as of ',@DeprecatedDate);
                         Set @CurrStepEndDate = @DeprecatedDate;
-                        IF (@CurrStepEndDate <= @CurrStepStartDate) 
-                        GOTO NextStageDate;
+                        IF (@CurrStepEndDate <= @CurrStepStartDate) GOTO NextStageDate;
+                    END
 				END
+                ELSE BEGIN
+				    IF (@DecommissionedDate >= @CurrStepStartDate AND @DecommissionedDate <= @CurrStepEndDate) BEGIN
+                        PRINT CONCAT('Stage ', @CurrStageDateId, ' decommissioned as of ',@DecommissionedDate);
+                        Set @CurrStepEndDate = @DecommissionedDate;
+                        IF (@CurrStepEndDate <= @CurrStepStartDate) GOTO NextStageDate;
+                    END
+                END
               End
                         
               PRINT CONCAT('Processing StageDateId:', @CurrStageDateId,' TagName:', @TagName, ' for ...');
               --Get processing date region
 
               DECLARE @ProcStartDate as datetime, @ProcEndDate as datetime;
-              SELECT @ProcStartDate = StartDate,  @ProcEndDate = EndDate 
-                      FROM [dbo].[fnGetOverlappingDates](@ProductionDate, @DeprecatedDate, @FromDate, @ToDate);
+			  IF (ISNULL(@DeprecatedDate,'9999-01-01') < ISNULL(@DecommissionedDate,'9999-01-01')) BEGIN
+				  SELECT @ProcStartDate = StartDate,  @ProcEndDate = EndDate 
+						  FROM [dbo].[fnGetOverlappingDates](@ProductionDate, @DeprecatedDate, @FromDate, @ToDate);
+			  END
+			  ELSE BEGIN
+			  		SELECT @ProcStartDate = StartDate,  @ProcEndDate = EndDate 
+						  FROM [dbo].[fnGetOverlappingDates](@ProductionDate, @DecommissionedDate, @FromDate, @ToDate);
+			  END
               PRINT CONCAT('...- Processing Start date:', Format(@ProcStartDate,'yyyy-MM-dd'),' and End date:', FORMAT(@ProcEndDate, 'yyyy-MM-dd'));
               IF (@ProcStartDate is NULL) BEGIN 
                       --PRINT CONCAT('valid processing dates not found for StageDateId', @CurrStageDateId);
@@ -140,8 +154,14 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
                       FROM [dbo].[fnGetOverlappingDates](@ProcStartDate, @ProcEndDate
                       , @CurrStepStartDate, ISNULL(@CurrStepEndDate, DATEADD(day,@StepSizedays,@CurrStepStartDate)));
 
-              IF (@DeprecatedDate IS NOT NULL) SELECT @ProcNextStepStartDate = StartDate,  @ProcNextStepEndDate = EndDate 
-                                    FROM [dbo].[fnGetOverlappingDates](@ProcNextStepStartDate, @ProcNextStepEndDate, NULL, @DeprecatedDate);
+			  IF (ISNULL(@DeprecatedDate,'9999-01-01') < ISNULL(@DecommissionedDate,'9999-01-01')) BEGIN
+				  IF (@DeprecatedDate IS NOT NULL) SELECT @ProcNextStepStartDate = StartDate,  @ProcNextStepEndDate = EndDate 
+					  FROM [dbo].[fnGetOverlappingDates](@ProcNextStepStartDate, @ProcNextStepEndDate, NULL, @DeprecatedDate);
+			  END
+			  ELSE BEGIN
+				  IF (@DecommissionedDate IS NOT NULL) SELECT @ProcNextStepStartDate = StartDate,  @ProcNextStepEndDate = EndDate 
+					  FROM [dbo].[fnGetOverlappingDates](@ProcNextStepStartDate, @ProcNextStepEndDate, NULL, @DecommissionedDate);
+			  END
 
               --PRINT 'processing first Step using...'; 
               --PRINT CONCAT(' @ProcNextStepStartDate:', FORMAT(@ProcNextStepStartDate,'yyyy-MM-dd'),' @ProcNextStepEndDate:', FORMAT(@ProcNextStepEndDate, 'yyyy-MM-dd'));
@@ -413,7 +433,7 @@ SetNextExcursion:
                       )
               SELECT 
                       --TagId, TagName, IsNull(TagExcNbr,0), StageDateId, @StepLogId as StepLogId
-                      TagId, TagName, IsNull(TagExcNbr,0), StageDateId, StepLogId
+                TagId, TagName, IsNull(TagExcNbr,0), StageDateId, StepLogId
                       , RampInDate, RampInValue, FirstExcDate, FirstExcValue
                       , LastExcDate, LastExcValue, RampOutDate, RampOutValue
                       , HiPointsCt, LowPointsCt, MinThreshold, MaxThreshold
@@ -428,9 +448,10 @@ SetNextExcursion:
               PRINT ' <<< Persist excursions to table ENDED'
 --*****************************************************************************************
               -- Insert PointsPaces' next process row if Tag was not deprecated in the next PointsPace time interval
-              if (@DeprecatedDate IS NULL OR @DeprecatedDate > DateAdd(day,@StepSizeDays,@ProcNextStepStartDate))
-              INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
-                      VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
+              if ((@DeprecatedDate IS NULL OR @DeprecatedDate > DateAdd(day,@StepSizeDays,@ProcNextStepStartDate)) OR 
+                  (@DecommissionedDate IS NULL OR @DecommissionedDate > DateAdd(day,@StepSizeDays,@ProcNextStepStartDate)) )
+                    INSERT INTO [dbo].[PointsPaces] ([StageDateId],[NextStepStartDate],[StepSizeDays],[ProcessedDate])
+                        VALUES (@CurrStageDateId, @ProcNextStepStartDate, @StepSizedays, NULL );
 
 NextStageDate:
               SET @CurrStgDtIx=@CurrStgDtIx+1;

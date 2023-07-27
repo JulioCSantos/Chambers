@@ -646,9 +646,9 @@ namespace ChambersTests.DataModel
             tag.DecommissionedDate = baseDate.AddDays(2);
             TestDbContext.PointsPaces.Add(pointsPace);
             var excDate = tag.DecommissionedDate.Value;
-            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(-5), (float)(stage.MaxThreshold! * 0.8));
-            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate, (float)(stage.MaxThreshold! * 1.5));
-            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(5), (float)(stage.MaxThreshold! * 0.5));
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(-20), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(-15), (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, excDate.AddHours(-10), (float)(stage.MaxThreshold! * 0.5));
             await TestDbContext.SaveChangesAsync();
             //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
             var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
@@ -703,5 +703,43 @@ namespace ChambersTests.DataModel
 
             Assert.IsNull(excursion.RampOutDate);
         }
+        [TestMethod]
+        public async Task ProcessWithDecommissionedDateTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today.AddDays(-10);
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate, 3);
+            var stage = pointsPace.StageDate.Stage;
+            stage.ThresholdDuration = 0;
+            var tag = stage.Tag;
+            tag.DecommissionedDate = baseDate.AddHours(12);
+
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint1 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(10), (float)(stage.MaxThreshold! * 1.5));
+            var hiExcPoint2 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(11), (float)(stage.MaxThreshold! * 1.6));
+            var hiExcPoint3 = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(16), (float)(stage.MaxThreshold! * 1.6));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(20), (float)(stage.MaxThreshold! * 0.5));
+            await TestDbContext.SaveChangesAsync();
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var startDate = pointsPace.NextStepStartDate;
+            var stopDate = tag.DecommissionedDate.Value.AddDays(4);
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                startDate, stopDate, pointsPace.StageDateId.ToString());
+            Assert.AreEqual(1, driverResult.Count);
+            Assert.IsNotNull(driverResult.First().DecommissionedDate);
+            var excursion = (TestDbContext.ExcursionPoints
+                .Where(ex => ex.StageDateId == driverResult.First().StageDateId)).FirstOrDefault();
+            Assert.IsNotNull(excursion);
+            Assert.IsNotNull(excursion.DecommissionedDate);
+            Assert.AreEqual(excursion.DecommissionedDate, tag.DecommissionedDate);
+            Assert.AreEqual(excursion.RampInDate, rampInPoint.Time);
+            Assert.AreEqual(excursion.FirstExcDate, hiExcPoint1.Time);
+            Assert.AreEqual(excursion.FirstExcValue, hiExcPoint1.Value);
+            Assert.AreEqual(excursion.LastExcDate, hiExcPoint2.Time);
+            Assert.AreEqual(excursion.LastExcValue, hiExcPoint2.Value);
+
+            Assert.IsNull(excursion.RampOutDate);
+        }
+
     }
 }
