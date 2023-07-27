@@ -666,5 +666,36 @@ namespace ChambersTests.DataModel
             Assert.IsNotNull(pointsStepsLog.DecommissionedDate);
             Assert.AreEqual(pointsStepsLog.DecommissionedDate, tag.DecommissionedDate);
         }
+
+        [TestMethod]
+        public async Task ProcessWithDeprecatedDateTest() {
+            TestDbContext.IsPreservedForTest = true;
+            var baseDate = DateTime.Today.AddDays(-10);
+            var pointsPace = TestDbContext.NewPointsPace(NewName(), baseDate, 3);
+            var stage = pointsPace.StageDate.Stage;
+            stage.ThresholdDuration = 0;
+            stage.DeprecatedDate = baseDate.AddHours(12);
+            var tag = stage.Tag;
+            TestDbContext.PointsPaces.Add(pointsPace);
+            var rampInPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(5), (float)(stage.MaxThreshold! * 0.8));
+            var hiExcPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(10), (float)(stage.MaxThreshold! * 1.5));
+            var rampOutPoint = TestDbContext.NewInterpolatedPoint(tag.TagName, baseDate.AddHours(15), (float)(stage.MaxThreshold! * 0.5));
+            await TestDbContext.SaveChangesAsync();
+            //var effectiveStages = await TestDbContext.GetStagesLimitsAndDates(tag.TagId, baseDate);
+            var startDate = pointsPace.NextStepStartDate;
+            var stopDate = stage.DeprecatedDate.Value.AddDays(4);
+            var driverResult = await TestDbContext.Procedures.spDriverExcursionsPointsForDateAsync(
+                startDate, stopDate, pointsPace.StageDateId.ToString());
+            Assert.AreEqual(1, driverResult.Count);
+            Assert.IsNotNull(driverResult.First().DeprecatedDate);
+            var excursion = (TestDbContext.ExcursionPoints
+                .Where(ex => ex.StageDateId == driverResult.First().StageDateId)).FirstOrDefault();
+            Assert.IsNotNull(excursion);
+            Assert.IsNotNull(excursion.DeprecatedDate);
+            Assert.AreEqual(excursion.DeprecatedDate, stage.DeprecatedDate);
+            Assert.AreEqual(excursion.RampInDate, rampInPoint.Time);
+            Assert.AreEqual(excursion.FirstExcDate, hiExcPoint.Time);
+            Assert.IsNull(excursion.RampOutDate);
+        }
     }
 }

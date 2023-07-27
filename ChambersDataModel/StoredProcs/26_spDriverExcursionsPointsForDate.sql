@@ -116,6 +116,8 @@ PRINT CONCAT('>>> spDriverExcursionsPointsForDate @FromDate:', Format(@FromDate,
 			  IF (@DeprecatedDate IS NOT NULL) BEGIN 
 				IF (@DeprecatedDate >= @CurrStepStartDate AND @DeprecatedDate <= @CurrStepEndDate) BEGIN
                         PRINT CONCAT('Stage ', @CurrStageDateId, ' deprecated as of ',@DeprecatedDate);
+                        Set @CurrStepEndDate = @DeprecatedDate;
+                        IF (@CurrStepEndDate <= @CurrStepStartDate) 
                         GOTO NextStageDate;
 				END
               End
