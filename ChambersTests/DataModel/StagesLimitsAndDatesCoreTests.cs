@@ -51,6 +51,23 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
+        public void TagDecommissionedTest() {
+            var name = NewName();
+            var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
+            stageDate.Stage.SetThresholds(30, 300);
+            var tag = stageDate.Stage.Tag;
+            tag.DecommissionedDate = DateTime.Now;
+            TestDbContext.StagesDates.Add(stageDate);
+            TestDbContext.SaveChanges();
+            var viewResults = TestDbContext.StagesLimitsAndDatesCores
+                .Where(std => std.DecommissionedDate != null && std.TagId == tag.TagId).ToList();
+            Assert.IsNotNull(viewResults);
+            Assert.AreEqual(1, viewResults.Count);
+            Assert.AreEqual(tag.DecommissionedDate.Value.Date, viewResults.First().DecommissionedDate!.Value.Date);
+
+        }
+
+        [TestMethod]
         public void StageDateDeprecatedTest()
         {
             var name = NewName();
