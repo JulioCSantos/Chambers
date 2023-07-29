@@ -48,6 +48,7 @@
     <None Remove="Views\05_PointsStepsLogNextValues.sql" />
     <None Remove="Views\09_GetScheduleDates.SQL" />
     <None Remove="Views\18_BAUExcursions.sql" />
+    <None Remove="Views\28_StagesLimitsAndDatesChanged.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +71,7 @@
     <EmbeddedResource Include="Views\03_StagesLimitsAndDates.sql" />
     <EmbeddedResource Include="Functions\10_fnGetScheduleDates.SQL" />
     <EmbeddedResource Include="Views\18_BAUExcursions.sql" />
+    <EmbeddedResource Include="Views\28_StagesLimitsAndDatesChanged.sql" />
   </ItemGroup>
 
   <ItemGroup>

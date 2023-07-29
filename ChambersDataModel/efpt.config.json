@@ -67,6 +67,10 @@
          "ObjectType": 3
       },
       {
+         "Name": "[dbo].[StagesLimitsAndDatesChanged]",
+         "ObjectType": 3
+      },
+      {
          "Name": "[dbo].[StagesLimitsAndDatesCore]",
          "ObjectType": 3
       },

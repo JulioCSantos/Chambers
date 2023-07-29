@@ -30,6 +30,7 @@ namespace ChambersDataModel.Entities
         public virtual DbSet<Stage> Stages { get; set; }
         public virtual DbSet<StagesDate> StagesDates { get; set; }
         public virtual DbSet<StagesLimitsAndDate> StagesLimitsAndDates { get; set; }
+        public virtual DbSet<StagesLimitsAndDatesChanged> StagesLimitsAndDatesChangeds { get; set; }
         public virtual DbSet<StagesLimitsAndDatesCore> StagesLimitsAndDatesCores { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
 
@@ -277,7 +278,6 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<Stage>(entity =>
             {
                 entity.HasIndex(e => new { e.TagId, e.StageName }, "IxTagStageName")
-                    .IsUnique()
                     .HasFilter("([StageName] IS NOT NULL)");
 
                 entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
@@ -324,6 +324,33 @@ namespace ChambersDataModel.Entities
                 entity.ToView("StagesLimitsAndDates");
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageName).HasMaxLength(255);
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.TagName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<StagesLimitsAndDatesChanged>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToView("StagesLimitsAndDatesChanged");
+
+                entity.Property(e => e.DecommissionedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.DeprecatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ProductionDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageDateDeprecatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StageDeprecatedDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StageName).HasMaxLength(255);
 

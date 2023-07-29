@@ -45,9 +45,10 @@ namespace ChambersTests.DataModel
 
 
         [TestMethod]
-        public void DuplicatedStageNameNegativeTest() {
+        public void DeprecatedStageTest() {
             var name = NewName();
             var stage1 = NewStageLimits(name, 40, 400); 
+            stage1.DeprecatedDate = DateTime.UtcNow;
             var stage2 = NewStageLimits(name, 50 , 500); 
 
             // Duplicated StageName for the same Tag is invalid. Will test this exception
@@ -56,17 +57,20 @@ namespace ChambersTests.DataModel
 
             TestDbContext.Stages.Add(stage1);
             TestDbContext.Stages.Add(stage2);
-            
-            var ex = Assert.ThrowsException<DbUpdateException>(() => TestDbContext.SaveChanges());
-            Assert.IsTrue(ex.InnerException?.Message.Contains("duplicate"));
-            
+
+            //var ex = Assert.ThrowsException<DbUpdateException>(() => TestDbContext.SaveChanges());
+            //Assert.IsTrue(ex.InnerException?.Message.Contains("duplicate"));
+            TestDbContext.SaveChanges();
+
             //rollback
             //var savedTag = stage1.Tag;
             //TestDbContext.Stages.Remove(stage2);
             //TestDbContext.Stages.Remove(stage1);
             //TestDbContext.Tags.Remove(savedTag);
-            TestDbContext.RollBack();
-            var entries = TestDbContext.ChangeTracker.Entries();
+            //TestDbContext.RollBack();
+            //var entries = TestDbContext.ChangeTracker.Entries();
+            var dupStages = TestDbContext.Stages.Where(st => st.StageName == stage1.StageName);
+            Assert.AreEqual(2, dupStages.Count());
         }
     }
 }

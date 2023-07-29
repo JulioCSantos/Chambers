@@ -20,8 +20,7 @@ namespace ChambersDataModel.Entities
                 if (stage.ProductionDate == null) { SetDates(startDate, endDate); }
                 else { StartDate = stage.ProductionDate!.Value; }
             }
-            if (endDate != null) { EndDate = endDate!.Value; }
-            else { EndDate = DateTime.MaxValue; }
+            EndDate = endDate != null ? endDate!.Value : DateTime.MaxValue;
 
 
         }
