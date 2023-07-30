@@ -33,7 +33,7 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public void StageDeprecatedTest()
+        public void StageDeprectdTest()
         {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
@@ -47,7 +47,6 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(1, viewResults.Count);
             Assert.IsTrue(viewResults.First().IsDeprecated);
             Assert.AreEqual(stageDate.Stage.DeprecatedDate.Value.Date, viewResults.First().StageDeprecatedDate!.Value.Date);
-
         }
 
         [TestMethod]
@@ -68,7 +67,7 @@ namespace ChambersTests.DataModel
         }
 
         [TestMethod]
-        public void StageDateDeprecatedTest()
+        public void StageDateDeprectdTest()
         {
             var name = NewName();
             var stageDate = new StagesDate(name, new DateTime(2022, 02, 01), new DateTime(2022, 02, 28));
