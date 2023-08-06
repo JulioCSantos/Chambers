@@ -15,17 +15,6 @@ namespace ChambersTests.DataModel
             return stage;
         }
 
-        //public static Stage NewStageLimits(Tag tag, double? minValue = null, double? maxValue = null) {
-        //    var stage = new Stage(tag, minValue, maxValue);
-        //    return stage;
-        //}
-
-        //public static void StageSetValues(Stage stage, double? minValue, double? maxValue) {
-        //    if (minValue != null) {stage.MinValue = (double)minValue; }
-        //    if (maxValue != null) {stage.MaxValue = (double)maxValue; }
-        //}
-
-
         private static string NewName([CallerMemberName] string? name = null) {
             var newName = nameof(StagesTests) + "_" + name;
             return newName;

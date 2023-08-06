@@ -37,7 +37,6 @@ namespace ChambersTests.DataModel
         }
         [TestMethod]
         public void StageDateDeprecatedTest() {
-            TestDbContext.IsPreservedForTest = true;
             var tag1 = new Tag(NewName());
             var baseDate = DateTime.Today.AddMonths(-3);
             var stage1 = new Stage(tag1, baseDate, 100, 200) ;
@@ -55,6 +54,7 @@ namespace ChambersTests.DataModel
             Assert.AreEqual(2, viewResults.Count);
             Assert.IsTrue(viewResults.First().IsDeprecated);
             Assert.AreEqual(stageDate1.DeprecatedDate.Value, viewResults.First().StageDateDeprecatedDate!.Value);
+            Assert.IsFalse(viewResults.Skip(1).First().IsDeprecated);
         }
 
         [TestMethod]

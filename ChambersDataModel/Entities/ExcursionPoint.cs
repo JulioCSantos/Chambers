@@ -12,7 +12,7 @@ namespace ChambersDataModel.Entities
         public string TagName { get; set; }
         public int TagExcNbr { get; set; }
         public int? StepLogId { get; set; }
-        public int? StageDateId { get; set; }
+        public int StageDateId { get; set; }
         public DateTime? RampInDate { get; set; }
         public double? RampInValue { get; set; }
         public DateTime? FirstExcDate { get; set; }
