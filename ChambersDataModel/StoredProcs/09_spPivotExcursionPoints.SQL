@@ -34,7 +34,7 @@ PRINT CONCAT('		INPUT: @StageDateId:',@StageDateId, ' @StartDate:', @StartDate, 
             , MinValue float, MaxValue float, AvergValue float, StdDevValue float
             , ThresholdDuration int, SetPoint float);
        -- Finished processed (saved) Excursions in date range
-       DECLARE @ExcPointsOutput as TABLE ( ExcPriority int, CycleId int, StageDateId int, TagId int
+       DECLARE @ExcPointsOutput as TABLE ( ExcPriority int, CycleId int, StageDateId int Not Null, TagId int
             , TagName varchar(255), TagExcNbr int
             , RampInDate DateTime, RampInValue float
             , FirstExcDate DateTime, FirstExcValue float

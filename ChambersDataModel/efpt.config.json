@@ -99,6 +99,10 @@
          "ObjectType": 1
       },
       {
+         "Name": "[dbo].[spPropagateDeprecatedDecomissioned]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[fn_SplitJoin]",
          "ObjectType": 2
       },

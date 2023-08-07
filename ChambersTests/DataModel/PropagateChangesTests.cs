@@ -29,17 +29,23 @@ namespace ChambersTests.DataModel
             var name = NewName();
             var baseDate = DateTime.Now.AddDays(-30);
             var stageDate1 = NewStageDate(name, baseDate, 40, 400);
+            var stage1 = stageDate1.Stage;
             stageDate1.Stage.DeprecatedDate = stageDate1.Stage.ProductionDate!.Value.AddDays(10);
             var tag = stageDate1.Stage.Tag;
             var stage2 = new Stage(tag, 50, 500);
             var stageDate2 = new StagesDate(stage2, stageDate1.Stage.DeprecatedDate);
-            //var excursion = new ExcursionPoint() {TagName = tag.TagName, }
-
-
             TestDbContext.Add(stageDate1);
             TestDbContext.Add(stageDate2);
 
+            //TestDbContext.SaveChanges();
+            var exc1 = new ExcursionPoint() {
+                StageDateId = stageDate1.StageDateId
+                , TagId = tag.TagId, TagName = tag.TagName, FirstExcDate = stage1.ProductionDate
+                , LastExcDate = stage1.ProductionDate!.Value.AddDays(20)
+            };
+            TestDbContext.Add(exc1);
             TestDbContext.SaveChanges();
+
         }
     }
 }
