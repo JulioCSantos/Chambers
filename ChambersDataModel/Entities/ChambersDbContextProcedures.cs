@@ -38,6 +38,7 @@ namespace ChambersDataModel.Entities
             modelBuilder.Entity<GetBAUExcursionsResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spDriverExcursionsPointsForDateResult>().HasNoKey().ToView(null);
             modelBuilder.Entity<spPivotExcursionPointsResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<spPropagateDeprecatedDecomissionedResult>().HasNoKey().ToView(null);
         }
     }
 
@@ -308,6 +309,32 @@ namespace ChambersDataModel.Entities
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<spPivotExcursionPointsResult>("EXEC @returnValue = [dbo].[spPivotExcursionPoints] @StageDateId, @StartDate, @EndDate, @LowThreashold, @HiThreashold, @TimeStep", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
+        }
+
+        public virtual async Task<List<spPropagateDeprecatedDecomissionedResult>> spPropagateDeprecatedDecomissionedAsync(int? dStageDateId, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "dStageDateId",
+                    Value = dStageDateId ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Int,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.SqlQueryAsync<spPropagateDeprecatedDecomissionedResult>("EXEC @returnValue = [dbo].[spPropagateDeprecatedDecomissioned] @dStageDateId", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 
